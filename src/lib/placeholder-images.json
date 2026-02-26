@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-india",
+      "description": "Panoramic view of a famous Indian landmark",
+      "imageUrl": "https://images.unsplash.com/photo-1542708993627-b6e5bbae43c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxJbmRpYSUyMGxhbmRzY2FwZXxlbnwwfHx8fDE3NzIwOTIxMDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "India landscape"
+    },
+    {
+      "id": "taj-mahal",
+      "description": "The Taj Mahal in Agra",
+      "imageUrl": "https://images.unsplash.com/photo-1526711657229-e7e080ed7aa1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxUYWolMjBNYWhhbHxlbnwwfHx8fDE3NzIwOTIxMDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Taj Mahal"
+    },
+    {
+      "id": "varanasi-ghats",
+      "description": "The ghats of Varanasi at sunset",
+      "imageUrl": "https://images.unsplash.com/photo-1671512226229-e05294dd1970?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxWYXJhbmFzaSUyMGdoYXRzfGVufDB8fHx8MTc3MjA5MjEwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Varanasi ghats"
+    },
+    {
+      "id": "kerala-backwaters",
+      "description": "Houseboat on Kerala backwaters",
+      "imageUrl": "https://images.unsplash.com/photo-1624554305378-0f440dd3a8c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxLZXJhbGElMjBiYWNrd2F0ZXJzfGVufDB8fHx8MTc3MjA5MjEwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Kerala backwaters"
+    },
+    {
+      "id": "rajasthan-fort",
+      "description": "A majestic fort in Rajasthan",
+      "imageUrl": "https://images.unsplash.com/photo-1672157932491-eb5df8e36994?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxSYWphc3RoYW4lMjBmb3J0fGVufDB8fHx8MTc3MjA5MjEwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Rajasthan fort"
+    }
+  ]
 }
