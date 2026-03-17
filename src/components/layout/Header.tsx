@@ -3,16 +3,25 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Menu, Search, User, Globe, MessageSquare, Mic, Bell } from 'lucide-react'
+import { Menu, Search, User, Globe, MessageSquare, Mic, Bell, Languages } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { Input } from '@/components/ui/input'
 import { VoiceSearchDialog } from '@/components/ai/VoiceSearchDialog'
 import { Badge } from '@/components/ui/badge'
+import { useAppLanguage } from '@/context/LanguageContext'
+import { INDIAN_LANGUAGES } from '@/lib/languages'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function Header() {
   const { toggleSidebar } = useSidebar()
   const [showVoiceSearch, setShowVoiceSearch] = useState(false)
+  const { currentLanguage, setLanguage } = useAppLanguage()
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-20 items-center border-b border-white/5 bg-background/80 backdrop-blur-2xl px-6 md:px-8 lg:px-12">
@@ -51,10 +60,27 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-3 md:gap-5">
-        <Button variant="ghost" size="icon" className="md:hidden text-white hover:text-primary" onClick={() => setShowVoiceSearch(true)}>
-          <Search className="h-6 w-6" />
-        </Button>
-        
+        {/* Language Switcher */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-white/80 hover:text-primary transition-all">
+              <Globe className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="max-h-[300px] overflow-y-auto w-[180px] bg-card border-white/10">
+            {INDIAN_LANGUAGES.map((lang) => (
+              <DropdownMenuItem 
+                key={lang.name} 
+                className={`flex justify-between items-center cursor-pointer ${currentLanguage === lang.name ? 'text-primary font-bold bg-primary/10' : ''}`}
+                onClick={() => setLanguage(lang.name)}
+              >
+                <span>{lang.native}</span>
+                <span className="text-[10px] opacity-50">{lang.name}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <Link href="/contribute">
           <Button variant="ghost" className="hidden sm:flex gap-2 text-white/80 hover:text-primary hover:bg-primary/5 rounded-full px-5 transition-all">
             <MessageSquare className="h-4 w-4" />

@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Languages, Loader2, Check, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { 
@@ -14,18 +14,22 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { aiTranslateArticleContent } from '@/ai/flows/ai-translate-article-content'
 import { useToast } from '@/hooks/use-toast'
-
-const INDIAN_LANGUAGES = [
-  "Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", 
-  "Gujarati", "Kannada", "Odia", "Malayalam", "Punjabi", 
-  "Sanskrit", "Assamese", "Maithili", "Santali", "Kashmiri"
-]
+import { INDIAN_LANGUAGES } from '@/lib/languages'
+import { useAppLanguage } from '@/context/LanguageContext'
 
 export function TranslatorTool({ content }: { content: string }) {
-  const [targetLang, setTargetLang] = useState("Hindi")
+  const { currentLanguage } = useAppLanguage()
+  const [targetLang, setTargetLang] = useState(currentLanguage !== "English" ? currentLanguage : "Hindi")
   const [translation, setTranslation] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+
+  // Update selection if global language changes
+  useEffect(() => {
+    if (currentLanguage !== "English") {
+      setTargetLang(currentLanguage);
+    }
+  }, [currentLanguage]);
 
   const handleTranslate = async () => {
     setLoading(true)
@@ -66,8 +70,8 @@ export function TranslatorTool({ content }: { content: string }) {
               <SelectValue placeholder="Language" />
             </SelectTrigger>
             <SelectContent>
-              {INDIAN_LANGUAGES.map(lang => (
-                <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+              {INDIAN_LANGUAGES.filter(l => l.name !== "English").map(lang => (
+                <SelectItem key={lang.name} value={lang.name}>{lang.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
