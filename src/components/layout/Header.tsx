@@ -3,15 +3,15 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Menu, Search, User, Globe, MessageSquare, Mic, Bell, Languages } from 'lucide-react'
+import { Menu, Search, User, Globe, MessageSquare, Mic, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { Input } from '@/components/ui/input'
 import { VoiceSearchDialog } from '@/components/ai/VoiceSearchDialog'
-import { Badge } from '@/components/ui/badge'
 import { useAppLanguage } from '@/context/LanguageContext'
 import { INDIAN_LANGUAGES } from '@/lib/languages'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/hooks/use-toast'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,7 @@ export function Header() {
   const [showVoiceSearch, setShowVoiceSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
+  const { toast } = useToast()
   const { currentLanguage, setLanguage } = useAppLanguage()
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -31,6 +32,13 @@ export function Header() {
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
     }
+  }
+
+  const handleNotificationClick = () => {
+    toast({
+      title: "Notifications",
+      description: "You have 3 new updates on your followed articles.",
+    })
   }
 
   return (
@@ -45,7 +53,7 @@ export function Header() {
           <Menu className="h-7 w-7" />
         </Button>
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-black font-black text-xl group-hover:rotate-12 transition-transform">B</div>
+          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-black font-black text-xl group-hover:rotate-12 transition-transform shadow-[0_0_15px_rgba(7,241,214,0.3)]">B</div>
           <span className="text-2xl font-bold font-headline text-white tracking-tight group-hover:text-primary transition-colors">BharatDarshan Wiki</span>
         </Link>
       </div>
@@ -57,7 +65,7 @@ export function Header() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search for states, districts, or monuments..." 
-            className="w-full h-12 pl-12 pr-12 bg-white/5 focus-visible:ring-primary/50 border-white/10 focus-visible:bg-white/10 transition-all rounded-full placeholder:text-muted-foreground/50"
+            className="w-full h-12 pl-12 pr-12 bg-white/5 focus-visible:ring-primary/50 border-white/10 focus-visible:bg-white/10 transition-all rounded-full placeholder:text-muted-foreground/50 font-medium"
           />
           <Button 
             type="button"
@@ -79,34 +87,39 @@ export function Header() {
               <Globe className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="max-h-[300px] overflow-y-auto w-[180px] bg-card border-white/10">
+          <DropdownMenuContent align="end" className="max-h-[300px] overflow-y-auto w-[220px] bg-[#161C21] border-white/10 p-2 rounded-2xl">
             {INDIAN_LANGUAGES.map((lang) => (
               <DropdownMenuItem 
                 key={lang.name} 
-                className={`flex justify-between items-center cursor-pointer ${currentLanguage === lang.name ? 'text-primary font-bold bg-primary/10' : ''}`}
+                className={`flex justify-between items-center cursor-pointer h-12 rounded-xl px-4 m-1 transition-colors ${currentLanguage === lang.name ? 'text-black font-black bg-primary' : 'text-white/70 hover:bg-primary/10 hover:text-primary'}`}
                 onClick={() => setLanguage(lang.name)}
               >
-                <span>{lang.native}</span>
-                <span className="text-[10px] opacity-50">{lang.name}</span>
+                <span className="font-bold">{lang.native}</span>
+                <span className="text-[10px] uppercase font-black opacity-40">{lang.name}</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
         <Link href="/contribute">
-          <Button variant="ghost" className="hidden sm:flex gap-2 text-white/80 hover:text-primary hover:bg-primary/5 rounded-full px-5 transition-all">
+          <Button variant="ghost" className="hidden sm:flex gap-2 text-white/80 hover:text-primary hover:bg-primary/5 rounded-full px-5 transition-all h-10 border border-transparent hover:border-primary/20">
             <MessageSquare className="h-4 w-4" />
-            <span className="font-bold uppercase tracking-widest text-[10px]">Contribute</span>
+            <span className="font-black uppercase tracking-widest text-[10px]">Contribute</span>
           </Button>
         </Link>
 
-        <Button variant="ghost" size="icon" className="relative text-white/80 hover:text-primary transition-all">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={handleNotificationClick}
+          className="relative text-white/80 hover:text-primary transition-all h-10 w-10"
+        >
           <Bell className="h-5 w-5" />
-          <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full neon-glow" />
+          <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-primary rounded-full shadow-[0_0_10px_rgba(7,241,214,1)] animate-pulse" />
         </Button>
         
         <Link href="/dashboard">
-          <Button variant="outline" size="icon" className="rounded-full border-primary/20 hover:border-primary bg-white/5 hover:bg-primary/10 transition-all group">
+          <Button variant="outline" size="icon" className="rounded-full border-primary/20 hover:border-primary bg-white/5 hover:bg-primary/10 transition-all group h-10 w-10">
             <User className="h-5 w-5 text-primary transition-transform group-hover:scale-110" />
           </Button>
         </Link>

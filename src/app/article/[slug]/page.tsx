@@ -4,7 +4,7 @@
 import React, { use } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ArrowLeft, MoreHorizontal, ChevronRight } from 'lucide-react'
+import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -16,13 +16,44 @@ import {
   TabsList, 
   TabsTrigger 
 } from '@/components/ui/tabs'
+import { useToast } from '@/hooks/use-toast'
+import { useRouter } from 'next/navigation'
 
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const article = ARTICLES.find(a => a.slug === slug) || ARTICLES[0]
+  const { toast } = useToast()
+  const router = useRouter()
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article.title,
+          text: `Read about ${article.title} on BharatDarshan Wiki`,
+          url: window.location.href,
+        })
+      } catch (err) {
+        console.error("Share failed:", err)
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+      toast({
+        title: "Link Copied!",
+        description: "Article URL has been copied to your clipboard.",
+      })
+    }
+  }
+
+  const handleBookmark = () => {
+    toast({
+      title: "Saved!",
+      description: `${article.title} has been added to your bookmarks.`,
+    })
+  }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 pb-24">
+    <div className="max-w-6xl mx-auto space-y-12 pb-24 animate-in fade-in duration-700">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
         <Link href="/" className="hover:text-primary transition-colors">Home</Link>
@@ -53,19 +84,36 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
           </div>
 
           <div className="flex flex-wrap gap-4">
-            <Button className="gap-2 rounded-full bg-primary text-black hover:bg-primary/90 font-bold px-8 h-12 neon-glow">
+            <Button 
+              onClick={() => router.push('/contribute')}
+              className="gap-2 rounded-full bg-primary text-black hover:bg-primary/90 font-bold px-8 h-12 neon-glow"
+            >
               <Edit2 className="h-4 w-4" />
               Edit This Page
             </Button>
-            <Button variant="outline" className="gap-2 rounded-full border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold h-12 px-6">
+            <Button 
+              variant="outline" 
+              onClick={() => toast({ title: "Revision History", description: "Loading archives for this article..." })}
+              className="gap-2 rounded-full border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold h-12 px-6"
+            >
               <History className="h-4 w-4" />
               Revision History
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" className="rounded-full border-white/10 bg-white/5 hover:text-primary h-12 w-12">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleBookmark}
+                className="rounded-full border-white/10 bg-white/5 hover:text-primary h-12 w-12"
+              >
                 <Bookmark className="h-5 w-5" />
               </Button>
-              <Button variant="outline" size="icon" className="rounded-full border-white/10 bg-white/5 hover:text-primary h-12 w-12">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleShare}
+                className="rounded-full border-white/10 bg-white/5 hover:text-primary h-12 w-12"
+              >
                 <Share2 className="h-5 w-5" />
               </Button>
               <Button variant="outline" size="icon" className="rounded-full border-white/10 bg-white/5 hover:text-primary h-12 w-12">
@@ -119,7 +167,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-                <Card className="bg-white/5 border-white/5 shadow-none rounded-[2rem] p-8 hover:bg-white/10 transition-colors">
+                <div className="bg-white/5 border border-white/5 shadow-none rounded-[2rem] p-8 hover:bg-white/10 transition-colors">
                   <div className="flex gap-5">
                     <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary neon-glow">
                       <MapPin className="h-7 w-7" />
@@ -130,8 +178,8 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                       <p className="text-sm text-white/50 mt-1 italic">Type: {article.category} Classification</p>
                     </div>
                   </div>
-                </Card>
-                <Card className="bg-white/5 border-white/5 shadow-none rounded-[2rem] p-8 hover:bg-white/10 transition-colors">
+                </div>
+                <div className="bg-white/5 border border-white/5 shadow-none rounded-[2rem] p-8 hover:bg-white/10 transition-colors">
                   <div className="flex gap-5">
                     <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary neon-glow">
                       <Sparkles className="h-7 w-7" />
@@ -142,14 +190,14 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                       <p className="text-sm text-white/50 mt-1 italic">Last edited 3 hours ago</p>
                     </div>
                   </div>
-                </Card>
+                </div>
               </div>
             </TabsContent>
 
             <TabsContent value="tools" className="mt-12 space-y-8">
               <TranslatorTool content={article.content} />
               
-              <Card className="border-white/5 bg-white/5 rounded-[2rem] overflow-hidden group">
+              <div className="border border-white/5 bg-white/5 rounded-[2rem] overflow-hidden group">
                 <div className="p-10 space-y-6">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary neon-glow">
@@ -160,14 +208,14 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                       <p className="text-muted-foreground font-light">Advanced AI analysis for tone, accuracy, and style.</p>
                     </div>
                   </div>
-                  <Link href="/tools/refine">
+                  <Link href="/contribute">
                     <Button variant="outline" className="w-full h-14 border-primary/20 hover:border-primary text-primary font-bold text-lg rounded-2xl group">
                       Launch AI Assistant
                       <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </Button>
                   </Link>
                 </div>
-              </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="discussion" className="mt-12">
@@ -179,7 +227,12 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                   <h3 className="text-3xl font-headline font-bold text-white">Talk Page</h3>
                   <p className="text-muted-foreground max-w-sm mx-auto font-light">Be the first to start a conversation about improving this article's coverage and accuracy.</p>
                 </div>
-                <Button className="bg-primary text-black font-black px-10 h-14 rounded-full neon-glow">Start A Discussion</Button>
+                <Button 
+                  onClick={() => toast({ title: "Opening Discussion", description: "Fetching threaded comments..." })}
+                  className="bg-primary text-black font-black px-10 h-14 rounded-full neon-glow"
+                >
+                  Start A Discussion
+                </Button>
               </div>
             </TabsContent>
           </Tabs>
@@ -201,12 +254,16 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 </Link>
               ))}
             </div>
-            <Button variant="ghost" className="w-full text-primary font-bold hover:bg-primary/5 rounded-xl h-12">
+            <Button 
+              variant="ghost" 
+              onClick={() => router.push('/browse')}
+              className="w-full text-primary font-bold hover:bg-primary/5 rounded-xl h-12"
+            >
               Explore Full Map
             </Button>
           </div>
 
-          <Card className="bg-primary p-10 rounded-[2.5rem] text-black border-none shadow-2xl relative overflow-hidden group">
+          <div className="bg-primary p-10 rounded-[2.5rem] text-black border-none shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-150 transition-transform">
               <Sparkles className="h-32 w-32" />
             </div>
@@ -215,21 +272,16 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               <p className="text-black/70 text-lg leading-relaxed font-bold italic">
                 Help us map the vast heritage of {article.title}. Your expertise matters.
               </p>
-              <Button className="w-full bg-black text-primary hover:bg-black/90 font-black h-16 rounded-2xl text-xl transition-all hover:scale-105 active:scale-95 shadow-xl">
+              <Button 
+                onClick={() => router.push('/contribute')}
+                className="w-full bg-black text-primary hover:bg-black/90 font-black h-16 rounded-2xl text-xl transition-all hover:scale-105 active:scale-95 shadow-xl"
+              >
                 Become An Editor
               </Button>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
-
-function Card({ children, className }: { children: React.ReactNode, className?: string }) {
-  return (
-    <div className={`rounded-2xl border ${className}`}>
-      {children}
     </div>
   )
 }
