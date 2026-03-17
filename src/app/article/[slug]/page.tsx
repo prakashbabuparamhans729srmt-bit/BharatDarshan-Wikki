@@ -1,9 +1,10 @@
+
 "use client"
 
-import React, { use } from 'react'
+import React, { use, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal } from 'lucide-react'
+import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -17,12 +18,15 @@ import {
 } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const article = ARTICLES.find(a => a.slug === slug) || ARTICLES[0]
   const { toast } = useToast()
   const router = useRouter()
+  const [newComment, setNewComment] = useState('')
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -50,6 +54,12 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
       description: `${article.title} has been added to your bookmarks.`,
     })
   }
+
+  const comments = [
+    { user: "Arjun S.", text: "This article needs more info on the local crafts of this region.", time: "2h ago", likes: 5 },
+    { user: "Priya M.", text: "I've uploaded some high-res photos from the 2022 excavation.", time: "5h ago", likes: 12 },
+    { user: "HistoryBuff99", text: "The dates in the third paragraph seem slightly off compared to ASI records.", time: "1d ago", likes: 8 }
+  ]
 
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-24 animate-in fade-in duration-700">
@@ -214,21 +224,51 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               </div>
             </TabsContent>
 
-            <TabsContent value="discussion" className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex flex-col items-center justify-center py-24 text-center space-y-6 border-2 border-dashed border-foreground/10 rounded-[3rem] bg-foreground/5">
-                <div className="h-20 w-20 rounded-full bg-foreground/5 flex items-center justify-center text-foreground/20">
-                  <MessageSquare className="h-10 w-10" />
+            <TabsContent value="discussion" className="mt-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-6">
+                <div className="bg-foreground/5 p-6 rounded-[2rem] border border-foreground/5 space-y-4">
+                  <h3 className="text-xl font-headline font-bold text-foreground">Community Discussion</h3>
+                  <div className="flex gap-3">
+                    <Input 
+                      placeholder="Share your thoughts or suggest changes..." 
+                      className="bg-background border-foreground/10 rounded-xl"
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                    />
+                    <Button 
+                      className="bg-primary text-black rounded-xl px-6 font-bold"
+                      onClick={() => {
+                        toast({ title: "Comment Posted", description: "Your suggestion has been added to the Talk page." })
+                        setNewComment('')
+                      }}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-3xl font-headline font-bold text-foreground">Talk Page</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto font-light">Be the first to start a conversation about improving this article's coverage and accuracy.</p>
-                </div>
-                <Button 
-                  onClick={() => toast({ title: "Opening Discussion", description: "Fetching threaded comments..." })}
-                  className="bg-primary text-black font-black px-10 h-14 rounded-full neon-glow transition-all hover:scale-105"
-                >
-                  Start A Discussion
-                </Button>
+
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="space-y-4">
+                    {comments.map((c, i) => (
+                      <div key={i} className="bg-foreground/5 p-6 rounded-2xl border border-foreground/5 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                              <User className="h-4 w-4" />
+                            </div>
+                            <span className="font-bold text-sm text-foreground">{c.user}</span>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{c.time}</span>
+                          </div>
+                          <Button variant="ghost" size="sm" className="gap-1 text-xs text-muted-foreground hover:text-primary">
+                            <ThumbsUp className="h-3 w-3" />
+                            {c.likes}
+                          </Button>
+                        </div>
+                        <p className="text-sm text-foreground/70 leading-relaxed italic">"{c.text}"</p>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
               </div>
             </TabsContent>
           </Tabs>
