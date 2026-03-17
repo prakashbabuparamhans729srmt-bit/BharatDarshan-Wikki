@@ -13,16 +13,19 @@ import {
   Eye, 
   EyeOff,
   UserCheck,
-  Globe
+  Globe,
+  Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuth } from '@/firebase'
+import { useAuth, useFirestore } from '@/firebase'
 import { initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase/non-blocking-login'
 import { useUser } from '@/firebase'
+import { doc, serverTimestamp } from 'firebase/firestore'
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -30,29 +33,48 @@ export default function AuthPage() {
   const [password, setPassword] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   const { user, isUserLoading } = useUser()
   const auth = useAuth()
+  const db = useFirestore()
   const router = useRouter()
 
-  // If user is already logged in, go home
+  // Create profile in Firestore when a new user is detected
   useEffect(() => {
-    if (!isUserLoading && user) {
+    if (user && !user.isAnonymous && !isUserLoading) {
+      const profileRef = doc(db, 'user_profiles', user.uid)
+      setDocumentNonBlocking(profileRef, {
+        id: user.uid,
+        email: user.email,
+        firstName: firstName || 'Explorer',
+        lastName: lastName || '',
+        username: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
+        memberSince: serverTimestamp(),
+        themePreference: 'dark',
+        preferredLanguageId: 'English'
+      }, { merge: true })
+      
+      router.push('/')
+    } else if (user?.isAnonymous) {
       router.push('/')
     }
-  }, [user, isUserLoading, router])
+  }, [user, isUserLoading, router, db, firstName, lastName])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
     initiateEmailSignIn(auth, email, password)
   }
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
     initiateEmailSignUp(auth, email, password)
   }
 
   const handleGuestMode = () => {
+    setIsSubmitting(true)
     initiateAnonymousSignIn(auth)
   }
 
@@ -61,7 +83,7 @@ export default function AuthPage() {
       <div className="min-h-screen bg-[#070707] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Compass className="h-12 w-12 text-primary animate-spin" />
-          <p className="text-primary font-bold animate-pulse">Initializing BharatDarshan...</p>
+          <p className="text-primary font-bold animate-pulse uppercase tracking-[0.3em] text-[10px]">Initializing BharatDarshan...</p>
         </div>
       </div>
     )
@@ -149,9 +171,12 @@ export default function AuthPage() {
                   </div>
                 </CardContent>
                 <CardFooter className="p-8 pt-0 flex flex-col gap-4">
-                  <Button className="w-full bg-primary text-black font-black h-14 rounded-2xl text-lg neon-glow transition-all hover:scale-[1.02] active:scale-[0.98]">
-                    Start Exploring
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                  <Button 
+                    disabled={isSubmitting}
+                    className="w-full bg-primary text-black font-black h-14 rounded-2xl text-lg neon-glow transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Start Exploring"}
+                    {!isSubmitting && <ArrowRight className="ml-2 h-5 w-5" />}
                   </Button>
                   <Button 
                     type="button" 
@@ -226,9 +251,12 @@ export default function AuthPage() {
                   </div>
                 </CardContent>
                 <CardFooter className="p-8 pt-0">
-                  <Button className="w-full bg-primary text-black font-black h-14 rounded-2xl text-lg neon-glow transition-all hover:scale-[1.02] active:scale-[0.98]">
-                    Join Community
-                    <Sparkles className="ml-2 h-5 w-5" />
+                  <Button 
+                    disabled={isSubmitting}
+                    className="w-full bg-primary text-black font-black h-14 rounded-2xl text-lg neon-glow transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Join Community"}
+                    {!isSubmitting && <Sparkles className="ml-2 h-5 w-5" />}
                   </Button>
                 </CardFooter>
               </form>

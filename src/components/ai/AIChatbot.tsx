@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Sparkles, X, Send, Mic, Square, Loader2, Compass, HelpCircle, Map, Info } from 'lucide-react'
+import { Sparkles, X, Send, Mic, Square, Loader2, Compass, HelpCircle, Map, Info, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 export function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<{ role: 'user' | 'ai', text: string }[]>([
-    { role: 'ai', text: 'Namaste! I am your Bharat Assistant. I am trained to guide you through India\'s heritage from A to Z. You can ask me to find states, monuments, or even translate articles into 22 Indian languages!' }
+    { role: 'ai', text: 'Namaste! I am your Bharat Assistant. I am here to guide you through India\'s digital heritage repository from A to Z. How can I help you today?' }
   ])
   const [input, setInput] = useState('')
   const [isRecording, setIsRecording] = useState(false)
@@ -34,16 +34,29 @@ export function AIChatbot() {
     setInput('')
     setIsProcessing(true)
 
-    // Advanced AI Simulation
+    // Advanced AI Logic - Explaining A to Z of the app
     setTimeout(() => {
       let response = `I've analyzed your query about "${text}". `;
       
-      if (text.toLowerCase().includes('help') || text.toLowerCase().includes('how')) {
-        response += "BharatDarshan Wiki is a collaborative platform where you can explore every district of India. You can contribute by clicking 'Edit', use our AI tools for refinement, or even use voice search to find ancient monuments."
-      } else if (text.toLowerCase().includes('language') || text.toLowerCase().includes('translate')) {
-        response += "Our AI supports 22 official Indian languages. Go to the 'AI & Tools' tab on any article or use the Globe icon in the header to switch your primary interface language."
+      const q = text.toLowerCase();
+      if (q.includes('help') || q.includes('how') || q.includes('a to z')) {
+        response = "BharatDarshan Wiki is India's most advanced digital encyclopedia. Here is the A to Z guide:\n\n" +
+          "• **A** - Auth: Secure login for contributors.\n" +
+          "• **B** - Browse: Explore 28 states alphabetically.\n" +
+          "• **C** - Contribute: Write and refine history with AI.\n" +
+          "• **D** - Dashboard: Track your points and impact.\n" +
+          "• **H** - History: Track every revision of a monument.\n" +
+          "• **L** - Languages: Translate everything into 22 Indian languages.\n" +
+          "• **S** - Search: Advanced crawling for monuments and districts.\n" +
+          "• **V** - Voice: Search just by speaking!\n\nHow can I guide your journey further?";
+      } else if (q.includes('language') || q.includes('translate')) {
+        response = "Our AI supports 22 official Indian languages including Hindi, Marathi, Tamil, Bengali, and more. Use the Globe icon in the Header or go to the 'AI & Tools' tab on any article to translate it instantly.";
+      } else if (q.includes('voice') || q.includes('mic') || q.includes('speak')) {
+        response = "You can use Voice Search! Just click the Mic icon in the search bar or right here in my chat window. I will listen, transcribe, and find the heritage site you are looking for.";
+      } else if (q.includes('monument') || q.includes('heritage')) {
+        response = "We have thousands of indexed nodes! Try searching for 'Taj Mahal', 'Agra Fort', or browse by State to see hidden gems in your region.";
       } else {
-        response += "I'm searching our heritage archives... In the meantime, did you know that BharatDarshan indexes data from over 700 districts across India?"
+        response += "I'm searching our heritage archives... Did you know that BharatDarshan indexes data from over 700 districts across India? You can explore them all in the 'Browse' section.";
       }
 
       setMessages(prev => [...prev, { 
@@ -116,7 +129,7 @@ export function AIChatbot() {
                 <CardTitle className="text-black font-black text-xl leading-none">Bharat Assistant</CardTitle>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="h-2 w-2 rounded-full bg-black animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-black/60">Live Explorer AI</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-black/60">A-Z Heritage Expert</span>
                 </div>
               </div>
             </div>
@@ -129,7 +142,7 @@ export function AIChatbot() {
             <div className="space-y-6">
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] p-5 rounded-[1.5rem] text-sm leading-relaxed ${
+                  <div className={`max-w-[85%] p-5 rounded-[1.5rem] text-sm leading-relaxed whitespace-pre-wrap ${
                     m.role === 'user' 
                       ? 'bg-primary text-black font-bold rounded-tr-none shadow-lg' 
                       : 'bg-[#161C21] text-foreground rounded-tl-none border border-white/10 shadow-xl italic'
@@ -155,14 +168,14 @@ export function AIChatbot() {
 
           <div className="p-6 bg-black/40 border-t border-white/5 space-y-4">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("How to contribute?")}>
-                <HelpCircle className="h-3 w-3 mr-2" /> Help
+              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("Tell me the A to Z guide")}>
+                <HelpCircle className="h-3 w-3 mr-2" /> A-Z Guide
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("Show me the map")}>
-                <Map className="h-3 w-3 mr-2" /> Map
+              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("How to use Voice Search?")}>
+                <Mic className="h-3 w-3 mr-2" /> Voice Info
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("What is BharatDarshan?")}>
-                <Info className="h-3 w-3 mr-2" /> About
+              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("Explore Monuments")}>
+                <BookOpen className="h-3 w-3 mr-2" /> Monuments
               </Button>
             </div>
             <div className="flex gap-3 relative">
