@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { use } from 'react'
@@ -60,7 +59,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
         <ChevronRight className="h-3 w-3" />
         <Link href="/browse" className="hover:text-primary transition-colors">Directory</Link>
         <ChevronRight className="h-3 w-3" />
-        <span className="text-white font-medium">{article.title}</span>
+        <span className="text-foreground font-medium">{article.title}</span>
       </nav>
 
       {/* Article Header */}
@@ -73,20 +72,20 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               </Badge>
               {article.parent && (
                 <>
-                  <span className="text-white/20">/</span>
+                  <span className="text-foreground/20">/</span>
                   <Link href={`/article/${article.parent.toLowerCase().replace(/\s+/g, '-')}`} className="text-xs font-bold text-primary hover:underline capitalize tracking-widest">
                     {article.parent}
                   </Link>
                 </>
               )}
             </div>
-            <h1 className="text-6xl md:text-8xl font-headline font-black text-white leading-tight">{article.title}</h1>
+            <h1 className="text-6xl md:text-8xl font-headline font-black text-foreground leading-tight">{article.title}</h1>
           </div>
 
           <div className="flex flex-wrap gap-4">
             <Button 
               onClick={() => router.push('/contribute')}
-              className="gap-2 rounded-full bg-primary text-black hover:bg-primary/90 font-bold px-8 h-12 neon-glow"
+              className="gap-2 rounded-full bg-primary text-black hover:bg-primary/90 font-bold px-8 h-12 neon-glow transition-all hover:scale-105"
             >
               <Edit2 className="h-4 w-4" />
               Edit This Page
@@ -94,7 +93,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
             <Button 
               variant="outline" 
               onClick={() => toast({ title: "Revision History", description: "Loading archives for this article..." })}
-              className="gap-2 rounded-full border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold h-12 px-6"
+              className="gap-2 rounded-full border-primary/10 bg-primary/5 hover:bg-primary/10 text-primary font-bold h-12 px-6"
             >
               <History className="h-4 w-4" />
               Revision History
@@ -104,7 +103,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 variant="outline" 
                 size="icon" 
                 onClick={handleBookmark}
-                className="rounded-full border-white/10 bg-white/5 hover:text-primary h-12 w-12"
+                className="rounded-full border-foreground/10 bg-foreground/5 hover:text-primary h-12 w-12 transition-all hover:scale-110"
               >
                 <Bookmark className="h-5 w-5" />
               </Button>
@@ -112,27 +111,27 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 variant="outline" 
                 size="icon" 
                 onClick={handleShare}
-                className="rounded-full border-white/10 bg-white/5 hover:text-primary h-12 w-12"
+                className="rounded-full border-foreground/10 bg-foreground/5 hover:text-primary h-12 w-12 transition-all hover:scale-110"
               >
                 <Share2 className="h-5 w-5" />
               </Button>
-              <Button variant="outline" size="icon" className="rounded-full border-white/10 bg-white/5 hover:text-primary h-12 w-12">
+              <Button variant="outline" size="icon" className="rounded-full border-foreground/10 bg-foreground/5 hover:text-primary h-12 w-12 transition-all hover:scale-110">
                 <MoreHorizontal className="h-5 w-5" />
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="w-full lg:w-[450px] h-[450px] relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/5 group">
+        <div className="w-full lg:w-[450px] h-[450px] relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-foreground/5 group">
           <Image 
             src={article.image}
             alt={article.title}
             fill
             className="object-cover transition-transform duration-1000 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute bottom-6 left-6 right-6 p-6 rounded-3xl bg-black/40 backdrop-blur-md border border-white/10">
-            <div className="flex items-center gap-3 text-white">
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+          <div className="absolute bottom-6 left-6 right-6 p-6 rounded-3xl bg-background/60 backdrop-blur-md border border-foreground/10">
+            <div className="flex items-center gap-3 text-foreground">
               <MapPin className="h-5 w-5 text-primary" />
               <span className="font-bold text-lg">{article.title}, India</span>
             </div>
@@ -140,26 +139,23 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
         </div>
       </div>
 
-      <Separator className="bg-white/5" />
+      <Separator className="bg-foreground/5" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
         <div className="lg:col-span-2 space-y-12">
           <Tabs defaultValue="read" className="w-full">
-            <TabsList className="bg-white/5 p-1 rounded-2xl border border-white/5 h-14">
+            <TabsList className="bg-foreground/5 p-1 rounded-2xl border border-foreground/5 h-14">
               <TabsTrigger value="read" className="rounded-xl px-10 h-11 data-[state=active]:bg-primary data-[state=active]:text-black font-black text-xs uppercase tracking-widest">Read Content</TabsTrigger>
               <TabsTrigger value="tools" className="rounded-xl px-10 h-11 data-[state=active]:bg-primary data-[state=active]:text-black font-black text-xs uppercase tracking-widest">AI & Tools</TabsTrigger>
               <TabsTrigger value="discussion" className="rounded-xl px-10 h-11 data-[state=active]:bg-primary data-[state=active]:text-black font-black text-xs uppercase tracking-widest">Talk Page</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="read" className="mt-12 space-y-10">
+            <TabsContent value="read" className="mt-12 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="prose prose-invert max-w-none">
-                <p className="text-2xl leading-[1.7] text-white/90 font-light selection:bg-primary/20">
-                  <span className="text-7xl font-headline font-black text-primary mr-4 float-left leading-none mt-2">
-                    {article.content.charAt(0)}
-                  </span>
-                  {article.content.slice(1)}
+                <p className="text-2xl leading-[1.7] text-foreground/90 font-light selection:bg-primary/20 article-dropcap">
+                  {article.content}
                 </p>
-                <p className="text-xl leading-[1.8] text-white/70 font-light mt-8">
+                <p className="text-xl leading-[1.8] text-foreground/70 font-light mt-8">
                   The history of {article.title} is deeply intertwined with the cultural evolution of the Indian subcontinent. 
                   Recent archaeological findings and historical archives maintained by BharatDarshan contributors highlight its strategic importance 
                   in ancient trade routes and its role as a center for learning and spiritual enlightenment.
@@ -167,49 +163,49 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-                <div className="bg-white/5 border border-white/5 shadow-none rounded-[2rem] p-8 hover:bg-white/10 transition-colors">
+                <div className="bg-foreground/5 border border-foreground/5 shadow-none rounded-[2rem] p-8 hover:bg-foreground/10 transition-all hover:scale-[1.02]">
                   <div className="flex gap-5">
                     <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary neon-glow">
                       <MapPin className="h-7 w-7" />
                     </div>
                     <div>
-                      <h4 className="font-bold font-headline text-xl text-white">Geographical Data</h4>
+                      <h4 className="font-bold font-headline text-xl text-foreground">Geographical Data</h4>
                       <p className="text-sm text-primary/70 font-bold mt-1 uppercase tracking-wider">{article.tags[0]}</p>
-                      <p className="text-sm text-white/50 mt-1 italic">Type: {article.category} Classification</p>
+                      <p className="text-sm text-foreground/50 mt-1 italic">Type: {article.category} Classification</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white/5 border border-white/5 shadow-none rounded-[2rem] p-8 hover:bg-white/10 transition-colors">
+                <div className="bg-foreground/5 border border-foreground/5 shadow-none rounded-[2rem] p-8 hover:bg-foreground/10 transition-all hover:scale-[1.02]">
                   <div className="flex gap-5">
                     <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary neon-glow">
                       <Sparkles className="h-7 w-7" />
                     </div>
                     <div>
-                      <h4 className="font-bold font-headline text-xl text-white">Wiki Stats</h4>
-                      <p className="text-sm text-white/70 mt-1">Verified by <span className="text-primary font-bold">14+ Experts</span></p>
-                      <p className="text-sm text-white/50 mt-1 italic">Last edited 3 hours ago</p>
+                      <h4 className="font-bold font-headline text-xl text-foreground">Wiki Stats</h4>
+                      <p className="text-sm text-foreground/70 mt-1">Verified by <span className="text-primary font-bold">14+ Experts</span></p>
+                      <p className="text-sm text-foreground/50 mt-1 italic">Last edited 3 hours ago</p>
                     </div>
                   </div>
                 </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="tools" className="mt-12 space-y-8">
+            <TabsContent value="tools" className="mt-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <TranslatorTool content={article.content} />
               
-              <div className="border border-white/5 bg-white/5 rounded-[2rem] overflow-hidden group">
+              <div className="border border-foreground/5 bg-foreground/5 rounded-[2rem] overflow-hidden group">
                 <div className="p-10 space-y-6">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary neon-glow">
                       <Sparkles className="h-6 w-6" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-headline font-bold text-white">Smart Content Refiner</h3>
+                      <h3 className="text-2xl font-headline font-bold text-foreground">Smart Content Refiner</h3>
                       <p className="text-muted-foreground font-light">Advanced AI analysis for tone, accuracy, and style.</p>
                     </div>
                   </div>
                   <Link href="/contribute">
-                    <Button variant="outline" className="w-full h-14 border-primary/20 hover:border-primary text-primary font-bold text-lg rounded-2xl group">
+                    <Button variant="outline" className="w-full h-14 border-primary/20 hover:border-primary text-primary font-bold text-lg rounded-2xl group transition-all">
                       Launch AI Assistant
                       <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </Button>
@@ -218,18 +214,18 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               </div>
             </TabsContent>
 
-            <TabsContent value="discussion" className="mt-12">
-              <div className="flex flex-col items-center justify-center py-24 text-center space-y-6 border-2 border-dashed border-white/10 rounded-[3rem] bg-white/5">
-                <div className="h-20 w-20 rounded-full bg-white/5 flex items-center justify-center text-white/20">
+            <TabsContent value="discussion" className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex flex-col items-center justify-center py-24 text-center space-y-6 border-2 border-dashed border-foreground/10 rounded-[3rem] bg-foreground/5">
+                <div className="h-20 w-20 rounded-full bg-foreground/5 flex items-center justify-center text-foreground/20">
                   <MessageSquare className="h-10 w-10" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-3xl font-headline font-bold text-white">Talk Page</h3>
+                  <h3 className="text-3xl font-headline font-bold text-foreground">Talk Page</h3>
                   <p className="text-muted-foreground max-w-sm mx-auto font-light">Be the first to start a conversation about improving this article's coverage and accuracy.</p>
                 </div>
                 <Button 
                   onClick={() => toast({ title: "Opening Discussion", description: "Fetching threaded comments..." })}
-                  className="bg-primary text-black font-black px-10 h-14 rounded-full neon-glow"
+                  className="bg-primary text-black font-black px-10 h-14 rounded-full neon-glow transition-all hover:scale-105"
                 >
                   Start A Discussion
                 </Button>
@@ -239,16 +235,16 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
         </div>
 
         <div className="space-y-10">
-          <div className="bg-secondary p-10 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-8">
-            <h3 className="font-headline font-bold text-2xl text-white border-b border-white/5 pb-4">Related Heritage</h3>
+          <div className="bg-secondary p-10 rounded-[2.5rem] border border-foreground/5 shadow-2xl space-y-8">
+            <h3 className="font-headline font-bold text-2xl text-foreground border-b border-foreground/5 pb-4">Related Heritage</h3>
             <div className="space-y-6">
               {ARTICLES.filter(a => a.slug !== slug).map(related => (
                 <Link key={related.slug} href={`/article/${related.slug}`} className="flex gap-4 group items-center">
-                  <div className="h-16 w-16 rounded-2xl relative overflow-hidden shrink-0 border border-white/10">
+                  <div className="h-16 w-16 rounded-2xl relative overflow-hidden shrink-0 border border-foreground/10">
                     <Image src={related.image} alt={related.title} fill className="object-cover transition-transform group-hover:scale-125" />
                   </div>
                   <div className="overflow-hidden">
-                    <h4 className="text-lg font-bold text-white group-hover:text-primary transition-colors truncate">{related.title}</h4>
+                    <h4 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate">{related.title}</h4>
                     <p className="text-xs text-primary font-black uppercase tracking-widest">{related.category}</p>
                   </div>
                 </Link>
