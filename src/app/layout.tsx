@@ -1,16 +1,16 @@
-
 "use client"
 
-import type {Metadata} from 'next';
 import './globals.css';
 import {SidebarProvider} from '@/components/ui/sidebar';
 import {AppSidebar} from '@/components/layout/AppSidebar';
 import {Header} from '@/components/layout/Header';
 import {Toaster} from '@/components/ui/toaster';
 import {LanguageProvider} from '@/context/LanguageContext';
+import {ThemeProvider} from '@/context/ThemeContext';
 import { FirebaseClientProvider, useUser } from '@/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { AIChatbot } from '@/components/ai/AIChatbot';
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
@@ -33,12 +33,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // If we are on the auth page or logged in, show the content
   if (pathname === '/auth' || user) {
     return <>{children}</>;
   }
 
-  // Otherwise, hide content while redirecting
   return <div className="min-h-screen bg-[#070707]" />;
 }
 
@@ -60,6 +58,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
             {children}
           </main>
         </div>
+        <AIChatbot />
       </div>
     </SidebarProvider>
   );
@@ -71,7 +70,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -81,14 +80,16 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <FirebaseClientProvider>
-          <LanguageProvider>
-            <AuthGuard>
-              <MainLayout>
-                {children}
-              </MainLayout>
-            </AuthGuard>
-            <Toaster />
-          </LanguageProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <AuthGuard>
+                <MainLayout>
+                  {children}
+                </MainLayout>
+              </AuthGuard>
+              <Toaster />
+            </LanguageProvider>
+          </ThemeProvider>
         </FirebaseClientProvider>
       </body>
     </html>

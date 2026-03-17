@@ -1,10 +1,32 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3%;
+    --primary: 173 94% 48%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 3%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 173 94% 48%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 173 94% 48%;
+    --radius: 1rem;
+  }
+
+  .dark {
     --background: 0 0% 3%;
     --foreground: 0 0% 100%;
     --card: 207 19% 11%;
@@ -24,15 +46,6 @@
     --border: 207 19% 20%;
     --input: 207 19% 20%;
     --ring: 173 94% 48%;
-    --radius: 1rem;
-    --sidebar-background: 0 0% 3%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 173 94% 48%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 207 19% 15%;
-    --sidebar-accent-foreground: 173 94% 48%;
-    --sidebar-border: 207 19% 15%;
-    --sidebar-ring: 173 94% 48%;
   }
 }
 
@@ -41,7 +54,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body selection:bg-primary/30 selection:text-primary;
+    @apply bg-background text-foreground font-body selection:bg-primary/30 selection:text-primary transition-colors duration-300;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline tracking-tight;
@@ -64,4 +77,13 @@
 }
 ::-webkit-scrollbar-thumb {
   @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
+}
+
+.floating-ai-bounce {
+  animation: floating-bounce 3s ease-in-out infinite;
+}
+
+@keyframes floating-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
