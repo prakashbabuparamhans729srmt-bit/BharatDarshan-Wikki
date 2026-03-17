@@ -1,3 +1,4 @@
+
 "use client"
 
 import React from 'react'
@@ -20,7 +21,8 @@ import {
   MapPin,
   History,
   TrendingUp,
-  Award
+  Award,
+  Image as ImageIcon
 } from 'lucide-react'
 import { 
   Sidebar, 
@@ -85,6 +87,14 @@ export function AppSidebar() {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isRouteActive('/media')} tooltip="Media Gallery" className="h-12 hover:bg-primary/10 hover:text-primary transition-all rounded-xl data-[active=true]:bg-primary/20 data-[active=true]:text-primary">
+                <Link href="/media">
+                  <ImageIcon className="h-5 w-5" />
+                  <span className="font-bold">Media Library</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
 
@@ -135,14 +145,6 @@ export function AppSidebar() {
                   <Link href="/settings">
                     <Languages className="h-5 w-5" />
                     <span className="font-bold">AI Translator</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild className="h-12 hover:bg-primary/10 hover:text-primary transition-all rounded-xl">
-                  <Link href="/dashboard">
-                    <Award className="h-5 w-5" />
-                    <span className="font-bold">Achievements</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

@@ -1,8 +1,9 @@
+
 "use client"
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Menu, Search, User, Globe, MessageSquare, Mic, Bell, Sparkles } from 'lucide-react'
+import { Menu, Search, User, Globe, MessageSquare, Mic, Bell, Sparkles, Image as ImageIcon, History, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { Input } from '@/components/ui/input'
@@ -15,8 +16,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export function Header() {
   const { toggleSidebar } = useSidebar()
@@ -26,18 +31,17 @@ export function Header() {
   const { toast } = useToast()
   const { currentLanguage, setLanguage } = useAppLanguage()
 
+  const notifications = [
+    { id: 1, title: "New Edit on Taj Mahal", time: "2m ago", type: "edit", unread: true },
+    { id: 2, title: "Achievement Unlocked: Master Editor", time: "1h ago", type: "award", unread: true },
+    { id: 3, title: "New Comment in Talk: Agra", time: "3h ago", type: "talk", unread: false },
+  ]
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
     }
-  }
-
-  const handleNotificationClick = () => {
-    toast({
-      title: "Notifications",
-      description: "You have 3 new updates on your followed articles.",
-    })
   }
 
   return (
@@ -100,22 +104,42 @@ export function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Link href="/contribute">
-          <Button variant="ghost" className="hidden lg:flex gap-2 text-white/80 hover:text-primary hover:bg-primary/5 rounded-full px-5 transition-all h-10 border border-transparent hover:border-primary/20">
-            <Sparkles className="h-4 w-4" />
-            <span className="font-black uppercase tracking-widest text-[10px]">Editor Hub</span>
-          </Button>
-        </Link>
-
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={handleNotificationClick}
-          className="relative text-white/80 hover:text-primary transition-all h-11 w-11 rounded-xl hover:bg-primary/10"
-        >
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-3 right-3 h-2 w-2 bg-primary rounded-full shadow-[0_0_10px_rgba(7,241,214,1)] animate-pulse" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative text-white/80 hover:text-primary transition-all h-11 w-11 rounded-xl hover:bg-primary/10"
+            >
+              <Bell className="h-5 w-5" />
+              {notifications.some(n => n.unread) && (
+                <span className="absolute top-3 right-3 h-2 w-2 bg-primary rounded-full shadow-[0_0_10px_rgba(7,241,214,1)] animate-pulse" />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[320px] bg-[#161C21] border-white/10 p-0 rounded-[2rem] shadow-2xl overflow-hidden">
+            <DropdownMenuLabel className="p-6 bg-primary text-black font-black text-lg flex items-center justify-between">
+              Notifications
+              <Badge variant="outline" className="border-black/20 text-black font-bold text-[10px]">{notifications.filter(n => n.unread).length} New</Badge>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-white/5 m-0" />
+            <ScrollArea className="h-[300px]">
+              <div className="p-2 space-y-1">
+                {notifications.map((n) => (
+                  <DropdownMenuItem key={n.id} className="p-4 rounded-2xl flex flex-col items-start gap-1 cursor-pointer hover:bg-white/5 focus:bg-white/10 group transition-all">
+                    <div className="flex items-center justify-between w-full">
+                      <span className={`font-bold text-sm ${n.unread ? 'text-primary' : 'text-white'}`}>{n.title}</span>
+                      {n.unread && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                    </div>
+                    <span className="text-[10px] text-white/40 uppercase tracking-widest font-black">{n.time}</span>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            </ScrollArea>
+            <DropdownMenuSeparator className="bg-white/5 m-0" />
+            <Button variant="ghost" className="w-full h-12 text-primary font-black uppercase text-[10px] tracking-widest rounded-none hover:bg-primary/10">View All Alerts</Button>
+          </DropdownMenuContent>
+        </DropdownMenu>
         
         <Link href="/dashboard">
           <Button variant="outline" size="icon" className="rounded-xl border-primary/20 hover:border-primary bg-white/5 hover:bg-primary/10 transition-all group h-11 w-11">
