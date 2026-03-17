@@ -4,7 +4,7 @@
 import React, { use, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp } from 'lucide-react'
+import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -20,13 +20,17 @@ import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useUser } from '@/firebase'
 
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
+  const { user } = useUser()
   const article = ARTICLES.find(a => a.slug === slug) || ARTICLES[0]
   const { toast } = useToast()
   const router = useRouter()
   const [newComment, setNewComment] = useState('')
+
+  const isGuest = user?.isAnonymous
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -49,10 +53,44 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   }
 
   const handleBookmark = () => {
+    if (isGuest) {
+      toast({
+        title: "Login Required",
+        description: "Please create an account to bookmark articles.",
+        variant: "destructive"
+      })
+      return
+    }
     toast({
       title: "Saved!",
       description: `${article.title} has been added to your bookmarks.`,
     })
+  }
+
+  const handleCommentSubmit = () => {
+    if (isGuest) {
+      toast({
+        title: "Access Denied",
+        description: "Guest users cannot post comments. Please login.",
+        variant: "destructive"
+      })
+      return
+    }
+    if (!newComment.trim()) return
+    toast({ title: "Comment Posted", description: "Your suggestion has been added to the Talk page." })
+    setNewComment('')
+  }
+
+  const handleEditClick = () => {
+    if (isGuest) {
+      toast({
+        title: "Login Required",
+        description: "Only registered members can edit the wiki.",
+        variant: "destructive"
+      })
+      return
+    }
+    router.push('/contribute')
   }
 
   const comments = [
@@ -89,20 +127,20 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 </>
               )}
             </div>
-            <h1 className="text-6xl md:text-8xl font-headline font-black text-foreground leading-tight">{article.title}</h1>
+            <h1 className="text-6xl md:text-8xl font-headline font-black text-white leading-tight">{article.title}</h1>
           </div>
 
           <div className="flex flex-wrap gap-4">
             <Button 
-              onClick={() => router.push('/contribute')}
+              onClick={handleEditClick}
               className="gap-2 rounded-full bg-primary text-black hover:bg-primary/90 font-bold px-8 h-12 neon-glow transition-all hover:scale-105"
             >
-              <Edit2 className="h-4 w-4" />
+              {isGuest ? <Lock className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
               Edit This Page
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => toast({ title: "Revision History", description: "Loading archives for this article..." })}
+              onClick={() => router.push(`/article/${slug}/history`)}
               className="gap-2 rounded-full border-primary/10 bg-primary/5 hover:bg-primary/10 text-primary font-bold h-12 px-6"
             >
               <History className="h-4 w-4" />
@@ -214,12 +252,14 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                       <p className="text-muted-foreground font-light">Advanced AI analysis for tone, accuracy, and style.</p>
                     </div>
                   </div>
-                  <Link href="/contribute">
-                    <Button variant="outline" className="w-full h-14 border-primary/20 hover:border-primary text-primary font-bold text-lg rounded-2xl group transition-all">
-                      Launch AI Assistant
-                      <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleEditClick}
+                    className="w-full h-14 border-primary/20 hover:border-primary text-primary font-bold text-lg rounded-2xl group transition-all"
+                  >
+                    Launch AI Assistant
+                    <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Button>
                 </div>
               </div>
             </TabsContent>
@@ -230,17 +270,15 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                   <h3 className="text-xl font-headline font-bold text-foreground">Community Discussion</h3>
                   <div className="flex gap-3">
                     <Input 
-                      placeholder="Share your thoughts or suggest changes..." 
+                      placeholder={isGuest ? "Login to share your thoughts..." : "Share your thoughts or suggest changes..."} 
                       className="bg-background border-foreground/10 rounded-xl"
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
+                      disabled={isGuest}
                     />
                     <Button 
                       className="bg-primary text-black rounded-xl px-6 font-bold"
-                      onClick={() => {
-                        toast({ title: "Comment Posted", description: "Your suggestion has been added to the Talk page." })
-                        setNewComment('')
-                      }}
+                      onClick={handleCommentSubmit}
                     >
                       <Send className="h-4 w-4" />
                     </Button>
@@ -309,10 +347,10 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 Help us map the vast heritage of {article.title}. Your expertise matters.
               </p>
               <Button 
-                onClick={() => router.push('/contribute')}
+                onClick={handleEditClick}
                 className="w-full bg-black text-primary hover:bg-black/90 font-black h-16 rounded-2xl text-xl transition-all hover:scale-105 active:scale-95 shadow-xl"
               >
-                Become An Editor
+                {isGuest ? "Sign Up to Edit" : "Become An Editor"}
               </Button>
             </div>
           </div>

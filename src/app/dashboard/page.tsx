@@ -1,3 +1,4 @@
+
 "use client"
 
 import React from 'react'
@@ -18,7 +19,9 @@ import {
   Clock,
   ChevronRight,
   Zap,
-  MapPin
+  MapPin,
+  Lock,
+  UserCheck
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
@@ -35,6 +38,7 @@ import {
   ResponsiveContainer 
 } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { useUser } from '@/firebase'
 
 const impactData = [
   { name: 'Mon', points: 400 },
@@ -49,7 +53,10 @@ const impactData = [
 export default function DashboardPage() {
   const { toast } = useToast()
   const router = useRouter()
-  
+  const { user } = useUser()
+
+  const isGuest = user?.isAnonymous
+
   const contributions = [
     { title: "Taj Mahal", date: "2 days ago", action: "Edited Content", status: "Published" },
     { title: "Agra Fort", date: "1 week ago", action: "Added Images", status: "Under Review" },
@@ -63,6 +70,44 @@ export default function DashboardPage() {
     { title: "District Guide", desc: "Mapped over 50 local districts", icon: MapPin }
   ]
 
+  if (isGuest) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-12 pb-24 animate-in fade-in duration-700 grid-bg">
+        <div className="flex flex-col items-center justify-center py-20 text-center space-y-10">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl scale-150 animate-pulse" />
+            <div className="h-40 w-40 rounded-full bg-secondary border-4 border-white/5 flex items-center justify-center relative z-10 shadow-2xl">
+              <Lock className="h-20 w-20 text-primary/40" />
+            </div>
+          </div>
+          <div className="space-y-4 max-w-xl mx-auto">
+            <Badge className="bg-primary/10 text-primary border-none font-black text-[10px] tracking-widest uppercase px-4 py-1.5">Limited Access</Badge>
+            <h1 className="text-5xl font-headline font-black text-white">Guest Explorer Mode</h1>
+            <p className="text-xl text-muted-foreground italic font-light leading-relaxed">
+              Welcome, traveler! You are currently browsing as a guest. To save articles, earn points, and contribute to the history of India, please upgrade to a full account.
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <Button 
+              onClick={() => router.push('/auth')}
+              className="bg-primary text-black font-black h-16 px-12 rounded-2xl text-xl shadow-neon transition-all hover:scale-105"
+            >
+              <UserCheck className="mr-3 h-6 w-6" />
+              Create Profile
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => router.push('/browse')}
+              className="border-white/10 bg-white/5 hover:bg-white/10 text-white h-16 px-12 rounded-2xl text-xl"
+            >
+              Continue Browsing
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-24 animate-in fade-in duration-700 grid-bg">
       {/* Profile Header */}
@@ -71,15 +116,15 @@ export default function DashboardPage() {
           <div className="relative group">
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/40 transition-all" />
             <Avatar className="h-32 w-32 border-4 border-primary/20 shadow-2xl relative z-10 transition-transform group-hover:scale-105">
-              <AvatarImage src="https://picsum.photos/seed/user1/200" />
-              <AvatarFallback>BD</AvatarFallback>
+              <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/200`} />
+              <AvatarFallback className="bg-primary text-black font-black">{user?.displayName?.slice(0, 2) || "BD"}</AvatarFallback>
             </Avatar>
             <div className="absolute -bottom-2 -right-2 bg-primary text-black h-10 w-10 rounded-full flex items-center justify-center font-black border-4 border-background shadow-lg z-20">
               48
             </div>
           </div>
           <div className="space-y-2 relative z-10">
-            <h1 className="text-5xl font-headline font-black text-white tracking-tight">Explorer Profile</h1>
+            <h1 className="text-5xl font-headline font-black text-white tracking-tight">{user?.displayName || "Heritage Explorer"}</h1>
             <p className="text-muted-foreground text-lg italic">Joined BharatDarshan in October 2023</p>
             <div className="flex gap-2 justify-center md:justify-start pt-2">
               <Badge className="bg-primary/10 text-primary border border-primary/20 font-black text-[10px] tracking-widest uppercase px-3 py-1">Expert Contributor</Badge>
