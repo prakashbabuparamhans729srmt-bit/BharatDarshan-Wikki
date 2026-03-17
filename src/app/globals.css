@@ -10,7 +10,7 @@
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 173 94% 48%;
+    --primary: 173 94% 48%; /* #07F1D6 */
     --primary-foreground: 0 0% 0%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
@@ -27,15 +27,15 @@
   }
 
   .dark {
-    --background: 0 0% 3.9%;
+    --background: 0 0% 2.7%; /* #070707 */
     --foreground: 0 0% 98%;
-    --card: 207 19% 11%;
+    --card: 207 19% 11%; /* #161C21 */
     --card-foreground: 0 0% 98%;
     --popover: 207 19% 11%;
     --popover-foreground: 0 0% 98%;
     --primary: 173 94% 48%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 200 15% 9%;
+    --secondary: 207 15% 9%; /* #14181B */
     --secondary-foreground: 0 0% 98%;
     --muted: 207 19% 15%;
     --muted-foreground: 207 10% 70%;
@@ -46,6 +46,11 @@
     --border: 207 19% 20%;
     --input: 207 19% 20%;
     --ring: 173 94% 48%;
+    
+    --sidebar-background: 207 15% 9%; /* #14181B */
+    --sidebar-foreground: 207 10% 90%;
+    --sidebar-primary: 173 94% 48%;
+    --sidebar-border: 207 19% 15%;
   }
 }
 
@@ -66,7 +71,11 @@
 }
 
 .glass-card {
-  @apply bg-card/40 backdrop-blur-2xl border-white/5;
+  @apply bg-card/60 backdrop-blur-2xl border-white/5;
+}
+
+.shadow-neon {
+  box-shadow: 0 0 15px -2px hsl(var(--primary) / 0.5);
 }
 
 ::-webkit-scrollbar {
@@ -90,4 +99,10 @@
 
 .article-dropcap::first-letter {
   @apply text-7xl font-headline font-black text-primary mr-4 float-left leading-none mt-2;
+}
+
+.grid-bg {
+  background-image: linear-gradient(to right, rgba(7, 241, 214, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(7, 241, 214, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
