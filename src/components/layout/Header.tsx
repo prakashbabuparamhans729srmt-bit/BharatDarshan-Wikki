@@ -11,6 +11,7 @@ import { VoiceSearchDialog } from '@/components/ai/VoiceSearchDialog'
 import { Badge } from '@/components/ui/badge'
 import { useAppLanguage } from '@/context/LanguageContext'
 import { INDIAN_LANGUAGES } from '@/lib/languages'
+import { useRouter } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +22,16 @@ import {
 export function Header() {
   const { toggleSidebar } = useSidebar()
   const [showVoiceSearch, setShowVoiceSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const router = useRouter()
   const { currentLanguage, setLanguage } = useAppLanguage()
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+    }
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-20 items-center border-b border-white/5 bg-background/80 backdrop-blur-2xl px-6 md:px-8 lg:px-12">
@@ -41,13 +51,16 @@ export function Header() {
       </div>
 
       <div className="flex-1 max-w-2xl mx-auto hidden md:flex relative group px-12">
-        <div className="relative w-full">
+        <form onSubmit={handleSearchSubmit} className="relative w-full">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <Input 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search for states, districts, or monuments..." 
             className="w-full h-12 pl-12 pr-12 bg-white/5 focus-visible:ring-primary/50 border-white/10 focus-visible:bg-white/10 transition-all rounded-full placeholder:text-muted-foreground/50"
           />
           <Button 
+            type="button"
             variant="ghost" 
             size="icon" 
             className="absolute right-2 top-1/2 -translate-y-1/2 hover:text-primary text-muted-foreground transition-all hover:scale-110"
@@ -56,11 +69,10 @@ export function Header() {
           >
             <Mic className="h-5 w-5" />
           </Button>
-        </div>
+        </form>
       </div>
 
       <div className="flex items-center gap-3 md:gap-5">
-        {/* Language Switcher */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="text-white/80 hover:text-primary transition-all">

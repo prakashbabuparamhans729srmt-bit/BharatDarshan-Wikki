@@ -1,14 +1,30 @@
 
+"use client"
+
+import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, MapPin, Sparkles, BookOpen, Users, Globe, ArrowRight } from 'lucide-react'
+import { Search, MapPin, Sparkles, BookOpen, Users, Globe, ArrowRight, Mic } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { ARTICLES, STATES } from '@/lib/mock-data'
+import { VoiceSearchDialog } from '@/components/ai/VoiceSearchDialog'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showVoiceSearch, setShowVoiceSearch] = useState(false)
+  const router = useRouter()
   const featuredArticles = ARTICLES.slice(0, 3)
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+    }
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-20 pb-20">
@@ -32,9 +48,29 @@ export default function Home() {
           <h1 className="text-5xl md:text-7xl font-headline font-extrabold leading-[1.1] text-white drop-shadow-2xl">
             Discover the Heritage of <span className="text-primary italic">Bharat Darshan</span>
           </h1>
-          <p className="text-xl md:text-2xl text-white/70 font-light max-w-3xl mx-auto leading-relaxed">
-            Explore states, districts, and ancient monuments through a collaborative open-source platform.
-          </p>
+          
+          {/* Advanced Search Bar */}
+          <div className="max-w-2xl mx-auto relative group">
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+              <Search className="absolute left-6 h-6 w-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search monuments, states, districts..." 
+                className="h-16 pl-16 pr-16 bg-black/40 backdrop-blur-xl border-white/20 focus-visible:ring-primary/50 text-xl rounded-full neon-glow"
+              />
+              <Button 
+                type="button"
+                variant="ghost" 
+                size="icon" 
+                className="absolute right-4 h-10 w-10 text-primary hover:bg-primary/10 rounded-full"
+                onClick={() => setShowVoiceSearch(true)}
+              >
+                <Mic className="h-6 w-6" />
+              </Button>
+            </form>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-5 justify-center pt-6">
             <Link href="/browse">
               <Button size="lg" className="bg-primary text-black hover:bg-primary/90 px-10 py-7 text-lg font-bold rounded-full neon-glow transition-all hover:scale-105">
@@ -98,53 +134,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* States Quick Links */}
-      <section className="bg-secondary rounded-[3rem] p-10 md:p-16 border border-white/5 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[100px] -mr-32 -mt-32" />
-        <div className="max-w-5xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
-            <h2 className="text-4xl font-headline font-bold text-white">Browse by State</h2>
-            <p className="text-muted-foreground text-lg italic">Directly access information for any Indian State</p>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {STATES.slice(0, 17).map(state => (
-              <Link 
-                key={state.code} 
-                href={`/article/${state.name.toLowerCase().replace(/\s+/g, '-')}`}
-                className="p-4 bg-white/5 hover:bg-primary hover:text-black rounded-2xl border border-white/5 text-sm font-bold transition-all text-center flex items-center justify-center min-h-[60px]"
-              >
-                {state.name}
-              </Link>
-            ))}
-            <Link 
-              href="/browse"
-              className="p-4 bg-primary text-black rounded-2xl border border-primary/20 text-sm font-black transition-all text-center flex items-center justify-center neon-glow hover:scale-105"
-            >
-              Browse All
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Section */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-12">
-        {[
-          { icon: Sparkles, title: "AI-Powered", desc: "Translate, summarize, and search using advanced AI tools powered by Gemini." },
-          { icon: Users, title: "Collaborative", desc: "Join thousands of editors contributing to the knowledge of Bharat." },
-          { icon: Globe, title: "22+ Languages", desc: "Read heritage information in your preferred Indian language including Hindi, Marathi, and Tamil." }
-        ].map((feat, idx) => (
-          <div key={idx} className="flex flex-col items-center text-center p-8 space-y-5 rounded-3xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5">
-            <div className="h-20 w-20 rounded-[2rem] bg-primary/10 flex items-center justify-center text-primary neon-glow">
-              <feat.icon className="h-10 w-10" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-headline font-bold text-white">{feat.title}</h3>
-              <p className="text-muted-foreground text-base leading-relaxed font-light">{feat.desc}</p>
-            </div>
-          </div>
-        ))}
-      </section>
+      <VoiceSearchDialog open={showVoiceSearch} onOpenChange={setShowVoiceSearch} />
     </div>
   )
 }
