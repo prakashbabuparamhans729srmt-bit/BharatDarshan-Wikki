@@ -2,9 +2,11 @@
 
 A-Z Advanced Heritage Wiki for every state and district in India. Built with Next.js, Firebase, and Genkit AI.
 
-## GitHub par Push karne ke Commands:
+## GitHub par Push karne ke Sahi Commands:
 
-1. **Git Initialise karein (agar pehle nahi kiya hai):**
+Aapko placeholders (`<..._USERNAME>`) ko apni asli details se badalna hoga:
+
+1. **Git Initialise karein:**
    ```bash
    git init
    ```
@@ -25,10 +27,12 @@ A-Z Advanced Heritage Wiki for every state and district in India. Built with Nex
    ```
 
 5. **Remote Repository link karein:**
-   *(Apne GitHub repo ka URL yahan paste karein)*
+   Pehle GitHub par ek repository banayein, phir uska URL yahan paste karein. 
+   **Dhayan dein:** `YOUR_USERNAME` ki jagah apna username likhein.
    ```bash
    git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
    ```
+   *Example: git remote add origin https://github.com/amit123/my-wiki-project.git*
 
 6. **GitHub par Push karein:**
    ```bash
