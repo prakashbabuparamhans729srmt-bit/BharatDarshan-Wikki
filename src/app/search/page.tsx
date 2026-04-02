@@ -12,7 +12,7 @@ import { ARTICLES, STATES } from '@/lib/mock-data'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, where } from 'firebase/firestore'
+import { collection, query, where, getDocs } from 'firebase/firestore'
 
 export default function SearchResultsPage() {
   const searchParams = useSearchParams()
@@ -21,13 +21,13 @@ export default function SearchResultsPage() {
   const [progress, setProgress] = useState(0)
   const db = useFirestore()
 
-  // 1. Fetch live articles that might match
-  // Firestore doesn't support full-text search directly without 3rd party,
-  // so we fetch all and filter on client for this advance simulation
+  // 1. Fetch live articles from Firestore
+  // Since Firestore doesn't support complex full-text search easily,
+  // we fetch all articles and filter on the client for the "Advanced Search Simulation"
   const liveArticlesQuery = useMemoFirebase(() => collection(db, 'articles_published'), [db]);
   const { data: liveArticles } = useCollection(liveArticlesQuery);
 
-  // Simulation of a "Deep Search Crawl"
+  // Simulation of a "Deep Search Crawl" aesthetic
   useEffect(() => {
     setIsCrawling(true)
     setProgress(0)
@@ -51,7 +51,7 @@ export default function SearchResultsPage() {
     // Combine mock data and live Firestore data
     const allArticles = [...ARTICLES, ...(liveArticles || [])];
     
-    // Unique by slug
+    // De-duplicate by slug
     const uniqueArticles = Array.from(new Map(allArticles.map(a => [a.slug, a])).values());
 
     const articleResults = uniqueArticles.filter(a => 
@@ -75,7 +75,7 @@ export default function SearchResultsPage() {
       tags: ['State', 'Territory']
     }))
 
-    // Consolidate and sort (States first)
+    // Consolidate and prioritize
     const combined = [...stateResults, ...articleResults];
     const seen = new Set();
     return combined.filter(item => {
@@ -168,9 +168,9 @@ export default function SearchResultsPage() {
                         item.tagIds.slice(0, 3).map((tag: string) => (
                           <span key={tag} className="text-[10px] font-black text-primary/50 uppercase tracking-widest">#{tag}</span>
                         ))
-                      ) : item.tags?.slice(0, 3).map((tag: string) => (
+                      ) : (item.tags && item.tags.slice(0, 3).map((tag: string) => (
                         <span key={tag} className="text-[10px] font-black text-primary/50 uppercase tracking-widest">#{tag}</span>
-                      ))}
+                      )))}
                     </div>
                   </div>
                 </CardContent>

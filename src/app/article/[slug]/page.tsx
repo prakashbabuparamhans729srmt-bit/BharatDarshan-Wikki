@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { use, useState } from 'react'
+import React, { use, useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp, Lock, Headphones, Loader2 } from 'lucide-react'
@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, where, limit } from 'firebase/firestore'
+import { collection, query, where, limit, orderBy } from 'firebase/firestore'
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -40,16 +40,20 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   
   const { data: articleDocs, isLoading: isArticleLoading } = useCollection(articleQuery);
 
-  // Fallback to mock data if not found in Firestore yet (to maintain "chalu" state for demo slugs)
+  // Fallback to mock data if not found in Firestore yet
   const staticArticle = ARTICLES.find(a => a.slug === slug) || ARTICLES[0];
-  const article = articleDocs?.[0] || staticArticle;
+  const article = (articleDocs && articleDocs.length > 0) ? articleDocs[0] : staticArticle;
 
   const isGuest = user?.isAnonymous
 
   // 2. Real-time comments from Firestore
   const commentsQuery = useMemoFirebase(() => {
-    // We group comments under the article's unique slug
-    return collection(db, 'articles_published', slug, 'comments');
+    // Comments subcollection under the article document
+    // Note: We use the unique article slug as the path segment for simplicity in this wiki
+    return query(
+      collection(db, 'articles_published', slug, 'comments'),
+      orderBy('createdAt', 'desc')
+    );
   }, [db, slug]);
   
   const { data: realTimeComments } = useCollection(commentsQuery);
@@ -90,7 +94,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   }
 
   const handleCommentSubmit = () => {
-    if (isGuest) {
+    if (isGuest || !user) {
       toast({
         title: "Access Denied",
         description: "Guest users cannot post comments. Please login.",
@@ -103,11 +107,11 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
     const commentsColRef = collection(db, 'articles_published', slug, 'comments');
     addDocumentNonBlocking(commentsColRef, {
       articleId: slug,
-      userId: user!.uid,
+      userId: user.uid,
       content: newComment,
       createdAt: new Date().toISOString(),
       isApproved: true,
-      username: user!.displayName || user!.email?.split('@')[0] || 'Heritage Explorer'
+      username: user.displayName || user.email?.split('@')[0] || 'Heritage Explorer'
     });
 
     toast({ title: "Comment Posted", description: "Your contribution has been added to the Talk page." })
@@ -128,8 +132,11 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
   if (isArticleLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-12 w-12 text-primary animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 text-primary animate-spin" />
+          <p className="text-primary font-black uppercase tracking-[0.3em] text-[10px] animate-pulse">Scanning Archives...</p>
+        </div>
       </div>
     );
   }

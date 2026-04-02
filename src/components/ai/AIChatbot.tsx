@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Sparkles, X, Send, Mic, Square, Loader2, Compass, HelpCircle, Map, Info, BookOpen } from 'lucide-react'
+import { Sparkles, X, Send, Mic, Square, Loader2, Compass, HelpCircle, Map, Info, BookOpen, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -211,5 +211,3 @@ export function AIChatbot() {
     </>
   )
 }
-import { cn } from '@/lib/utils'
-import { FileText } from 'lucide-react'

@@ -13,7 +13,7 @@ import { ARTICLES } from '@/lib/mock-data'
 import { VoiceSearchDialog } from '@/components/ai/VoiceSearchDialog'
 import { useRouter } from 'next/navigation'
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, limit } from 'firebase/firestore'
+import { collection, query, limit, orderBy } from 'firebase/firestore'
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -22,9 +22,15 @@ export default function Home() {
   const db = useFirestore()
 
   // 1. Fetch live articles from Firestore for the "Featured Heritage" section
+  // We order by updatedAt to show the most recently active heritage nodes
   const latestArticlesQuery = useMemoFirebase(() => {
-    return query(collection(db, 'articles_published'), limit(6));
+    return query(
+      collection(db, 'articles_published'), 
+      orderBy('updatedAt', 'desc'),
+      limit(6)
+    );
   }, [db]);
+  
   const { data: liveArticles, isLoading: isLiveLoading } = useCollection(latestArticlesQuery);
 
   // Hybrid approach: use live data if available, otherwise fallback to mock data

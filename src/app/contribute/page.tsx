@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useUser, useFirestore } from '@/firebase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { doc, serverTimestamp } from 'firebase/firestore'
+import { doc } from 'firebase/firestore'
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function ContributePage() {
@@ -23,6 +23,8 @@ export default function ContributePage() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [categoryId, setCategoryId] = useState('Place')
+  const [parent, setParent] = useState('')
+  const [tags, setTags] = useState('')
   const [isRefining, setIsRefining] = useState(false)
   const [aiFeedback, setAiFeedback] = useState<AiRefineAndSummarizeContentOutput | null>(null)
   const { toast } = useToast()
@@ -32,14 +34,14 @@ export default function ContributePage() {
     if (!isUserLoading && user?.isAnonymous) {
       toast({
         title: "Registration Required",
-        description: "Guests cannot create or edit articles. Please sign up.",
+        description: "Guests cannot create or edit articles. Please sign up for full access.",
         variant: "destructive"
       })
     }
   }, [user, isUserLoading, toast])
 
   const handleRefine = async () => {
-    if (user?.isAnonymous) {
+    if (user?.isAnonymous || !user) {
       toast({ title: "Login Required", description: "Only members can use AI tools.", variant: "destructive" })
       return
     }
@@ -77,6 +79,7 @@ export default function ContributePage() {
       return
     }
 
+    // Generate a URL-friendly slug
     const slug = title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
     const articleId = `${slug}-${Date.now()}`;
     const articleRef = doc(db, 'articles_published', articleId);
@@ -87,18 +90,27 @@ export default function ContributePage() {
       slug,
       content,
       categoryId,
+      parent: parent || null,
       authorId: user.uid,
-      createdAt: serverTimestamp().toString(),
-      updatedAt: serverTimestamp().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       version: 1,
       isPublished: true,
-      tagIds: []
+      tagIds: tags.split(',').map(t => t.trim()).filter(t => !!t),
+      image: `https://picsum.photos/seed/${slug}/800/600` // Default placeholder
     };
 
     setDocumentNonBlocking(articleRef, articleData, { merge: true });
 
-    toast({ title: "Success", description: "Your article has been published to the wiki." })
-    router.push(`/article/${slug}`)
+    toast({ 
+      title: "Success", 
+      description: "Your article has been published to the BharatDarshan archives." 
+    })
+    
+    // Smooth transition to the new article
+    setTimeout(() => {
+      router.push(`/article/${slug}`)
+    }, 1500)
   }
 
   if (user?.isAnonymous) {
@@ -250,12 +262,24 @@ export default function ContributePage() {
 
               <div className="space-y-3">
                 <Label htmlFor="parent" className="text-[10px] font-black uppercase tracking-widest text-white/40">Parent Territory</Label>
-                <Input id="parent" placeholder="Parent state or district" className="bg-black/20 border-white/10 h-12 rounded-xl" />
+                <Input 
+                  id="parent" 
+                  placeholder="Parent state or district" 
+                  className="bg-black/20 border-white/10 h-12 rounded-xl"
+                  value={parent}
+                  onChange={(e) => setParent(e.target.value)}
+                />
               </div>
 
               <div className="space-y-3">
                 <Label htmlFor="tags" className="text-[10px] font-black uppercase tracking-widest text-white/40">Tags</Label>
-                <Input id="tags" placeholder="temple, ancient, south india" className="bg-black/20 border-white/10 h-12 rounded-xl" />
+                <Input 
+                  id="tags" 
+                  placeholder="temple, ancient, south india" 
+                  className="bg-black/20 border-white/10 h-12 rounded-xl"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                />
               </div>
             </CardContent>
           </Card>
