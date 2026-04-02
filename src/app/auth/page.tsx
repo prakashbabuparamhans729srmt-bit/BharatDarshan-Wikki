@@ -55,8 +55,8 @@ export default function AuthPage() {
         firstName: firstName || user.displayName?.split(' ')[0] || (user.isAnonymous ? 'Guest' : 'Explorer'),
         lastName: lastName || user.displayName?.split(' ')[1] || (user.isAnonymous ? 'Explorer' : ''),
         username: user.email?.split('@')[0] || `explorer_${user.uid.slice(0, 5)}`,
-        memberSince: serverTimestamp(),
-        lastActive: serverTimestamp(),
+        memberSince: new Date().toISOString(),
+        lastActive: new Date().toISOString(),
         themePreference: 'dark',
         preferredLanguageId: 'English'
       }
