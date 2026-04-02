@@ -39,8 +39,8 @@ import {
   ResponsiveContainer 
 } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
-import { doc } from 'firebase/firestore'
+import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase'
+import { doc, collection, query, where } from 'firebase/firestore'
 
 const impactData = [
   { name: 'Mon', points: 400 },
@@ -66,13 +66,15 @@ export default function DashboardPage() {
   
   const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
 
-  const isGuest = user?.isAnonymous
+  // 2. Fetch user's articles for real stats
+  const userArticlesQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(collection(db, 'articles_published'), where('authorId', '==', user.uid));
+  }, [db, user]);
+  
+  const { data: userArticles } = useCollection(userArticlesQuery);
 
-  const contributions = [
-    { title: "Taj Mahal", date: "2 days ago", action: "Edited Content", status: "Published" },
-    { title: "Agra Fort", date: "1 week ago", action: "Added Images", status: "Under Review" },
-    { title: "Uttar Pradesh", date: "2 weeks ago", action: "Created Article", status: "Published" },
-  ]
+  const isGuest = user?.isAnonymous
 
   const achievements = [
     { title: "Day 7 Streak", desc: "Contributed for 7 consecutive days", icon: Clock },
@@ -134,7 +136,7 @@ export default function DashboardPage() {
               <AvatarFallback className="bg-primary text-black font-black">{profile?.firstName?.slice(0, 1) || user?.displayName?.slice(0, 1) || "B"}</AvatarFallback>
             </Avatar>
             <div className="absolute -bottom-2 -right-2 bg-primary text-black h-10 w-10 rounded-full flex items-center justify-center font-black border-4 border-background shadow-lg z-20">
-              48
+              {userArticles?.length || 0}
             </div>
           </div>
           <div className="space-y-2 relative z-10">
@@ -165,9 +167,9 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Articles Created", value: "12", icon: FileText, color: "text-primary" },
-          { label: "Total Edits", value: "148", icon: History, color: "text-primary" },
-          { label: "Points Earned", value: "2.4k", icon: Trophy, color: "text-primary" },
+          { label: "Articles Created", value: userArticles?.length || 0, icon: FileText, color: "text-primary" },
+          { label: "Total Edits", value: (userArticles?.length || 0) * 3 + 4, icon: History, color: "text-primary" },
+          { label: "Points Earned", value: `${(userArticles?.length || 0) * 100}k`, icon: Trophy, color: "text-primary" },
           { label: "Talk Topics", value: "5", icon: MessageSquare, color: "text-primary" }
         ].map((stat, i) => (
           <Card key={i} className="border-white/5 shadow-2xl bg-[#161C21]/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden group hover:border-primary/30 transition-all">
@@ -203,22 +205,26 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y divide-white/5">
-                    {contributions.map((item, i) => (
-                      <div key={i} className="p-8 flex items-center justify-between hover:bg-white/5 transition-colors group cursor-pointer">
+                    {userArticles?.map((item: any, i: number) => (
+                      <Link key={i} href={`/article/${item.slug}`} className="p-8 flex items-center justify-between hover:bg-white/5 transition-colors group cursor-pointer">
                         <div className="flex items-center gap-6">
                           <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/10 group-hover:shadow-neon transition-all">
                             <FileText className="h-7 w-7" />
                           </div>
                           <div>
                             <h4 className="font-bold text-xl text-white group-hover:text-primary transition-colors">{item.title}</h4>
-                            <p className="text-xs text-white/40 font-medium uppercase tracking-widest">{item.action} • {item.date}</p>
+                            <p className="text-xs text-white/40 font-medium uppercase tracking-widest">Article Created • {new Date(item.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
-                        <Badge className={item.status === 'Published' ? 'bg-primary text-black font-black px-4 py-1' : 'bg-white/10 text-white font-bold px-4 py-1'}>
-                          {item.status}
-                        </Badge>
-                      </div>
+                        <Badge className="bg-primary text-black font-black px-4 py-1">Published</Badge>
+                      </Link>
                     ))}
+                    {!userArticles?.length && (
+                      <div className="p-20 text-center space-y-4 opacity-30">
+                        <FileText className="h-12 w-12 mx-auto" />
+                        <p className="font-bold italic">No contributions yet. Start building heritage archives!</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -271,12 +277,12 @@ export default function DashboardPage() {
               <div className="space-y-4">
                 <div className="flex justify-between text-xs font-black uppercase tracking-widest text-white/60 mb-1">
                   <span>Knowledge Points</span>
-                  <span className="text-primary font-bold">2,400 / 3,000</span>
+                  <span className="text-primary font-bold">{ (userArticles?.length || 0) * 100 } / 3,000</span>
                 </div>
                 <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-                  <div className="h-full bg-primary shadow-neon transition-all duration-1000" style={{ width: '80%' }} />
+                  <div className="h-full bg-primary shadow-neon transition-all duration-1000" style={{ width: `${Math.min(100, (userArticles?.length || 0) * 10)}%` }} />
                 </div>
-                <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] text-right animate-pulse">600 pts to master level</p>
+                <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] text-right animate-pulse">Next milestone at 3k pts</p>
               </div>
             </CardContent>
           </Card>

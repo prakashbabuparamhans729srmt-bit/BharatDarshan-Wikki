@@ -21,8 +21,8 @@ import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, where, limit, orderBy } from 'firebase/firestore'
+import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase'
+import { collection, query, where, limit, orderBy, doc } from 'firebase/firestore'
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -33,16 +33,16 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   const router = useRouter()
   const [newComment, setNewComment] = useState('')
 
-  // 1. Fetch Article from Firestore (Live Query by Slug)
-  const articleQuery = useMemoFirebase(() => {
-    return query(collection(db, 'articles_published'), where('slug', '==', slug), limit(1));
+  // 1. Fetch Article from Firestore (Direct Access by Slug ID)
+  const articleRef = useMemoFirebase(() => {
+    return doc(db, 'articles_published', slug);
   }, [db, slug]);
   
-  const { data: articleDocs, isLoading: isArticleLoading } = useCollection(articleQuery);
+  const { data: liveArticle, isLoading: isArticleLoading } = useDoc(articleRef);
 
   // Fallback to mock data if not found in Firestore yet
   const staticArticle = ARTICLES.find(a => a.slug === slug) || ARTICLES[0];
-  const article = (articleDocs && articleDocs.length > 0) ? articleDocs[0] : staticArticle;
+  const article = liveArticle || staticArticle;
 
   const isGuest = user?.isAnonymous
 
