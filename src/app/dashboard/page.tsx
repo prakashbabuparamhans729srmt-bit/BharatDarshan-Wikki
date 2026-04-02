@@ -1,7 +1,7 @@
 
 "use client"
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -21,7 +21,8 @@ import {
   Zap,
   MapPin,
   Lock,
-  UserCheck
+  UserCheck,
+  Loader2
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
@@ -38,7 +39,8 @@ import {
   ResponsiveContainer 
 } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import { useUser } from '@/firebase'
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
+import { doc } from 'firebase/firestore'
 
 const impactData = [
   { name: 'Mon', points: 400 },
@@ -53,7 +55,16 @@ const impactData = [
 export default function DashboardPage() {
   const { toast } = useToast()
   const router = useRouter()
-  const { user } = useUser()
+  const { user, isUserLoading: isAuthLoading } = useUser()
+  const db = useFirestore()
+
+  // Fetch real profile data from Firestore
+  const profileRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(db, 'user_profiles', user.uid);
+  }, [db, user]);
+  
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
 
   const isGuest = user?.isAnonymous
 
@@ -69,6 +80,14 @@ export default function DashboardPage() {
     { title: "Multilingual", desc: "Translated 10+ heritage articles", icon: Sparkles },
     { title: "District Guide", desc: "Mapped over 50 local districts", icon: MapPin }
   ]
+
+  if (isAuthLoading || isProfileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-12 w-12 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   if (isGuest) {
     return (
@@ -108,6 +127,8 @@ export default function DashboardPage() {
     )
   }
 
+  const displayName = profile?.firstName ? `${profile.firstName} ${profile.lastName || ''}` : user?.displayName || "Heritage Explorer";
+
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-24 animate-in fade-in duration-700 grid-bg">
       {/* Profile Header */}
@@ -117,15 +138,17 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/40 transition-all" />
             <Avatar className="h-32 w-32 border-4 border-primary/20 shadow-2xl relative z-10 transition-transform group-hover:scale-105">
               <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/200`} />
-              <AvatarFallback className="bg-primary text-black font-black">{user?.displayName?.slice(0, 2) || "BD"}</AvatarFallback>
+              <AvatarFallback className="bg-primary text-black font-black">{profile?.firstName?.slice(0, 1) || user?.displayName?.slice(0, 1) || "B"}</AvatarFallback>
             </Avatar>
             <div className="absolute -bottom-2 -right-2 bg-primary text-black h-10 w-10 rounded-full flex items-center justify-center font-black border-4 border-background shadow-lg z-20">
               48
             </div>
           </div>
           <div className="space-y-2 relative z-10">
-            <h1 className="text-5xl font-headline font-black text-white tracking-tight">{user?.displayName || "Heritage Explorer"}</h1>
-            <p className="text-muted-foreground text-lg italic">Joined BharatDarshan in October 2023</p>
+            <h1 className="text-5xl font-headline font-black text-white tracking-tight">{displayName}</h1>
+            <p className="text-muted-foreground text-lg italic">
+              {profile?.username ? `@${profile.username}` : user?.email} • Joined {profile?.memberSince ? new Date(profile.memberSince).toLocaleDateString() : 'October 2023'}
+            </p>
             <div className="flex gap-2 justify-center md:justify-start pt-2">
               <Badge className="bg-primary/10 text-primary border border-primary/20 font-black text-[10px] tracking-widest uppercase px-3 py-1">Expert Contributor</Badge>
               <Badge className="bg-primary/10 text-primary border border-primary/20 font-black text-[10px] tracking-widest uppercase px-3 py-1">History Buff</Badge>

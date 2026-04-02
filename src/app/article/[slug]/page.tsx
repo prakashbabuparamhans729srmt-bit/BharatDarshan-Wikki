@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { use, useState, useMemo } from 'react'
+import React, { use, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp, Lock, Headphones, Loader2 } from 'lucide-react'
