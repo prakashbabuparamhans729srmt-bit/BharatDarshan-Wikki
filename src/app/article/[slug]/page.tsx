@@ -4,12 +4,13 @@
 import React, { use, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp, Lock } from 'lucide-react'
+import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp, Lock, Headphones } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ARTICLES } from '@/lib/mock-data'
 import { TranslatorTool } from '@/components/ai/TranslatorTool'
+import { AudioGuide } from '@/components/ai/AudioGuide'
 import { 
   Tabs, 
   TabsContent, 
@@ -239,7 +240,10 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
             </TabsContent>
 
             <TabsContent value="tools" className="mt-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <TranslatorTool content={article.content} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <TranslatorTool content={article.content} />
+                <AudioGuide text={article.content} title={article.title} />
+              </div>
               
               <div className="border border-foreground/5 bg-foreground/5 rounded-[2rem] overflow-hidden group">
                 <div className="p-10 space-y-6">
