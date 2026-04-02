@@ -14,8 +14,8 @@ import { useToast } from '@/hooks/use-toast'
 import { useUser, useFirestore } from '@/firebase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { doc } from 'firebase/firestore'
-import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates'
+import { doc, collection } from 'firebase/firestore'
+import { setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function ContributePage() {
   const { user, isUserLoading } = useUser()
@@ -26,6 +26,7 @@ export default function ContributePage() {
   const [parent, setParent] = useState('')
   const [tags, setTags] = useState('')
   const [isRefining, setIsRefining] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
   const [aiFeedback, setAiFeedback] = useState<AiRefineAndSummarizeContentOutput | null>(null)
   const { toast } = useToast()
   const router = useRouter()
@@ -79,11 +80,14 @@ export default function ContributePage() {
       return
     }
 
-    // Generate a URL-friendly slug
+    setIsPublishing(true)
+
+    // 1. Generate a URL-friendly slug
     const slug = title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
-    const articleId = `${slug}-${Date.now()}`;
+    const articleId = slug; // Using slug as ID for simplicity in A-Z flow
     const articleRef = doc(db, 'articles_published', articleId);
 
+    const now = new Date().toISOString()
     const articleData = {
       id: articleId,
       title,
@@ -92,22 +96,34 @@ export default function ContributePage() {
       categoryId,
       parent: parent || null,
       authorId: user.uid,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      version: 1,
+      createdAt: now,
+      updatedAt: now,
+      version: 1.0,
       isPublished: true,
       tagIds: tags.split(',').map(t => t.trim()).filter(t => !!t),
       image: `https://picsum.photos/seed/${slug}/800/600` // Default placeholder
     };
 
+    // 2. Save the Article
     setDocumentNonBlocking(articleRef, articleData, { merge: true });
+
+    // 3. Save initial Revision entry
+    const revisionsColRef = collection(db, 'articles_published', articleId, 'revisions');
+    addDocumentNonBlocking(revisionsColRef, {
+      articleId,
+      userId: user.uid,
+      username: user.displayName || user.email?.split('@')[0] || 'Contributor',
+      revisionNumber: 1.0,
+      contentSnapshot: content,
+      changesSummary: "Initial publication of article.",
+      createdAt: now
+    });
 
     toast({ 
       title: "Success", 
-      description: "Your article has been published to the BharatDarshan archives." 
+      description: "Your article has been published and history logged." 
     })
     
-    // Smooth transition to the new article
     setTimeout(() => {
       router.push(`/article/${slug}`)
     }, 1500)
@@ -149,8 +165,12 @@ export default function ContributePage() {
             <Eye className="h-4 w-4" />
             Preview
           </Button>
-          <Button onClick={handlePublish} className="gap-2 bg-primary text-black hover:bg-primary/90 font-bold rounded-xl neon-glow">
-            <Save className="h-4 w-4" />
+          <Button 
+            onClick={handlePublish} 
+            disabled={isPublishing}
+            className="gap-2 bg-primary text-black hover:bg-primary/90 font-bold rounded-xl neon-glow"
+          >
+            {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Publish Entry
           </Button>
         </div>
