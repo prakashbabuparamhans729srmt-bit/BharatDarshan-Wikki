@@ -11,14 +11,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { aiRefineAndSummarizeContent, AiRefineAndSummarizeContentOutput } from '@/ai/flows/ai-refine-and-summarize-content'
 import { useToast } from '@/hooks/use-toast'
-import { useUser } from '@/firebase'
+import { useUser, useFirestore } from '@/firebase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { doc, serverTimestamp } from 'firebase/firestore'
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function ContributePage() {
   const { user, isUserLoading } = useUser()
+  const db = useFirestore()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [categoryId, setCategoryId] = useState('Place')
   const [isRefining, setIsRefining] = useState(false)
   const [aiFeedback, setAiFeedback] = useState<AiRefineAndSummarizeContentOutput | null>(null)
   const { toast } = useToast()
@@ -64,12 +68,37 @@ export default function ContributePage() {
   }
 
   const handlePublish = () => {
-    if (user?.isAnonymous) {
+    if (!user || user.isAnonymous) {
       toast({ title: "Access Denied", description: "You must be logged in to publish articles.", variant: "destructive" })
       return
     }
-    toast({ title: "Success", description: "Your article has been submitted for review." })
-    router.push('/')
+    if (!title || !content) {
+      toast({ title: "Missing Fields", description: "Please fill in the title and content.", variant: "destructive" })
+      return
+    }
+
+    const slug = title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
+    const articleId = `${slug}-${Date.now()}`;
+    const articleRef = doc(db, 'articles_published', articleId);
+
+    const articleData = {
+      id: articleId,
+      title,
+      slug,
+      content,
+      categoryId,
+      authorId: user.uid,
+      createdAt: serverTimestamp().toString(),
+      updatedAt: serverTimestamp().toString(),
+      version: 1,
+      isPublished: true,
+      tagIds: []
+    };
+
+    setDocumentNonBlocking(articleRef, articleData, { merge: true });
+
+    toast({ title: "Success", description: "Your article has been published to the wiki." })
+    router.push(`/article/${slug}`)
   }
 
   if (user?.isAnonymous) {
@@ -209,8 +238,9 @@ export default function ContributePage() {
                   {['State', 'District', 'Place'].map(cat => (
                     <Badge 
                       key={cat} 
-                      variant={cat === 'Place' ? 'default' : 'outline'} 
-                      className={`cursor-pointer px-4 py-1.5 rounded-xl transition-all ${cat === 'Place' ? 'bg-primary text-black' : 'border-white/10 hover:border-primary/40'}`}
+                      variant={cat === categoryId ? 'default' : 'outline'} 
+                      onClick={() => setCategoryId(cat)}
+                      className={`cursor-pointer px-4 py-1.5 rounded-xl transition-all ${cat === categoryId ? 'bg-primary text-black' : 'border-white/10 hover:border-primary/40'}`}
                     >
                       {cat}
                     </Badge>

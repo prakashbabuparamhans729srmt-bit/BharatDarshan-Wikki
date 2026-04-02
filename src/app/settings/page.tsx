@@ -1,3 +1,4 @@
+
 "use client"
 
 import React from 'react'
@@ -33,16 +34,29 @@ import {
 } from "@/components/ui/select"
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
+import { useUser, useFirestore } from '@/firebase'
+import { doc } from 'firebase/firestore'
+import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function SettingsPage() {
   const { theme, setTheme } = useAppTheme()
   const { currentLanguage, setLanguage } = useAppLanguage()
+  const { user } = useUser()
+  const db = useFirestore()
   const { toast } = useToast()
 
   const handleSave = () => {
+    if (user && !user.isAnonymous) {
+      const profileRef = doc(db, 'user_profiles', user.uid)
+      updateDocumentNonBlocking(profileRef, {
+        themePreference: theme,
+        preferredLanguageId: currentLanguage
+      })
+    }
+    
     toast({
       title: "Settings Saved",
-      description: "Your preferences have been successfully updated.",
+      description: "Your preferences have been successfully updated and synced.",
     })
   }
 

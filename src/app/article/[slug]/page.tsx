@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { use, useState } from 'react'
+import React, { use, useState, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp, Lock, Headphones } from 'lucide-react'
@@ -21,17 +21,27 @@ import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useUser } from '@/firebase'
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
+import { collection, doc, serverTimestamp } from 'firebase/firestore'
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const { user } = useUser()
+  const db = useFirestore()
   const article = ARTICLES.find(a => a.slug === slug) || ARTICLES[0]
   const { toast } = useToast()
   const router = useRouter()
   const [newComment, setNewComment] = useState('')
 
   const isGuest = user?.isAnonymous
+
+  // Real-time comments from Firestore
+  const commentsQuery = useMemoFirebase(() => {
+    return collection(db, 'articles_published', slug, 'comments');
+  }, [db, slug]);
+  
+  const { data: realTimeComments } = useCollection(commentsQuery);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -78,7 +88,18 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
       return
     }
     if (!newComment.trim()) return
-    toast({ title: "Comment Posted", description: "Your suggestion has been added to the Talk page." })
+    
+    const commentsColRef = collection(db, 'articles_published', slug, 'comments');
+    addDocumentNonBlocking(commentsColRef, {
+      articleId: slug,
+      userId: user!.uid,
+      content: newComment,
+      createdAt: new Date().toISOString(),
+      isApproved: true,
+      username: user!.displayName || user!.email?.split('@')[0] || 'Contributor'
+    });
+
+    toast({ title: "Comment Posted", description: "Your contribution has been added to the Talk page." })
     setNewComment('')
   }
 
@@ -94,10 +115,9 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
     router.push('/contribute')
   }
 
-  const comments = [
+  const staticComments = [
     { user: "Arjun S.", text: "This article needs more info on the local crafts of this region.", time: "2h ago", likes: 5 },
-    { user: "Priya M.", text: "I've uploaded some high-res photos from the 2022 excavation.", time: "5h ago", likes: 12 },
-    { user: "HistoryBuff99", text: "The dates in the third paragraph seem slightly off compared to ASI records.", time: "1d ago", likes: 8 }
+    { user: "Priya M.", text: "I've uploaded some high-res photos from the 2022 excavation.", time: "5h ago", likes: 12 }
   ]
 
   return (
@@ -291,7 +311,24 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
                 <ScrollArea className="h-[400px] pr-4">
                   <div className="space-y-4">
-                    {comments.map((c, i) => (
+                    {/* Real-time comments from Firestore */}
+                    {realTimeComments?.map((c: any) => (
+                      <div key={c.id} className="bg-foreground/5 p-6 rounded-2xl border border-primary/20 space-y-3 animate-in fade-in">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                              <User className="h-4 w-4" />
+                            </div>
+                            <span className="font-bold text-sm text-foreground">{c.username}</span>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Just now</span>
+                          </div>
+                          <Badge variant="outline" className="text-[8px] border-primary/20 text-primary">Live</Badge>
+                        </div>
+                        <p className="text-sm text-foreground/70 leading-relaxed italic">"{c.content}"</p>
+                      </div>
+                    ))}
+                    {/* Mocked comments */}
+                    {staticComments.map((c, i) => (
                       <div key={i} className="bg-foreground/5 p-6 rounded-2xl border border-foreground/5 space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">

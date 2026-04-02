@@ -40,24 +40,30 @@ export default function AuthPage() {
   const db = useFirestore()
   const router = useRouter()
 
-  // Create profile in Firestore when a new user is detected
+  // Create profile in Firestore when a user is detected
   useEffect(() => {
-    if (user && !user.isAnonymous && !isUserLoading) {
+    if (user && !isUserLoading) {
       const profileRef = doc(db, 'user_profiles', user.uid)
-      setDocumentNonBlocking(profileRef, {
+      
+      const profileData = {
         id: user.uid,
-        email: user.email,
-        firstName: firstName || 'Explorer',
-        lastName: lastName || '',
-        username: user.email?.split('@')[0] || `user_${user.uid.slice(0, 5)}`,
+        email: user.email || 'guest@bharatdarshan.wiki',
+        firstName: firstName || user.displayName?.split(' ')[0] || 'Explorer',
+        lastName: lastName || user.displayName?.split(' ')[1] || '',
+        username: user.email?.split('@')[0] || `explorer_${user.uid.slice(0, 5)}`,
         memberSince: serverTimestamp(),
+        lastActive: serverTimestamp(),
         themePreference: 'dark',
         preferredLanguageId: 'English'
-      }, { merge: true })
+      }
+
+      setDocumentNonBlocking(profileRef, profileData, { merge: true })
       
-      router.push('/')
-    } else if (user?.isAnonymous) {
-      router.push('/')
+      // Redirect after profile initialization
+      const timer = setTimeout(() => {
+        router.push('/')
+      }, 500)
+      return () => clearTimeout(timer)
     }
   }, [user, isUserLoading, router, db, firstName, lastName])
 
@@ -172,6 +178,7 @@ export default function AuthPage() {
                 </CardContent>
                 <CardFooter className="p-8 pt-0 flex flex-col gap-4">
                   <Button 
+                    type="submit"
                     disabled={isSubmitting}
                     className="w-full bg-primary text-black font-black h-14 rounded-2xl text-lg neon-glow transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
@@ -252,6 +259,7 @@ export default function AuthPage() {
                 </CardContent>
                 <CardFooter className="p-8 pt-0">
                   <Button 
+                    type="submit"
                     disabled={isSubmitting}
                     className="w-full bg-primary text-black font-black h-14 rounded-2xl text-lg neon-glow transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
