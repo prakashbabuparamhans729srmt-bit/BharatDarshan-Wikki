@@ -5,18 +5,27 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, MapPin, ChevronRight, Filter, BookOpen, Clock, Tag, Loader2, Sparkles, Database } from 'lucide-react'
+import { Search, MapPin, ChevronRight, Filter, BookOpen, Clock, Tag, Loader2, Sparkles, Database, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ARTICLES, STATES } from '@/lib/mock-data'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
+import { collection, query, where } from 'firebase/firestore'
 
 export default function SearchResultsPage() {
   const searchParams = useSearchParams()
-  const query = searchParams.get('q') || ''
+  const queryParam = searchParams.get('q') || ''
   const [isCrawling, setIsCrawling] = useState(true)
   const [progress, setProgress] = useState(0)
+  const db = useFirestore()
+
+  // 1. Fetch live articles that might match
+  // Firestore doesn't support full-text search directly without 3rd party,
+  // so we fetch all and filter on client for this advance simulation
+  const liveArticlesQuery = useMemoFirebase(() => collection(db, 'articles_published'), [db]);
+  const { data: liveArticles } = useCollection(liveArticlesQuery);
 
   // Simulation of a "Deep Search Crawl"
   useEffect(() => {
@@ -33,17 +42,24 @@ export default function SearchResultsPage() {
       })
     }, 50)
     return () => clearInterval(interval)
-  }, [query])
+  }, [queryParam])
 
   const results = useMemo(() => {
-    if (!query) return []
-    const q = query.toLowerCase()
+    if (!queryParam) return []
+    const q = queryParam.toLowerCase()
     
-    const articleResults = ARTICLES.filter(a => 
+    // Combine mock data and live Firestore data
+    const allArticles = [...ARTICLES, ...(liveArticles || [])];
+    
+    // Unique by slug
+    const uniqueArticles = Array.from(new Map(allArticles.map(a => [a.slug, a])).values());
+
+    const articleResults = uniqueArticles.filter(a => 
       a.title.toLowerCase().includes(q) || 
       a.content.toLowerCase().includes(q) ||
-      a.tags.some(t => t.toLowerCase().includes(q)) ||
-      a.category.toLowerCase().includes(q)
+      (a.tags && a.tags.some((t: string) => t.toLowerCase().includes(q))) ||
+      (a.tagIds && a.tagIds.some((t: string) => t.toLowerCase().includes(q))) ||
+      a.category?.toLowerCase().includes(q)
     ).map(a => ({ ...a, type: 'article' }))
 
     const stateResults = STATES.filter(s => 
@@ -59,8 +75,15 @@ export default function SearchResultsPage() {
       tags: ['State', 'Territory']
     }))
 
-    return [...stateResults, ...articleResults]
-  }, [query])
+    // Consolidate and sort (States first)
+    const combined = [...stateResults, ...articleResults];
+    const seen = new Set();
+    return combined.filter(item => {
+      if (seen.has(item.slug)) return false;
+      seen.add(item.slug);
+      return true;
+    });
+  }, [queryParam, liveArticles])
 
   if (isCrawling) {
     return (
@@ -73,7 +96,7 @@ export default function SearchResultsPage() {
         </div>
         <div className="text-center space-y-4 w-full max-w-md">
           <h2 className="text-3xl font-headline font-black text-white tracking-widest uppercase">Deep Crawling...</h2>
-          <p className="text-muted-foreground italic font-medium">Scanning BharatDarshan Wiki archives for "{query}"</p>
+          <p className="text-muted-foreground italic font-medium">Scanning BharatDarshan Wiki archives for "{queryParam}"</p>
           <Progress value={progress} className="h-2 bg-white/5" />
           <div className="flex justify-between text-[10px] font-black text-primary/40 uppercase tracking-[0.3em]">
             <span>Indexing Nodes</span>
@@ -92,19 +115,19 @@ export default function SearchResultsPage() {
           <h1 className="text-5xl font-headline font-black text-white">Crawl Results</h1>
         </div>
         <p className="text-muted-foreground text-xl font-light italic">
-          Advanced crawling finished. Found {results.length} heritage entries for <span className="text-primary font-bold">"{query}"</span>.
+          Advanced crawling finished. Found {results.length} heritage entries for <span className="text-primary font-bold">"{queryParam}"</span>.
         </p>
       </div>
 
       {results.length > 0 ? (
         <div className="grid grid-cols-1 gap-8">
-          {results.map((item, idx) => (
+          {results.map((item: any, idx) => (
             <Link key={idx} href={`/article/${item.slug}`} className="group">
               <Card className="bg-[#161C21]/60 backdrop-blur-xl border-white/5 hover:border-primary/40 transition-all duration-500 rounded-[2.5rem] overflow-hidden group shadow-2xl">
                 <CardContent className="p-0 flex flex-col md:flex-row">
                   <div className="w-full md:w-80 h-64 relative shrink-0 overflow-hidden">
                     <Image 
-                      src={item.image || `https://picsum.photos/seed/${idx}/600/400`}
+                      src={item.image || `https://picsum.photos/seed/${item.slug}/600/400`}
                       alt={item.title}
                       fill
                       className="object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -141,7 +164,11 @@ export default function SearchResultsPage() {
                       {item.content}
                     </p>
                     <div className="flex flex-wrap gap-2 pt-4 border-t border-white/5">
-                      {item.tags?.slice(0, 3).map(tag => (
+                      {item.tagIds?.length > 0 ? (
+                        item.tagIds.slice(0, 3).map((tag: string) => (
+                          <span key={tag} className="text-[10px] font-black text-primary/50 uppercase tracking-widest">#{tag}</span>
+                        ))
+                      ) : item.tags?.slice(0, 3).map((tag: string) => (
                         <span key={tag} className="text-[10px] font-black text-primary/50 uppercase tracking-widest">#{tag}</span>
                       ))}
                     </div>

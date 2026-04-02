@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, MapPin, Sparkles, BookOpen, Users, Globe, ArrowRight, Mic } from 'lucide-react'
+import { Search, MapPin, Sparkles, BookOpen, Users, Globe, ArrowRight, Mic, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -12,12 +12,24 @@ import { Input } from '@/components/ui/input'
 import { ARTICLES, STATES } from '@/lib/mock-data'
 import { VoiceSearchDialog } from '@/components/ai/VoiceSearchDialog'
 import { useRouter } from 'next/navigation'
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
+import { collection, query, limit, orderBy } from 'firebase/firestore'
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showVoiceSearch, setShowVoiceSearch] = useState(false)
   const router = useRouter()
-  const featuredArticles = ARTICLES.slice(0, 3)
+  const db = useFirestore()
+
+  // Fetch live articles from Firestore
+  const latestArticlesQuery = useMemoFirebase(() => {
+    return query(collection(db, 'articles_published'), limit(6));
+  }, [db]);
+  const { data: liveArticles, isLoading: isLiveLoading } = useCollection(latestArticlesQuery);
+
+  const featuredArticles = liveArticles && liveArticles.length > 0 
+    ? liveArticles 
+    : ARTICLES.slice(0, 3);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,7 +44,7 @@ export default function Home() {
       <section className="relative rounded-[2.5rem] overflow-hidden border border-primary/20 bg-black neon-glow group">
         <div className="absolute inset-0 z-0">
           <Image 
-            src="https://picsum.photos/seed/india-hero-dark/1200/600"
+            src="https://images.unsplash.com/photo-1542708993627-b6e5bbae43c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxJbmRpYSUyMGxhbmRzY2FwZXxlbnwwfHx8fDE3NzIwOTIxMDd8MA&ixlib=rb-4.1.0&q=80&w=1200"
             alt="Beautiful landscape of India"
             fill
             className="object-cover opacity-60 scale-105 group-hover:scale-100 transition-transform duration-1000"
@@ -102,36 +114,50 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredArticles.map((article) => (
-            <Link href={`/article/${article.slug}`} key={article.slug} className="group">
-              <Card className="h-full border border-white/10 glass-card hover:border-primary/40 transition-all duration-500 overflow-hidden rounded-3xl group">
-                <div className="relative h-64 w-full overflow-hidden">
-                  <Image 
-                    src={article.image}
-                    alt={article.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-primary text-black font-bold px-3 py-1">{article.category}</Badge>
+        {isLiveLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-12 w-12 text-primary animate-spin" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredArticles.map((article: any) => (
+              <Link href={`/article/${article.slug}`} key={article.slug} className="group">
+                <Card className="h-full border border-white/10 glass-card hover:border-primary/40 transition-all duration-500 overflow-hidden rounded-3xl group">
+                  <div className="relative h-64 w-full overflow-hidden">
+                    <Image 
+                      src={article.image || `https://picsum.photos/seed/${article.slug}/800/600`}
+                      alt={article.title}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-primary text-black font-bold px-3 py-1">{article.category}</Badge>
+                    </div>
                   </div>
-                </div>
-                <CardContent className="p-8 space-y-4">
-                  <h3 className="text-2xl font-headline font-bold group-hover:text-primary transition-colors">{article.title}</h3>
-                  <p className="text-muted-foreground text-base line-clamp-3 leading-relaxed font-light">
-                    {article.content}
-                  </p>
-                  <div className="pt-4 flex flex-wrap gap-2 border-t border-white/5">
-                    {article.tags.slice(0, 2).map(tag => (
-                      <Badge variant="outline" key={tag} className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">{tag}</Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                  <CardContent className="p-8 space-y-4">
+                    <h3 className="text-2xl font-headline font-bold group-hover:text-primary transition-colors">{article.title}</h3>
+                    <p className="text-muted-foreground text-base line-clamp-3 leading-relaxed font-light">
+                      {article.content}
+                    </p>
+                    <div className="pt-4 flex flex-wrap gap-2 border-t border-white/5">
+                      {article.tagIds?.length > 0 ? (
+                        article.tagIds.slice(0, 2).map((tagId: string) => (
+                          <Badge variant="outline" key={tagId} className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">#{tagId}</Badge>
+                        ))
+                      ) : article.tags?.length > 0 ? (
+                        article.tags.slice(0, 2).map((tag: string) => (
+                          <Badge variant="outline" key={tag} className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">{tag}</Badge>
+                        ))
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">Heritage</Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       <VoiceSearchDialog open={showVoiceSearch} onOpenChange={setShowVoiceSearch} />

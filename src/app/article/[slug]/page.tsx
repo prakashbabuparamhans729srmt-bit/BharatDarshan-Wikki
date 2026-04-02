@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase'
-import { collection, doc, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, serverTimestamp, query, where, limit } from 'firebase/firestore'
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -33,18 +33,22 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   const router = useRouter()
   const [newComment, setNewComment] = useState('')
 
-  // 1. Fetch Article from Firestore (Live Data)
-  const articleRef = useMemoFirebase(() => doc(db, 'articles_published', slug), [db, slug]);
-  const { data: firestoreArticle, isLoading: isArticleLoading } = useDoc(articleRef);
+  // 1. Fetch Article from Firestore (Live Query by Slug)
+  const articleQuery = useMemoFirebase(() => {
+    return query(collection(db, 'articles_published'), where('slug', '==', slug), limit(1));
+  }, [db, slug]);
+  
+  const { data: articleDocs, isLoading: isArticleLoading } = useCollection(articleQuery);
 
   // Fallback to mock data if not found in Firestore yet
   const staticArticle = ARTICLES.find(a => a.slug === slug) || ARTICLES[0];
-  const article = firestoreArticle || staticArticle;
+  const article = articleDocs?.[0] || staticArticle;
 
   const isGuest = user?.isAnonymous
 
   // 2. Real-time comments from Firestore
   const commentsQuery = useMemoFirebase(() => {
+    // We use the slug as the parent for comments to keep them grouped
     return collection(db, 'articles_published', slug, 'comments');
   }, [db, slug]);
   
