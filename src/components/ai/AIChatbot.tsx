@@ -34,29 +34,32 @@ export function AIChatbot() {
     setInput('')
     setIsProcessing(true)
 
-    // Advanced AI Logic - Explaining A to Z of the app
+    // Advanced AI Logic - Explaining A to Z of the app and its live features
     setTimeout(() => {
       let response = `I've analyzed your query about "${text}". `;
       
       const q = text.toLowerCase();
-      if (q.includes('help') || q.includes('how') || q.includes('a to z')) {
-        response = "BharatDarshan Wiki is India's most advanced digital encyclopedia. Here is the A to Z guide:\n\n" +
-          "• **A** - Auth: Secure login for contributors.\n" +
-          "• **B** - Browse: Explore 28 states alphabetically.\n" +
-          "• **C** - Contribute: Write and refine history with AI.\n" +
-          "• **D** - Dashboard: Track your points and impact.\n" +
-          "• **H** - History: Track every revision of a monument.\n" +
-          "• **L** - Languages: Translate everything into 22 Indian languages.\n" +
-          "• **S** - Search: Advanced crawling for monuments and districts.\n" +
-          "• **V** - Voice: Search just by speaking!\n\nHow can I guide your journey further?";
-      } else if (q.includes('language') || q.includes('translate')) {
-        response = "Our AI supports 22 official Indian languages including Hindi, Marathi, Tamil, Bengali, and more. Use the Globe icon in the Header or go to the 'AI & Tools' tab on any article to translate it instantly.";
+      if (q.includes('help') || q.includes('how') || q.includes('a to z') || q.includes('guide')) {
+        response = "BharatDarshan Wiki is India's most advanced digital encyclopedia. Here is your A to Z roadmap:\n\n" +
+          "• **A** - Auth: Secure login to unlock editing rights.\n" +
+          "• **B** - Browse: Alphabetical index of all 28 states.\n" +
+          "• **C** - Contribute: Write new heritage entries and use AI to refine them.\n" +
+          "• **D** - Dashboard: Your personal command center for points and achievements.\n" +
+          "• **H** - History: Track every single change via Revision History.\n" +
+          "• **M** - Media: A high-res archive of visual heritage.\n" +
+          "• **S** - Search: Deep crawling of live and archived data.\n" +
+          "• **T** - Talk Page: Real-time community discussions on every article.\n" +
+          "• **V** - Voice: Advanced Voice Search—just speak and explore!\n\nWhat would you like to explore first?";
+      } else if (q.includes('language') || q.includes('translate') || q.includes('hindi')) {
+        response = "We support 22 official Indian languages! On any article page, go to the 'AI & Tools' tab. Our Gemini AI will translate the entire content into your chosen language in seconds.";
       } else if (q.includes('voice') || q.includes('mic') || q.includes('speak')) {
-        response = "You can use Voice Search! Just click the Mic icon in the search bar or right here in my chat window. I will listen, transcribe, and find the heritage site you are looking for.";
-      } else if (q.includes('monument') || q.includes('heritage')) {
-        response = "We have thousands of indexed nodes! Try searching for 'Taj Mahal', 'Agra Fort', or browse by State to see hidden gems in your region.";
+        response = "Voice Search is active! Click the Mic icon in the Search bar or right here. You can ask me things like 'Tell me about the Shore Temple' or 'Search for Rajasthan forts'.";
+      } else if (q.includes('edit') || q.includes('publish') || q.includes('write')) {
+        response = "Contributing is easy! Go to the 'Create Article' section in the sidebar. You can write your own history, and use our AI Content Refiner to check facts and grammar before you publish.";
+      } else if (q.includes('monument') || q.includes('heritage') || q.includes('district')) {
+        response = "Our database indexes data across all 700+ districts of India. Try searching for specific local sites, or browse by State to see everything from large monuments to hidden heritage nodes.";
       } else {
-        response += "I'm searching our heritage archives... Did you know that BharatDarshan indexes data from over 700 districts across India? You can explore them all in the 'Browse' section.";
+        response += "I'm searching our heritage archives for live nodes... Did you know you can earn 'Heritage Points' on your Dashboard for every verified edit you make?";
       }
 
       setMessages(prev => [...prev, { 
@@ -169,13 +172,13 @@ export function AIChatbot() {
           <div className="p-6 bg-black/40 border-t border-white/5 space-y-4">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("Tell me the A to Z guide")}>
-                <HelpCircle className="h-3 w-3 mr-2" /> A-Z Guide
+                <HelpCircle className="h-3 w-3 mr-2" /> A-Z Roadmap
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("How to use Voice Search?")}>
-                <Mic className="h-3 w-3 mr-2" /> Voice Info
+              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("How to contribute?")}>
+                <FileText className="h-3 w-3 mr-2" /> Contribute
               </Button>
-              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("Explore Monuments")}>
-                <BookOpen className="h-3 w-3 mr-2" /> Monuments
+              <Button variant="outline" size="sm" className="rounded-full text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 h-8 shrink-0" onClick={() => handleSend("Explore Voice Search")}>
+                <Mic className="h-3 w-3 mr-2" /> Voice Search
               </Button>
             </div>
             <div className="flex gap-3 relative">
@@ -208,3 +211,5 @@ export function AIChatbot() {
     </>
   )
 }
+import { cn } from '@/lib/utils'
+import { FileText } from 'lucide-react'

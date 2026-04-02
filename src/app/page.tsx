@@ -9,11 +9,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { ARTICLES, STATES } from '@/lib/mock-data'
+import { ARTICLES } from '@/lib/mock-data'
 import { VoiceSearchDialog } from '@/components/ai/VoiceSearchDialog'
 import { useRouter } from 'next/navigation'
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
-import { collection, query, limit, orderBy } from 'firebase/firestore'
+import { collection, query, limit } from 'firebase/firestore'
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -21,12 +21,13 @@ export default function Home() {
   const router = useRouter()
   const db = useFirestore()
 
-  // Fetch live articles from Firestore
+  // 1. Fetch live articles from Firestore for the "Featured Heritage" section
   const latestArticlesQuery = useMemoFirebase(() => {
     return query(collection(db, 'articles_published'), limit(6));
   }, [db]);
   const { data: liveArticles, isLoading: isLiveLoading } = useCollection(latestArticlesQuery);
 
+  // Hybrid approach: use live data if available, otherwise fallback to mock data
   const featuredArticles = liveArticles && liveArticles.length > 0 
     ? liveArticles 
     : ARTICLES.slice(0, 3);
@@ -40,7 +41,7 @@ export default function Home() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-20 pb-20">
-      {/* Hero Section */}
+      {/* Hero Section - A to Z Advance */}
       <section className="relative rounded-[2.5rem] overflow-hidden border border-primary/20 bg-black neon-glow group">
         <div className="absolute inset-0 z-0">
           <Image 
@@ -61,7 +62,7 @@ export default function Home() {
             Discover the Heritage of <span className="text-primary italic">Bharat Darshan</span>
           </h1>
           
-          {/* Advanced Search Bar */}
+          {/* Advanced Search Bar - Integrated with Voice */}
           <div className="max-w-2xl mx-auto relative group">
             <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <Search className="absolute left-6 h-6 w-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -99,7 +100,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Articles Grid */}
+      {/* Featured Articles Grid - Real-time Wiki Updates */}
       <section className="space-y-10">
         <div className="flex items-end justify-between px-2">
           <div className="space-y-1">
@@ -131,7 +132,7 @@ export default function Home() {
                       className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
                     />
                     <div className="absolute top-4 left-4">
-                      <Badge className="bg-primary text-black font-bold px-3 py-1">{article.category}</Badge>
+                      <Badge className="bg-primary text-black font-bold px-3 py-1">{article.category || 'Heritage'}</Badge>
                     </div>
                   </div>
                   <CardContent className="p-8 space-y-4">
@@ -146,10 +147,10 @@ export default function Home() {
                         ))
                       ) : article.tags?.length > 0 ? (
                         article.tags.slice(0, 2).map((tag: string) => (
-                          <Badge variant="outline" key={tag} className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">{tag}</Badge>
+                          <Badge variant="outline" key={tag} className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">#{tag}</Badge>
                         ))
                       ) : (
-                        <Badge variant="outline" className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">Heritage</Badge>
+                        <Badge variant="outline" className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">Heritage Node</Badge>
                       )}
                     </div>
                   </CardContent>

@@ -21,8 +21,8 @@ import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase'
-import { collection, doc, serverTimestamp, query, where, limit } from 'firebase/firestore'
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
+import { collection, query, where, limit } from 'firebase/firestore'
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -40,7 +40,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   
   const { data: articleDocs, isLoading: isArticleLoading } = useCollection(articleQuery);
 
-  // Fallback to mock data if not found in Firestore yet
+  // Fallback to mock data if not found in Firestore yet (to maintain "chalu" state for demo slugs)
   const staticArticle = ARTICLES.find(a => a.slug === slug) || ARTICLES[0];
   const article = articleDocs?.[0] || staticArticle;
 
@@ -48,7 +48,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
   // 2. Real-time comments from Firestore
   const commentsQuery = useMemoFirebase(() => {
-    // We use the slug as the parent for comments to keep them grouped
+    // We group comments under the article's unique slug
     return collection(db, 'articles_published', slug, 'comments');
   }, [db, slug]);
   
@@ -107,7 +107,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
       content: newComment,
       createdAt: new Date().toISOString(),
       isApproved: true,
-      username: user!.displayName || user!.email?.split('@')[0] || 'Contributor'
+      username: user!.displayName || user!.email?.split('@')[0] || 'Heritage Explorer'
     });
 
     toast({ title: "Comment Posted", description: "Your contribution has been added to the Talk page." })
@@ -149,7 +149,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <Badge className="bg-primary text-black font-black uppercase tracking-widest text-[10px] px-3 py-1">
-                {article.category || 'Place'}
+                {article.category || 'Heritage'}
               </Badge>
               {article.parent && (
                 <>
@@ -238,8 +238,8 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 </p>
                 <p className="text-xl leading-[1.8] text-foreground/70 font-light mt-8">
                   The history of {article.title} is deeply intertwined with the cultural evolution of the Indian subcontinent. 
-                  Recent archaeological findings and historical archives maintained by BharatDarshan contributors highlight its strategic importance 
-                  in ancient trade routes and its role as a center for learning and spiritual enlightenment.
+                  Recent records maintained by BharatDarshan contributors highlight its strategic importance 
+                  across eras and its role as a beacon of heritage and learning.
                 </p>
               </div>
 
@@ -251,8 +251,8 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                     </div>
                     <div>
                       <h4 className="font-bold font-headline text-xl text-foreground">Geographical Data</h4>
-                      <p className="text-sm text-primary/70 font-bold mt-1 uppercase tracking-wider">{article.tags?.[0] || 'Heritage'}</p>
-                      <p className="text-sm text-foreground/50 mt-1 italic">Type: {article.category} Classification</p>
+                      <p className="text-sm text-primary/70 font-bold mt-1 uppercase tracking-wider">{article.tags?.[0] || article.tagIds?.[0] || 'Heritage'}</p>
+                      <p className="text-sm text-foreground/50 mt-1 italic">Classification: {article.category}</p>
                     </div>
                   </div>
                 </div>
@@ -263,7 +263,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                     </div>
                     <div>
                       <h4 className="font-bold font-headline text-xl text-foreground">Wiki Stats</h4>
-                      <p className="text-sm text-foreground/70 mt-1">Verified by <span className="text-primary font-bold">14+ Experts</span></p>
+                      <p className="text-sm text-foreground/70 mt-1">Verified by <span className="text-primary font-bold">14+ Nodes</span></p>
                       <p className="text-sm text-foreground/50 mt-1 italic">Last edited recently</p>
                     </div>
                   </div>
@@ -311,6 +311,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       disabled={isGuest}
+                      onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
                     />
                     <Button 
                       className="bg-primary text-black rounded-xl px-6 font-bold"
@@ -333,7 +334,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                             <span className="font-bold text-sm text-foreground">{c.username}</span>
                             <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{new Date(c.createdAt).toLocaleDateString()}</span>
                           </div>
-                          <Badge variant="outline" className="text-[8px] border-primary/20 text-primary">Live</Badge>
+                          <Badge variant="outline" className="text-[8px] border-primary/20 text-primary">Live Contribution</Badge>
                         </div>
                         <p className="text-sm text-foreground/70 leading-relaxed italic">"{c.content}"</p>
                       </div>
@@ -383,7 +384,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
             <div className="relative z-10 space-y-6">
               <h3 className="font-headline font-black text-3xl leading-tight">Join the Knowledge Revolution</h3>
               <p className="text-black/70 text-lg leading-relaxed font-bold italic">
-                Help us map the vast heritage of {article.title}. Your expertise matters.
+                Help us map the vast heritage of India. Your expertise matters.
               </p>
               <Button 
                 onClick={handleEditClick}
