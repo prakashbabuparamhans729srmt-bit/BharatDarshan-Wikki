@@ -54,10 +54,6 @@ export function AIChatbot() {
         response = "We support 22 official Indian languages! On any article page, go to the 'AI & Tools' tab. Our Gemini AI will translate the entire content into your chosen language in seconds.";
       } else if (q.includes('voice') || q.includes('mic') || q.includes('speak')) {
         response = "Voice Search is active! Click the Mic icon in the Search bar or right here. You can ask me things like 'Tell me about the Shore Temple' or 'Search for Rajasthan forts'.";
-      } else if (q.includes('edit') || q.includes('publish') || q.includes('write')) {
-        response = "Contributing is easy! Go to the 'Create Article' section in the sidebar. You can write your own history, and use our AI Content Refiner to check facts and grammar before you publish.";
-      } else if (q.includes('monument') || q.includes('heritage') || q.includes('district')) {
-        response = "Our database indexes data across all 700+ districts of India. Try searching for specific local sites, or browse by State to see everything from large monuments to hidden heritage nodes.";
       } else {
         response += "I'm searching our heritage archives for live nodes... Did you know you can earn 'Heritage Points' on your Dashboard for every verified edit you make?";
       }
@@ -197,11 +193,7 @@ export function AIChatbot() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               />
-              <Button 
-                size="icon" 
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 rounded-lg bg-primary text-black hover:bg-primary/90 transition-all active:scale-95 shadow-neon"
-                onClick={() => handleSend()}
-              >
+              <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 rounded-lg bg-primary text-black hover:bg-primary/90 transition-all active:scale-95 shadow-neon" onClick={() => handleSend()}>
                 <Send className="h-5 w-5" />
               </Button>
             </div>

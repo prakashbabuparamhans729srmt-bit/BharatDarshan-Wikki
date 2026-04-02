@@ -22,7 +22,6 @@ export default function Home() {
   const db = useFirestore()
 
   // 1. Fetch live articles from Firestore for the "Featured Heritage" section
-  // We order by updatedAt to show the most recently active heritage nodes
   const latestArticlesQuery = useMemoFirebase(() => {
     return query(
       collection(db, 'articles_published'), 
@@ -47,7 +46,7 @@ export default function Home() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-20 pb-20">
-      {/* Hero Section - A to Z Advance */}
+      {/* Hero Section */}
       <section className="relative rounded-[2.5rem] overflow-hidden border border-primary/20 bg-black neon-glow group">
         <div className="absolute inset-0 z-0">
           <Image 
@@ -68,7 +67,6 @@ export default function Home() {
             Discover the Heritage of <span className="text-primary italic">Bharat Darshan</span>
           </h1>
           
-          {/* Advanced Search Bar - Integrated with Voice */}
           <div className="max-w-2xl mx-auto relative group">
             <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <Search className="absolute left-6 h-6 w-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -106,7 +104,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Articles Grid - Real-time Wiki Updates */}
+      {/* Featured Articles Section */}
       <section className="space-y-10">
         <div className="flex items-end justify-between px-2">
           <div className="space-y-1">
@@ -147,17 +145,7 @@ export default function Home() {
                       {article.content}
                     </p>
                     <div className="pt-4 flex flex-wrap gap-2 border-t border-white/5">
-                      {article.tagIds?.length > 0 ? (
-                        article.tagIds.slice(0, 2).map((tagId: string) => (
-                          <Badge variant="outline" key={tagId} className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">#{tagId}</Badge>
-                        ))
-                      ) : article.tags?.length > 0 ? (
-                        article.tags.slice(0, 2).map((tag: string) => (
-                          <Badge variant="outline" key={tag} className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">#{tag}</Badge>
-                        ))
-                      ) : (
-                        <Badge variant="outline" className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">Heritage Node</Badge>
-                      )}
+                      <Badge variant="outline" className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">Heritage Node</Badge>
                     </div>
                   </CardContent>
                 </Card>

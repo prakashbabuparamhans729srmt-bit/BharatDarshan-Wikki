@@ -48,8 +48,6 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
   // 2. Real-time comments from Firestore
   const commentsQuery = useMemoFirebase(() => {
-    // Comments subcollection under the article document
-    // Note: We use the unique article slug as the path segment for simplicity in this wiki
     return query(
       collection(db, 'articles_published', slug, 'comments'),
       orderBy('createdAt', 'desc')
@@ -187,24 +185,11 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               Revision History
             </Button>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={handleBookmark}
-                className="rounded-full border-foreground/10 bg-foreground/5 hover:text-primary h-12 w-12 transition-all hover:scale-110"
-              >
+              <Button variant="outline" size="icon" onClick={handleBookmark} className="rounded-full border-foreground/10 bg-foreground/5 hover:text-primary h-12 w-12 transition-all hover:scale-110">
                 <Bookmark className="h-5 w-5" />
               </Button>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={handleShare}
-                className="rounded-full border-foreground/10 bg-foreground/5 hover:text-primary h-12 w-12 transition-all hover:scale-110"
-              >
+              <Button variant="outline" size="icon" onClick={handleShare} className="rounded-full border-foreground/10 bg-foreground/5 hover:text-primary h-12 w-12 transition-all hover:scale-110">
                 <Share2 className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="icon" className="rounded-full border-foreground/10 bg-foreground/5 hover:text-primary h-12 w-12 transition-all hover:scale-110">
-                <MoreHorizontal className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -243,38 +228,11 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 <p className="text-2xl leading-[1.7] text-foreground/90 font-light selection:bg-primary/20 article-dropcap">
                   {article.content}
                 </p>
-                <p className="text-xl leading-[1.8] text-foreground/70 font-light mt-8">
+                <p className="text-xl leading-[1.8] text-foreground/70 font-light mt-8 italic">
                   The history of {article.title} is deeply intertwined with the cultural evolution of the Indian subcontinent. 
                   Recent records maintained by BharatDarshan contributors highlight its strategic importance 
                   across eras and its role as a beacon of heritage and learning.
                 </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-                <div className="bg-foreground/5 border border-foreground/5 shadow-none rounded-[2rem] p-8 hover:bg-foreground/10 transition-all hover:scale-[1.02]">
-                  <div className="flex gap-5">
-                    <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary neon-glow">
-                      <MapPin className="h-7 w-7" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold font-headline text-xl text-foreground">Geographical Data</h4>
-                      <p className="text-sm text-primary/70 font-bold mt-1 uppercase tracking-wider">{article.tags?.[0] || article.tagIds?.[0] || 'Heritage'}</p>
-                      <p className="text-sm text-foreground/50 mt-1 italic">Classification: {article.category}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-foreground/5 border border-foreground/5 shadow-none rounded-[2rem] p-8 hover:bg-foreground/10 transition-all hover:scale-[1.02]">
-                  <div className="flex gap-5">
-                    <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary neon-glow">
-                      <Sparkles className="h-7 w-7" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold font-headline text-xl text-foreground">Wiki Stats</h4>
-                      <p className="text-sm text-foreground/70 mt-1">Verified by <span className="text-primary font-bold">14+ Nodes</span></p>
-                      <p className="text-sm text-foreground/50 mt-1 italic">Last edited recently</p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </TabsContent>
 
@@ -282,28 +240,6 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <TranslatorTool content={article.content} />
                 <AudioGuide text={article.content} title={article.title} />
-              </div>
-              
-              <div className="border border-foreground/5 bg-foreground/5 rounded-[2rem] overflow-hidden group">
-                <div className="p-10 space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary neon-glow">
-                      <Sparkles className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-headline font-bold text-foreground">Smart Content Refiner</h3>
-                      <p className="text-muted-foreground font-light">Advanced AI analysis for tone, accuracy, and style.</p>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleEditClick}
-                    className="w-full h-14 border-primary/20 hover:border-primary text-primary font-bold text-lg rounded-2xl group transition-all"
-                  >
-                    Launch AI Assistant
-                    <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </div>
               </div>
             </TabsContent>
 
@@ -320,10 +256,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                       disabled={isGuest}
                       onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
                     />
-                    <Button 
-                      className="bg-primary text-black rounded-xl px-6 font-bold"
-                      onClick={handleCommentSubmit}
-                    >
+                    <Button className="bg-primary text-black rounded-xl px-6 font-bold" onClick={handleCommentSubmit}>
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>
@@ -363,7 +296,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
           <div className="bg-secondary p-10 rounded-[2.5rem] border border-foreground/5 shadow-2xl space-y-8">
             <h3 className="font-headline font-bold text-2xl text-foreground border-b border-foreground/5 pb-4">Related Heritage</h3>
             <div className="space-y-6">
-              {ARTICLES.filter(a => a.slug !== slug).map(related => (
+              {ARTICLES.filter(a => a.slug !== slug).slice(0, 3).map(related => (
                 <Link key={related.slug} href={`/article/${related.slug}`} className="flex gap-4 group items-center">
                   <div className="h-16 w-16 rounded-2xl relative overflow-hidden shrink-0 border border-foreground/10">
                     <Image src={related.image} alt={related.title} fill className="object-cover transition-transform group-hover:scale-125" />
@@ -375,31 +308,9 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 </Link>
               ))}
             </div>
-            <Button 
-              variant="ghost" 
-              onClick={() => router.push('/browse')}
-              className="w-full text-primary font-bold hover:bg-primary/5 rounded-xl h-12"
-            >
+            <Button variant="ghost" onClick={() => router.push('/browse')} className="w-full text-primary font-bold hover:bg-primary/5 rounded-xl h-12">
               Explore Full Map
             </Button>
-          </div>
-
-          <div className="bg-primary p-10 rounded-[2.5rem] text-black border-none shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-150 transition-transform">
-              <Sparkles className="h-32 w-32" />
-            </div>
-            <div className="relative z-10 space-y-6">
-              <h3 className="font-headline font-black text-3xl leading-tight">Join the Knowledge Revolution</h3>
-              <p className="text-black/70 text-lg leading-relaxed font-bold italic">
-                Help us map the vast heritage of India. Your expertise matters.
-              </p>
-              <Button 
-                onClick={handleEditClick}
-                className="w-full bg-black text-primary hover:bg-black/90 font-black h-16 rounded-2xl text-xl transition-all hover:scale-105 active:scale-95 shadow-xl"
-              >
-                {isGuest ? "Sign Up to Edit" : "Become An Editor"}
-              </Button>
-            </div>
           </div>
         </div>
       </div>
