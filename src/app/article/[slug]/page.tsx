@@ -4,7 +4,7 @@
 import React, { use, useState, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp, Lock, Headphones } from 'lucide-react'
+import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp, Lock, Headphones, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase'
+import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase'
 import { collection, doc, serverTimestamp } from 'firebase/firestore'
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
@@ -29,14 +29,21 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   const { slug } = use(params)
   const { user } = useUser()
   const db = useFirestore()
-  const article = ARTICLES.find(a => a.slug === slug) || ARTICLES[0]
   const { toast } = useToast()
   const router = useRouter()
   const [newComment, setNewComment] = useState('')
 
+  // 1. Fetch Article from Firestore (Live Data)
+  const articleRef = useMemoFirebase(() => doc(db, 'articles_published', slug), [db, slug]);
+  const { data: firestoreArticle, isLoading: isArticleLoading } = useDoc(articleRef);
+
+  // Fallback to mock data if not found in Firestore yet
+  const staticArticle = ARTICLES.find(a => a.slug === slug) || ARTICLES[0];
+  const article = firestoreArticle || staticArticle;
+
   const isGuest = user?.isAnonymous
 
-  // Real-time comments from Firestore
+  // 2. Real-time comments from Firestore
   const commentsQuery = useMemoFirebase(() => {
     return collection(db, 'articles_published', slug, 'comments');
   }, [db, slug]);
@@ -115,14 +122,16 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
     router.push('/contribute')
   }
 
-  const staticComments = [
-    { user: "Arjun S.", text: "This article needs more info on the local crafts of this region.", time: "2h ago", likes: 5 },
-    { user: "Priya M.", text: "I've uploaded some high-res photos from the 2022 excavation.", time: "5h ago", likes: 12 }
-  ]
+  if (isArticleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-12 w-12 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-24 animate-in fade-in duration-700">
-      {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
         <Link href="/" className="hover:text-primary transition-colors">Home</Link>
         <ChevronRight className="h-3 w-3" />
@@ -131,13 +140,12 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
         <span className="text-foreground font-medium">{article.title}</span>
       </nav>
 
-      {/* Article Header */}
       <div className="flex flex-col lg:flex-row gap-12 items-start">
         <div className="flex-1 space-y-8">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <Badge className="bg-primary text-black font-black uppercase tracking-widest text-[10px] px-3 py-1">
-                {article.category}
+                {article.category || 'Place'}
               </Badge>
               {article.parent && (
                 <>
@@ -193,7 +201,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
         <div className="w-full lg:w-[450px] h-[450px] relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-foreground/5 group">
           <Image 
-            src={article.image}
+            src={article.image || `https://picsum.photos/seed/${slug}/800/600`}
             alt={article.title}
             fill
             className="object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -239,7 +247,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                     </div>
                     <div>
                       <h4 className="font-bold font-headline text-xl text-foreground">Geographical Data</h4>
-                      <p className="text-sm text-primary/70 font-bold mt-1 uppercase tracking-wider">{article.tags[0]}</p>
+                      <p className="text-sm text-primary/70 font-bold mt-1 uppercase tracking-wider">{article.tags?.[0] || 'Heritage'}</p>
                       <p className="text-sm text-foreground/50 mt-1 italic">Type: {article.category} Classification</p>
                     </div>
                   </div>
@@ -252,7 +260,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                     <div>
                       <h4 className="font-bold font-headline text-xl text-foreground">Wiki Stats</h4>
                       <p className="text-sm text-foreground/70 mt-1">Verified by <span className="text-primary font-bold">14+ Experts</span></p>
-                      <p className="text-sm text-foreground/50 mt-1 italic">Last edited 3 hours ago</p>
+                      <p className="text-sm text-foreground/50 mt-1 italic">Last edited recently</p>
                     </div>
                   </div>
                 </div>
@@ -311,7 +319,6 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
                 <ScrollArea className="h-[400px] pr-4">
                   <div className="space-y-4">
-                    {/* Real-time comments from Firestore */}
                     {realTimeComments?.map((c: any) => (
                       <div key={c.id} className="bg-foreground/5 p-6 rounded-2xl border border-primary/20 space-y-3 animate-in fade-in">
                         <div className="flex items-center justify-between">
@@ -320,32 +327,19 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                               <User className="h-4 w-4" />
                             </div>
                             <span className="font-bold text-sm text-foreground">{c.username}</span>
-                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Just now</span>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{new Date(c.createdAt).toLocaleDateString()}</span>
                           </div>
                           <Badge variant="outline" className="text-[8px] border-primary/20 text-primary">Live</Badge>
                         </div>
                         <p className="text-sm text-foreground/70 leading-relaxed italic">"{c.content}"</p>
                       </div>
                     ))}
-                    {/* Mocked comments */}
-                    {staticComments.map((c, i) => (
-                      <div key={i} className="bg-foreground/5 p-6 rounded-2xl border border-foreground/5 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                              <User className="h-4 w-4" />
-                            </div>
-                            <span className="font-bold text-sm text-foreground">{c.user}</span>
-                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{c.time}</span>
-                          </div>
-                          <Button variant="ghost" size="sm" className="gap-1 text-xs text-muted-foreground hover:text-primary">
-                            <ThumbsUp className="h-3 w-3" />
-                            {c.likes}
-                          </Button>
-                        </div>
-                        <p className="text-sm text-foreground/70 leading-relaxed italic">"{c.text}"</p>
+                    {!realTimeComments?.length && (
+                      <div className="py-20 text-center space-y-4 opacity-30">
+                        <MessageSquare className="h-12 w-12 mx-auto" />
+                        <p className="font-bold italic">No discussions yet. Be the first to contribute!</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </ScrollArea>
               </div>
