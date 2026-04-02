@@ -27,6 +27,10 @@ import { useUser } from '@/firebase'
 import { doc, serverTimestamp } from 'firebase/firestore'
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
+/**
+ * @description A-Z Advanced Auth Page. Handles Login, Signup, and Guest Mode.
+ * Automatically synchronizes user profiles with Firestore for full heritage access.
+ */
 export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -48,8 +52,8 @@ export default function AuthPage() {
       const profileData = {
         id: user.uid,
         email: user.email || 'guest@bharatdarshan.wiki',
-        firstName: firstName || user.displayName?.split(' ')[0] || 'Explorer',
-        lastName: lastName || user.displayName?.split(' ')[1] || '',
+        firstName: firstName || user.displayName?.split(' ')[0] || (user.isAnonymous ? 'Guest' : 'Explorer'),
+        lastName: lastName || user.displayName?.split(' ')[1] || (user.isAnonymous ? 'Explorer' : ''),
         username: user.email?.split('@')[0] || `explorer_${user.uid.slice(0, 5)}`,
         memberSince: serverTimestamp(),
         lastActive: serverTimestamp(),
@@ -57,12 +61,13 @@ export default function AuthPage() {
         preferredLanguageId: 'English'
       }
 
+      // Synchronize profile data non-blockingly
       setDocumentNonBlocking(profileRef, profileData, { merge: true })
       
-      // Redirect after profile initialization
+      // Smooth transition to dashboard or home
       const timer = setTimeout(() => {
         router.push('/')
-      }, 500)
+      }, 800)
       return () => clearTimeout(timer)
     }
   }, [user, isUserLoading, router, db, firstName, lastName])

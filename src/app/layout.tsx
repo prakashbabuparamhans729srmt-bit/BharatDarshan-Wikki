@@ -1,3 +1,4 @@
+
 "use client"
 
 import './globals.css';
@@ -12,32 +13,39 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { AIChatbot } from '@/components/ai/AIChatbot';
 
+/**
+ * @description Advanced AuthGuard that allows public browsing for Wiki reading
+ * but protects member-only areas like Dashboard, Contribute, and Settings.
+ */
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const pathname = usePathname();
   const router = useRouter();
 
+  // Define public routes that don't require authentication
+  const publicRoutes = ['/', '/auth', '/browse', '/search'];
+  const isArticlePage = pathname.startsWith('/article/');
+  const isPublicRoute = publicRoutes.includes(pathname) || isArticlePage;
+
   useEffect(() => {
-    if (!isUserLoading && !user && pathname !== '/auth') {
+    // Redirect to auth only if trying to access a protected route without being logged in
+    if (!isUserLoading && !user && !isPublicRoute) {
       router.push('/auth');
     }
-  }, [user, isUserLoading, pathname, router]);
+  }, [user, isUserLoading, pathname, router, isPublicRoute]);
 
   if (isUserLoading) {
     return (
       <div className="min-h-screen bg-[#070707] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="h-12 w-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <p className="text-primary font-black uppercase tracking-[0.3em] text-[10px] animate-pulse">Syncing Heritage Archives...</p>
         </div>
       </div>
     );
   }
 
-  if (pathname === '/auth' || user) {
-    return <>{children}</>;
-  }
-
-  return <div className="min-h-screen bg-[#070707]" />;
+  return <>{children}</>;
 }
 
 function MainLayout({ children }: { children: React.ReactNode }) {
@@ -75,8 +83,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Alegreya:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
-        <title>BharatDarshan Wiki - India's Knowledge Platform</title>
-        <meta name="description" content="A collaborative wiki exploring the states, districts, and heritage of India." />
+        <title>BharatDarshan Wiki - India's Digital Encyclopedia</title>
+        <meta name="description" content="A collaborative A-Z wiki exploring the states, districts, and heritage of India powered by AI." />
       </head>
       <body className="font-body antialiased">
         <FirebaseClientProvider>
