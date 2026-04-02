@@ -25,6 +25,10 @@ import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase } from '@
 import { collection, query, where, limit, orderBy, doc } from 'firebase/firestore'
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
+/**
+ * @description Advanced Article Page. Pulls live data from Firestore /articles_published
+ * using the slug as the document ID. Supports live Talk Page (Comments).
+ */
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const { user } = useUser()
@@ -46,7 +50,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
   const isGuest = user?.isAnonymous
 
-  // 2. Real-time comments from Firestore
+  // 2. Real-time comments from Firestore subcollection
   const commentsQuery = useMemoFirebase(() => {
     return query(
       collection(db, 'articles_published', slug, 'comments'),

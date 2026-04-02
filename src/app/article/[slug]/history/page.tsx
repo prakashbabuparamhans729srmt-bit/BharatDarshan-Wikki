@@ -12,6 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 import { collection, query, orderBy, limit } from 'firebase/firestore'
 
+/**
+ * @description Advanced History Page. Pulls live revision logs from Firestore
+ * for a specific article heritage node.
+ */
 export default function RevisionHistoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const db = useFirestore()
@@ -114,29 +118,6 @@ export default function RevisionHistoryPage({ params }: { params: Promise<{ slug
           </ScrollArea>
         </CardContent>
       </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="p-8 bg-secondary/50 rounded-[2.5rem] border border-white/5 space-y-4">
-          <div className="flex items-center gap-3 text-primary">
-            <Filter className="h-5 w-5" />
-            <h4 className="font-black uppercase tracking-widest text-xs">Filter History</h4>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <Badge variant="outline" className="border-white/10 hover:border-primary cursor-pointer">Last 24h</Badge>
-            <Badge variant="outline" className="border-white/10 hover:border-primary cursor-pointer">Admin Edits</Badge>
-            <Badge variant="outline" className="border-white/10 hover:border-primary cursor-pointer">AI Updates</Badge>
-          </div>
-        </div>
-        <div className="p-8 bg-primary/5 rounded-[2.5rem] border border-primary/20 space-y-4">
-          <div className="flex items-center gap-3 text-primary">
-            <Clock className="h-5 w-5" />
-            <h4 className="font-black uppercase tracking-widest text-xs">Integrity Score</h4>
-          </div>
-          <p className="text-xs text-white/50 italic leading-relaxed">
-            This article has maintained a high verification score. All claims are tracked and versioned for full transparency.
-          </p>
-        </div>
-      </div>
     </div>
   )
 }

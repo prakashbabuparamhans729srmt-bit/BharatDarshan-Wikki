@@ -52,6 +52,10 @@ const impactData = [
   { name: 'Sun', points: 600 },
 ]
 
+/**
+ * @description Advanced User Dashboard. Connected to live Firestore
+ * for user profiles, points, and contribution history.
+ */
 export default function DashboardPage() {
   const { toast } = useToast()
   const router = useRouter()
@@ -75,13 +79,6 @@ export default function DashboardPage() {
   const { data: userArticles } = useCollection(userArticlesQuery);
 
   const isGuest = user?.isAnonymous
-
-  const achievements = [
-    { title: "Day 7 Streak", desc: "Contributed for 7 consecutive days", icon: Clock },
-    { title: "Master Editor", desc: "Over 100 quality edits approved", icon: Award },
-    { title: "Multilingual", desc: "Translated 10+ heritage articles", icon: Sparkles },
-    { title: "District Guide", desc: "Mapped over 50 local districts", icon: MapPin }
-  ]
 
   if (isAuthLoading || isProfileLoading) {
     return (
@@ -144,10 +141,6 @@ export default function DashboardPage() {
             <p className="text-muted-foreground text-lg italic">
               {profile?.username ? `@${profile.username}` : user?.email} • Joined {profile?.memberSince ? new Date(profile.memberSince).toLocaleDateString() : 'October 2023'}
             </p>
-            <div className="flex gap-2 justify-center md:justify-start pt-2">
-              <Badge className="bg-primary/10 text-primary border border-primary/20 font-black text-[10px] tracking-widest uppercase px-3 py-1">Expert Contributor</Badge>
-              <Badge className="bg-primary/10 text-primary border border-primary/20 font-black text-[10px] tracking-widest uppercase px-3 py-1">History Buff</Badge>
-            </div>
           </div>
         </div>
         <div className="flex gap-4 relative z-10">
@@ -184,109 +177,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2 space-y-12">
-          <Tabs defaultValue="activity" className="w-full">
-            <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl h-14 mb-8">
-              <TabsTrigger value="activity" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-black font-black uppercase text-xs tracking-widest px-8">Activity Hub</TabsTrigger>
-              <TabsTrigger value="achievements" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-black font-black uppercase text-xs tracking-widest px-8">Achievements</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="activity" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <Card className="border-white/5 shadow-md bg-[#161C21]/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
-                <CardHeader className="border-b border-white/5 bg-white/5 p-8">
-                  <div className="flex items-center gap-4">
-                    <Zap className="h-6 w-6 text-primary" />
-                    <CardTitle className="text-2xl font-headline font-black text-white">Recent Contributions</CardTitle>
-                  </div>
-                  <CardDescription className="text-white/40">Your latest activity across the wiki archives.</CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="divide-y divide-white/5">
-                    {userArticles?.map((item: any, i: number) => (
-                      <Link key={i} href={`/article/${item.slug}`} className="p-8 flex items-center justify-between hover:bg-white/5 transition-colors group cursor-pointer">
-                        <div className="flex items-center gap-6">
-                          <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/10 group-hover:shadow-neon transition-all">
-                            <FileText className="h-7 w-7" />
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-xl text-white group-hover:text-primary transition-colors">{item.title}</h4>
-                            <p className="text-xs text-white/40 font-medium uppercase tracking-widest">Article Created • {new Date(item.createdAt).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-primary text-black font-black px-4 py-1">Published</Badge>
-                      </Link>
-                    ))}
-                    {!userArticles?.length && (
-                      <div className="p-20 text-center space-y-4 opacity-30">
-                        <FileText className="h-12 w-12 mx-auto" />
-                        <p className="font-bold italic">No contributions yet. Start building heritage archives!</p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="achievements" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {achievements.map((a, i) => (
-                  <Card key={i} className="bg-[#161C21]/60 backdrop-blur-xl border-white/10 rounded-[2.5rem] p-8 group hover:border-primary/50 transition-all">
-                    <div className="flex gap-6 items-start">
-                      <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/10 group-hover:scale-110 transition-transform shadow-sm">
-                        <a.icon className="h-8 w-8" />
-                      </div>
-                      <div className="space-y-1">
-                        <h4 className="text-xl font-black text-white group-hover:text-primary transition-colors">{a.title}</h4>
-                        <p className="text-sm text-white/50 leading-relaxed italic">{a.desc}</p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        <div className="space-y-8">
-          <Card className="border-white/5 shadow-md overflow-hidden bg-[#161C21]/60 backdrop-blur-xl rounded-[2.5rem] group">
-            <CardHeader className="bg-primary p-8">
-              <CardTitle className="text-2xl font-headline font-black text-black flex items-center gap-3">
-                <TrendingUp className="h-7 w-7" />
-                Impact Engine
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 space-y-8">
-              <div className="h-[200px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={impactData}>
-                    <defs>
-                      <linearGradient id="colorPoints" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#07F1D6" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#07F1D6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                    <Tooltip content={<ChartTooltipContent hideLabel />} />
-                    <Area type="monotone" dataKey="points" stroke="#07F1D6" fillOpacity={1} fill="url(#colorPoints)" strokeWidth={3} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-4">
-                <div className="flex justify-between text-xs font-black uppercase tracking-widest text-white/60 mb-1">
-                  <span>Knowledge Points</span>
-                  <span className="text-primary font-bold">{ (userArticles?.length || 0) * 100 } / 3,000</span>
-                </div>
-                <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-                  <div className="h-full bg-primary shadow-neon transition-all duration-1000" style={{ width: `${Math.min(100, (userArticles?.length || 0) * 10)}%` }} />
-                </div>
-                <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] text-right animate-pulse">Next milestone at 3k pts</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   )
