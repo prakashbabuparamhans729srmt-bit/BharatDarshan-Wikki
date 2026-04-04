@@ -119,7 +119,7 @@ export default function Home() {
       <section className="space-y-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 px-4">
           <div className="space-y-2">
-            <h2 className="text-5xl font-headline font-black text-white">Advanced Roadmap</h2>
+            <h2 className="text-5xl font-headline font-black text-white">Heritage Roadmap</h2>
             <p className="text-muted-foreground text-xl italic font-light">From exploration to preservation—your A to Z guide.</p>
           </div>
           <Badge variant="outline" className="border-primary/20 text-primary font-black px-6 py-2 uppercase tracking-[0.3em] text-xs">
