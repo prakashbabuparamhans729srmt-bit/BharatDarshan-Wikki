@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { use, useState, useEffect } from 'react'
@@ -65,10 +64,10 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   const relatedQuery = useMemoFirebase(() => {
     return query(
       collection(db, 'articles_published'),
-      where('categoryId', '==', article.categoryId || 'Place'),
+      where('categoryId', '==', article.categoryId || article.category || 'Place'),
       limit(5)
     );
-  }, [db, article.categoryId]);
+  }, [db, article.categoryId, article.category]);
 
   const { data: relatedHeritage } = useCollection(relatedQuery);
 

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -66,7 +65,6 @@ export default function Home() {
             alt="Beautiful landscape of India"
             fill
             className="object-cover opacity-60 scale-105 group-hover:scale-100 transition-transform duration-1000"
-            data-ai-hint="India landscape"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         </div>
