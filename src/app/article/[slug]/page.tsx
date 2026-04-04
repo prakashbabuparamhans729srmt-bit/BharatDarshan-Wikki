@@ -4,7 +4,7 @@
 import React, { use, useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, Sparkles, ChevronRight, MoreHorizontal, User, Send, ThumbsUp, Lock, Headphones, Loader2 } from 'lucide-react'
+import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, ChevronRight, User, Send, Lock, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase'
-import { collection, query, where, limit, orderBy, doc } from 'firebase/firestore'
+import { collection, query, orderBy, doc } from 'firebase/firestore'
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 /**
@@ -48,7 +48,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   const staticArticle = ARTICLES.find(a => a.slug === slug) || ARTICLES[0];
   const article = liveArticle || staticArticle;
 
-  const isGuest = user?.isAnonymous
+  const isGuest = user?.isAnonymous || !user
 
   // 2. Real-time comments from Firestore subcollection
   const commentsQuery = useMemoFirebase(() => {
@@ -96,10 +96,10 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
   }
 
   const handleCommentSubmit = () => {
-    if (isGuest || !user) {
+    if (isGuest) {
       toast({
         title: "Access Denied",
-        description: "Guest users cannot post comments. Please login.",
+        description: "Guests cannot post comments. Please login to contribute to the Talk page.",
         variant: "destructive"
       })
       return
@@ -124,12 +124,12 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
     if (isGuest) {
       toast({
         title: "Login Required",
-        description: "Only registered members can edit the wiki.",
+        description: "Only registered members can edit the wiki archives.",
         variant: "destructive"
       })
       return
     }
-    // A to Z Flow: Pass the current slug to the contribute page for editing
+    // Advanced Flow: Pass the slug as an 'edit' parameter to the contribute page
     router.push(`/contribute?edit=${slug}`)
   }
 
@@ -146,7 +146,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-24 animate-in fade-in duration-700">
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4 px-4">
         <Link href="/" className="hover:text-primary transition-colors">Home</Link>
         <ChevronRight className="h-3 w-3" />
         <Link href="/browse" className="hover:text-primary transition-colors">Directory</Link>
@@ -154,11 +154,11 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
         <span className="text-foreground font-medium">{article.title}</span>
       </nav>
 
-      <div className="flex flex-col lg:flex-row gap-12 items-start">
+      <div className="flex flex-col lg:flex-row gap-12 items-start px-4">
         <div className="flex-1 space-y-8">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <Badge className="bg-primary text-black font-black uppercase tracking-widest text-[10px] px-3 py-1">
+              <Badge className="bg-primary text-black font-black uppercase tracking-widest text-[10px] px-3 py-1 shadow-neon">
                 {article.category || 'Heritage'}
               </Badge>
               {article.parent && (
@@ -170,24 +170,24 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 </>
               )}
             </div>
-            <h1 className="text-6xl md:text-8xl font-headline font-black text-white leading-tight">{article.title}</h1>
+            <h1 className="text-6xl md:text-8xl font-headline font-black text-white leading-tight drop-shadow-2xl">{article.title}</h1>
           </div>
 
           <div className="flex flex-wrap gap-4">
             <Button 
               onClick={handleEditClick}
-              className="gap-2 rounded-full bg-primary text-black hover:bg-primary/90 font-bold px-8 h-12 neon-glow transition-all hover:scale-105"
+              className="gap-2 rounded-full bg-primary text-black hover:bg-primary/90 font-black px-8 h-12 shadow-neon transition-all hover:scale-105"
             >
               {isGuest ? <Lock className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
-              Edit This Page
+              Edit Archive
             </Button>
             <Button 
               variant="outline" 
               onClick={() => router.push(`/article/${slug}/history`)}
-              className="gap-2 rounded-full border-primary/10 bg-primary/5 hover:bg-primary/10 text-primary font-bold h-12 px-6"
+              className="gap-2 rounded-full border-primary/10 bg-primary/5 hover:bg-primary/10 text-primary font-black h-12 px-6"
             >
               <History className="h-4 w-4" />
-              Revision History
+              History
             </Button>
             <div className="flex gap-2">
               <Button variant="outline" size="icon" onClick={handleBookmark} className="rounded-full border-foreground/10 bg-foreground/5 hover:text-primary h-12 w-12 transition-all hover:scale-110">
@@ -200,7 +200,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
           </div>
         </div>
 
-        <div className="w-full lg:w-[450px] h-[450px] relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-foreground/5 group">
+        <div className="w-full lg:w-[450px] h-[450px] relative rounded-[3.5rem] overflow-hidden shadow-2xl border-4 border-foreground/5 group">
           <Image 
             src={article.image || `https://picsum.photos/seed/${slug}/800/600`}
             alt={article.title}
@@ -219,12 +219,12 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
       <Separator className="bg-foreground/5" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 px-4">
         <div className="lg:col-span-2 space-y-12">
           <Tabs defaultValue="read" className="w-full">
             <TabsList className="bg-foreground/5 p-1 rounded-2xl border border-foreground/5 h-14">
-              <TabsTrigger value="read" className="rounded-xl px-10 h-11 data-[state=active]:bg-primary data-[state=active]:text-black font-black text-xs uppercase tracking-widest">Read Content</TabsTrigger>
-              <TabsTrigger value="tools" className="rounded-xl px-10 h-11 data-[state=active]:bg-primary data-[state=active]:text-black font-black text-xs uppercase tracking-widest">AI & Tools</TabsTrigger>
+              <TabsTrigger value="read" className="rounded-xl px-10 h-11 data-[state=active]:bg-primary data-[state=active]:text-black font-black text-xs uppercase tracking-widest">Read</TabsTrigger>
+              <TabsTrigger value="tools" className="rounded-xl px-10 h-11 data-[state=active]:bg-primary data-[state=active]:text-black font-black text-xs uppercase tracking-widest">AI Tools</TabsTrigger>
               <TabsTrigger value="discussion" className="rounded-xl px-10 h-11 data-[state=active]:bg-primary data-[state=active]:text-black font-black text-xs uppercase tracking-widest">Talk Page</TabsTrigger>
             </TabsList>
             
@@ -250,44 +250,46 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
             <TabsContent value="discussion" className="mt-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-6">
-                <div className="bg-foreground/5 p-6 rounded-[2rem] border border-foreground/5 space-y-4">
-                  <h3 className="text-xl font-headline font-bold text-foreground">Community Discussion</h3>
-                  <div className="flex gap-3">
+                <div className="bg-[#161C21]/60 p-8 rounded-[2.5rem] border border-white/5 space-y-6 shadow-xl">
+                  <h3 className="text-2xl font-headline font-black text-white">Community Talk</h3>
+                  <div className="flex gap-4">
                     <Input 
-                      placeholder={isGuest ? "Login to share your thoughts..." : "Share your thoughts or suggest changes..."} 
-                      className="bg-background border-foreground/10 rounded-xl"
+                      placeholder={isGuest ? "Login to join the discussion..." : "Add a fact or share your perspective..."} 
+                      className="bg-black/20 border-white/10 rounded-xl h-12"
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       disabled={isGuest}
                       onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
                     />
-                    <Button className="bg-primary text-black rounded-xl px-6 font-bold" onClick={handleCommentSubmit}>
+                    <Button className="bg-primary text-black rounded-xl px-8 font-black shadow-neon h-12" onClick={handleCommentSubmit}>
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
 
-                <ScrollArea className="h-[400px] pr-4">
+                <ScrollArea className="h-[500px] pr-4">
                   <div className="space-y-4">
                     {realTimeComments?.map((c: any) => (
-                      <div key={c.id} className="bg-foreground/5 p-6 rounded-2xl border border-primary/20 space-y-3 animate-in fade-in">
+                      <div key={c.id} className="bg-[#161C21]/40 p-8 rounded-[2rem] border border-primary/20 space-y-4 animate-in fade-in group hover:bg-[#161C21]/60 transition-all">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                              <User className="h-4 w-4" />
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary border border-primary/20 shadow-sm">
+                              <User className="h-5 w-5" />
                             </div>
-                            <span className="font-bold text-sm text-foreground">{c.username}</span>
-                            <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{new Date(c.createdAt).toLocaleDateString()}</span>
+                            <div>
+                              <span className="font-black text-sm text-white block">{c.username}</span>
+                              <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">{new Date(c.createdAt).toLocaleDateString()}</span>
+                            </div>
                           </div>
-                          <Badge variant="outline" className="text-[8px] border-primary/20 text-primary">Live Contribution</Badge>
+                          <Badge variant="outline" className="text-[8px] border-primary/20 text-primary uppercase font-black tracking-[0.2em] px-3">Verified Node</Badge>
                         </div>
-                        <p className="text-sm text-foreground/70 leading-relaxed italic">"{c.content}"</p>
+                        <p className="text-lg text-foreground/80 leading-relaxed italic font-light">"{c.content}"</p>
                       </div>
                     ))}
                     {!realTimeComments?.length && (
-                      <div className="py-20 text-center space-y-4 opacity-30">
-                        <MessageSquare className="h-12 w-12 mx-auto" />
-                        <p className="font-bold italic">No discussions yet. Be the first to contribute!</p>
+                      <div className="py-24 text-center space-y-6 opacity-30">
+                        <MessageSquare className="h-16 w-16 mx-auto text-primary" />
+                        <p className="font-headline text-2xl italic text-white">The Talk page is silent. Be the first to speak.</p>
                       </div>
                     )}
                   </div>
@@ -298,22 +300,22 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
         </div>
 
         <div className="space-y-10">
-          <div className="bg-secondary p-10 rounded-[2.5rem] border border-foreground/5 shadow-2xl space-y-8">
-            <h3 className="font-headline font-bold text-2xl text-foreground border-b border-foreground/5 pb-4">Related Heritage</h3>
-            <div className="space-y-6">
+          <div className="bg-[#161C21]/80 p-10 rounded-[3rem] border border-white/5 shadow-2xl space-y-10 sticky top-24">
+            <h3 className="font-headline font-black text-2xl text-white border-b border-white/5 pb-6">Related Heritage</h3>
+            <div className="space-y-8">
               {ARTICLES.filter(a => a.slug !== slug).slice(0, 3).map(related => (
                 <Link key={related.slug} href={`/article/${related.slug}`} className="flex gap-4 group items-center">
-                  <div className="h-16 w-16 rounded-2xl relative overflow-hidden shrink-0 border border-foreground/10">
+                  <div className="h-16 w-16 rounded-2xl relative overflow-hidden shrink-0 border border-white/10">
                     <Image src={related.image} alt={related.title} fill className="object-cover transition-transform group-hover:scale-125" />
                   </div>
                   <div className="overflow-hidden">
-                    <h4 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate">{related.title}</h4>
-                    <p className="text-xs text-primary font-black uppercase tracking-widest">{related.category}</p>
+                    <h4 className="text-lg font-bold text-white group-hover:text-primary transition-colors truncate">{related.title}</h4>
+                    <p className="text-[10px] text-primary font-black uppercase tracking-widest mt-1">{related.category}</p>
                   </div>
                 </Link>
               ))}
             </div>
-            <Button variant="ghost" onClick={() => router.push('/browse')} className="w-full text-primary font-bold hover:bg-primary/5 rounded-xl h-12">
+            <Button variant="ghost" onClick={() => router.push('/browse')} className="w-full text-primary font-black uppercase tracking-[0.3em] text-[10px] hover:bg-primary/10 rounded-xl h-14">
               Explore Full Map
             </Button>
           </div>

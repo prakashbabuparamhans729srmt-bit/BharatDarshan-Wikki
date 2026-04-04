@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, MapPin, Sparkles, BookOpen, Users, Globe, ArrowRight, Mic, Loader2, Compass, ShieldCheck, History, MessageSquare } from 'lucide-react'
+import { Search, MapPin, Sparkles, BookOpen, Mic, ArrowRight, Loader2, Compass, History, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,10 @@ import { useRouter } from 'next/navigation'
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 import { collection, query, limit, orderBy } from 'firebase/firestore'
 
+/**
+ * @description Advanced Home Page. Pulls live "Featured Heritage" from Firestore
+ * and provides an A-Z Roadmap for users.
+ */
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showVoiceSearch, setShowVoiceSearch] = useState(false)
@@ -53,7 +57,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="max-w-6xl mx-auto space-y-20 pb-20">
+    <div className="max-w-6xl mx-auto space-y-20 pb-20 animate-in fade-in duration-1000">
       {/* Hero Section */}
       <section className="relative rounded-[2.5rem] overflow-hidden border border-primary/20 bg-black neon-glow group">
         <div className="absolute inset-0 z-0">
@@ -118,7 +122,7 @@ export default function Home() {
           <h2 className="text-4xl font-headline font-black text-white">A-Z Heritage Roadmap</h2>
           <p className="text-muted-foreground italic">Master the wiki flow from exploration to preservation.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 px-4">
           {roadmapSteps.map((step, i) => (
             <div key={i} className="group relative">
               {i < roadmapSteps.length - 1 && (
@@ -126,7 +130,7 @@ export default function Home() {
               )}
               {step.link ? (
                 <Link href={step.link}>
-                  <Card className="h-full bg-[#161C21]/60 border-white/5 hover:border-primary/40 transition-all rounded-[2rem] p-6 text-center space-y-4 hover:scale-105 cursor-pointer relative z-10">
+                  <Card className="h-full bg-[#161C21]/60 border-white/5 hover:border-primary/40 transition-all rounded-[2rem] p-6 text-center space-y-4 hover:scale-105 cursor-pointer relative z-10 shadow-2xl">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mx-auto group-hover:scale-110 transition-transform">
                       <step.icon className="h-6 w-6" />
                     </div>
@@ -138,7 +142,7 @@ export default function Home() {
                 </Link>
               ) : (
                 <button className="w-full text-left" onClick={step.action}>
-                  <Card className="h-full bg-[#161C21]/60 border-white/5 hover:border-primary/40 transition-all rounded-[2rem] p-6 text-center space-y-4 hover:scale-105 cursor-pointer relative z-10">
+                  <Card className="h-full bg-[#161C21]/60 border-white/5 hover:border-primary/40 transition-all rounded-[2rem] p-6 text-center space-y-4 hover:scale-105 cursor-pointer relative z-10 shadow-2xl">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mx-auto group-hover:scale-110 transition-transform">
                       <step.icon className="h-6 w-6" />
                     </div>
@@ -155,15 +159,15 @@ export default function Home() {
       </section>
 
       {/* Featured Articles Section */}
-      <section className="space-y-10">
+      <section className="space-y-10 px-4">
         <div className="flex items-end justify-between px-2">
-          <div className="space-y-1">
+          <div className="space-y-1 border-l-4 border-primary pl-6">
             <h2 className="text-4xl font-headline font-bold text-white">Featured Heritage</h2>
-            <p className="text-muted-foreground text-lg italic">Handpicked historical articles for you.</p>
+            <p className="text-muted-foreground text-lg italic">Discover the latest contributed nodes from the community.</p>
           </div>
           <Link href="/browse">
             <Button variant="link" className="text-primary text-lg group">
-              View all articles
+              View all
               <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
@@ -177,7 +181,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredArticles.map((article: any) => (
               <Link href={`/article/${article.slug}`} key={article.slug} className="group">
-                <Card className="h-full border border-white/10 glass-card hover:border-primary/40 transition-all duration-500 overflow-hidden rounded-3xl group">
+                <Card className="h-full border border-white/10 glass-card hover:border-primary/40 transition-all duration-500 overflow-hidden rounded-[2.5rem] group shadow-2xl">
                   <div className="relative h-64 w-full overflow-hidden">
                     <Image 
                       src={article.image || `https://picsum.photos/seed/${article.slug}/800/600`}
@@ -186,16 +190,16 @@ export default function Home() {
                       className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
                     />
                     <div className="absolute top-4 left-4">
-                      <Badge className="bg-primary text-black font-bold px-3 py-1">{article.category || 'Heritage'}</Badge>
+                      <Badge className="bg-primary text-black font-black uppercase text-[10px] tracking-widest px-3 py-1">{article.category || 'Heritage'}</Badge>
                     </div>
                   </div>
                   <CardContent className="p-8 space-y-4">
-                    <h3 className="text-2xl font-headline font-bold group-hover:text-primary transition-colors">{article.title}</h3>
-                    <p className="text-muted-foreground text-base line-clamp-3 leading-relaxed font-light">
+                    <h3 className="text-2xl font-headline font-bold text-white group-hover:text-primary transition-colors">{article.title}</h3>
+                    <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed font-light italic">
                       {article.content}
                     </p>
                     <div className="pt-4 flex flex-wrap gap-2 border-t border-white/5">
-                      <Badge variant="outline" className="text-[10px] border-white/10 text-white/60 font-medium uppercase tracking-widest">Heritage Node</Badge>
+                      <Badge variant="outline" className="text-[8px] border-primary/20 text-primary font-black uppercase tracking-widest">Live Heritage Node</Badge>
                     </div>
                   </CardContent>
                 </Card>
