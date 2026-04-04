@@ -47,12 +47,13 @@ export default function Home() {
     }
   }
 
+  // Expanded A to Z Roadmap steps
   const roadmapSteps = [
-    { title: "Browse Index", desc: "Discover all 28 states alphabetically.", icon: BookOpen, link: "/browse", letter: "B" },
-    { title: "Voice Exploration", desc: "Speak to find hidden heritage nodes.", icon: Mic, action: () => setShowVoiceSearch(true), letter: "V" },
-    { title: "Contribute History", desc: "Write new entries for the live wiki.", icon: Sparkles, link: "/contribute", letter: "C" },
+    { title: "Browse Index", desc: "Discover all 28 states alphabetically.", icon: BookOpen, link: "/browse", letter: "A" },
+    { title: "Voice Search", desc: "Speak to find hidden heritage nodes.", icon: Mic, action: () => setShowVoiceSearch(true), letter: "V" },
+    { title: "Contribute Node", desc: "Write new entries for the live wiki.", icon: Sparkles, link: "/contribute", letter: "C" },
     { title: "Community Talk", desc: "Discuss facts on live Talk Pages.", icon: MessageSquare, link: "/browse", letter: "T" },
-    { title: "Revision History", desc: "Track every edit across the timeline.", icon: History, link: "/dashboard", letter: "H" }
+    { title: "Archive History", desc: "Track every edit across the timeline.", icon: History, link: "/dashboard", letter: "Z" }
   ]
 
   return (
@@ -72,7 +73,7 @@ export default function Home() {
         <div className="relative z-10 px-8 py-24 md:py-48 text-center space-y-10 max-w-5xl mx-auto">
           <div className="inline-flex items-center gap-3 px-8 py-3 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-black tracking-[0.4em] uppercase animate-pulse backdrop-blur-md">
             <Zap className="h-4 w-4 fill-current" />
-            A to Z Advanced Heritage Flow
+            A to Z Advanced Flow: Chalu Hai
           </div>
           <h1 className="text-7xl md:text-9xl font-headline font-black leading-[0.85] text-white drop-shadow-2xl selection:bg-primary/20">
             Explore the <span className="text-primary italic">Infinity</span> of Bharat
