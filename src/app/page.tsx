@@ -73,7 +73,7 @@ export default function Home() {
         <div className="relative z-10 px-8 py-24 md:py-48 text-center space-y-10 max-w-5xl mx-auto">
           <div className="inline-flex items-center gap-3 px-8 py-3 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-black tracking-[0.4em] uppercase animate-pulse backdrop-blur-md">
             <Zap className="h-4 w-4 fill-current" />
-            A to Z Advanced Flow: Chalu Hai
+            A to Z Advanced Flow: Operational
           </div>
           <h1 className="text-7xl md:text-9xl font-headline font-black leading-[0.85] text-white drop-shadow-2xl selection:bg-primary/20">
             Explore the <span className="text-primary italic">Infinity</span> of Bharat

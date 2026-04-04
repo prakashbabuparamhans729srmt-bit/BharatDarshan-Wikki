@@ -44,7 +44,7 @@ export function AIChatbot() {
       
       const q = text.toLowerCase();
       if (q.includes('help') || q.includes('how') || q.includes('a to z') || q.includes('guide') || q.includes('flow') || q.includes('roadmap')) {
-        response = "BharatDarshan Wiki is India's most advanced digital encyclopedia. The **A to Z Heritage Flow** is now fully 'chalu' (active). Here is your roadmap:\n\n" +
+        response = "BharatDarshan Wiki is India's most advanced digital encyclopedia. The **A to Z Heritage Flow** is now fully active ('chalu'). Here is your roadmap:\n\n" +
           "• **A** - Auth: Secure login to unlock advanced editing rights.\n" +
           "• **B** - Browse: A perfect alphabetical index of all 28 states.\n" +
           "• **C** - Contribute: Write new heritage entries and use **Gemini AI** to refine them.\n" +
@@ -59,7 +59,7 @@ export function AIChatbot() {
       } else if (q.includes('voice') || q.includes('mic') || q.includes('speak')) {
         response = "Voice Search is 100% active. You can speak naturally—ask for states, monuments, or historical events. I will transcribe your query and crawl our archives for matching nodes instantly.";
       } else if (q.includes('edit') || q.includes('update') || q.includes('publish')) {
-        response = "To contribute, navigate to the 'Contribute Node' section. You can publish naya content or refine existing articles. Once you hit publish, it becomes a 'Live Node' in our heritage index and creates a revision record.";
+        response = "To contribute, navigate to the 'Contribute Node' section. You can publish new content or refine existing articles. Once you hit publish, it becomes a 'Live Node' in our heritage index and creates a revision record.";
       } else {
         response += "I'm currently crawling our live heritage archives for matching nodes... Did you know you earn 250 'Heritage Points' for every verified article you publish? The entire system is now 100% advanced and operational.";
       }
