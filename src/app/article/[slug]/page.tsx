@@ -141,7 +141,6 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
       })
       return
     }
-    // Advanced Flow: Pass the slug as an 'edit' parameter to the contribute page
     router.push(`/contribute?edit=${slug}`)
   }
 
@@ -349,7 +348,7 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
               {(relatedHeritage && relatedHeritage.length > 0 ? relatedHeritage : ARTICLES.filter(a => a.slug !== slug)).slice(0, 4).map((related: any) => (
                 <Link key={related.slug || related.id} href={`/article/${related.slug}`} className="flex gap-6 group items-center">
                   <div className="h-20 w-20 rounded-[1.5rem] relative overflow-hidden shrink-0 border border-white/10 shadow-lg">
-                    <Image src={related.image || `https://picsum.photos/seed/${related.slug}/200/200`} alt={related.title} fill className="object-cover transition-transform duration-700 group-hover:scale-125" />
+                    <Image src={related.image || `https://picsum.photos/seed/${related.slug || related.id}/200/200`} alt={related.title} fill className="object-cover transition-transform duration-700 group-hover:scale-125" />
                   </div>
                   <div className="overflow-hidden flex-1">
                     <h4 className="text-xl font-bold text-white group-hover:text-primary transition-colors truncate">{related.title}</h4>

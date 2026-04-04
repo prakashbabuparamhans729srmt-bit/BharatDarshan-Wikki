@@ -82,7 +82,7 @@ function ContributeForm() {
     } catch (err) {
       toast({
         title: "AI Analysis Failed",
-        description: "Could not refine content at this time. Our AI models are busy indexing heritage.",
+        description: "Could not refine content at this time.",
         variant: "destructive"
       })
     } finally {
@@ -102,12 +102,10 @@ function ContributeForm() {
 
     setIsPublishing(true)
 
-    // A to Z Flow: Use existing slug if editing, otherwise generate a clean URL-friendly one
     const slug = editSlug || title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
     const articleId = slug; 
     const articleRef = doc(db, 'articles_published', articleId);
 
-    // Increment version if editing
     const newVersion = editSlug ? parseFloat((version + 0.1).toFixed(1)) : 1.0;
 
     const articleData = {
@@ -126,10 +124,8 @@ function ContributeForm() {
       image: `https://picsum.photos/seed/${slug}/800/600` 
     };
 
-    // Save Article to Published Collection (Non-blocking)
     setDocumentNonBlocking(articleRef, articleData, { merge: true });
 
-    // Track Revision History in subcollection
     const revisionsColRef = collection(db, 'articles_published', articleId, 'revisions');
     addDocumentNonBlocking(revisionsColRef, {
       articleId,
@@ -143,10 +139,9 @@ function ContributeForm() {
 
     toast({ 
       title: editSlug ? "Archive Updated" : "Archive Published", 
-      description: `"${title}" has been successfully ${editSlug ? 'updated' : 'added'} to the global wiki.` 
+      description: `"${title}" has been successfully added to the global wiki.` 
     })
     
-    // Redirect to the article page
     setTimeout(() => {
       router.push(`/article/${slug}`)
     }, 1500)
@@ -332,7 +327,7 @@ function ContributeForm() {
               <h4 className="font-black uppercase tracking-[0.3em] text-sm">A-Z Flow Guide</h4>
             </div>
             <ul className="text-base space-y-6 font-bold italic opacity-90 list-none leading-relaxed relative z-10">
-              <li className="flex gap-4"><span className="text-black/30 font-black">01</span> All content must be cross-verified for historical accuracy.</li>
+              <li className="flex gap-4"><span className="text-black/30 font-black">01</span> All content must be cross-verified for accuracy.</li>
               <li className="flex gap-4"><span className="text-black/30 font-black">02</span> Avoid political bias or promotional phrasing.</li>
               <li className="flex gap-4"><span className="text-black/30 font-black">03</span> Use standard ISO spellings for regional names.</li>
               <li className="flex gap-4"><span className="text-black/30 font-black">04</span> Every change is tracked in Revision History.</li>

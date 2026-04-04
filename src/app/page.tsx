@@ -123,7 +123,7 @@ export default function Home() {
             <p className="text-muted-foreground text-xl italic font-light">From exploration to preservation—your A to Z guide.</p>
           </div>
           <Badge variant="outline" className="border-primary/20 text-primary font-black px-6 py-2 uppercase tracking-[0.3em] text-xs">
-            Operational Node: CHALU
+            Operational Node: ACTIVE
           </Badge>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 px-4">
@@ -187,11 +187,11 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {featuredArticles.map((article: any) => (
-              <Link href={`/article/${article.slug}`} key={article.slug} className="group">
+              <Link href={`/article/${article.slug}`} key={article.slug || article.id} className="group">
                 <Card className="h-full border border-white/5 bg-[#161C21]/40 hover:border-primary/40 transition-all duration-700 overflow-hidden rounded-[3rem] group shadow-2xl">
                   <div className="relative h-72 w-full overflow-hidden">
                     <Image 
-                      src={article.image || `https://picsum.photos/seed/${article.slug}/800/600`}
+                      src={article.image || `https://picsum.photos/seed/${article.slug || article.id}/800/600`}
                       alt={article.title}
                       fill
                       className="object-cover transition-transform duration-1000 group-hover:scale-110"
