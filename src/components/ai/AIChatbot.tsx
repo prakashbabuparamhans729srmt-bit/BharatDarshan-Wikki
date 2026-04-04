@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 
 /**
  * @description Advanced AI Bharat Assistant. Acting as the master guide for the A to Z flow.
+ * Provides context-aware help and explains the "A to Z" operational flow of the wiki.
  */
 export function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false)
