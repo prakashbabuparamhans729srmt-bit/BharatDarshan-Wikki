@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { FileText, Save, Eye, Sparkles, AlertCircle, Loader2, Lock, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,29 +11,55 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { aiRefineAndSummarizeContent, AiRefineAndSummarizeContentOutput } from '@/ai/flows/ai-refine-and-summarize-content'
 import { useToast } from '@/hooks/use-toast'
-import { useUser, useFirestore } from '@/firebase'
-import { useRouter } from 'next/navigation'
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { doc, collection, serverTimestamp } from 'firebase/firestore'
+import { doc, collection, serverTimestamp, getDoc } from 'firebase/firestore'
 import { setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 /**
- * @description Advanced Contribution Page. Allows users to create new articles,
+ * @description Advanced Contribution Page. Allows users to create/edit articles,
  * refine them with AI, and publish them to the live wiki database with version history.
  */
-export default function ContributePage() {
+function ContributeForm() {
   const { user, isUserLoading } = useUser()
   const db = useFirestore()
+  const searchParams = useSearchParams()
+  const editSlug = searchParams.get('edit')
+  
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [categoryId, setCategoryId] = useState('Place')
   const [parent, setParent] = useState('')
   const [tags, setTags] = useState('')
+  const [version, setVersion] = useState(1.0)
+  
   const [isRefining, setIsRefining] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [aiFeedback, setAiFeedback] = useState<AiRefineAndSummarizeContentOutput | null>(null)
+  
   const { toast } = useToast()
   const router = useRouter()
+
+  // Load existing article if in edit mode
+  useEffect(() => {
+    if (editSlug && db) {
+      const fetchArticle = async () => {
+        const docRef = doc(db, 'articles_published', editSlug)
+        const snap = await getDoc(docRef)
+        if (snap.exists()) {
+          const data = snap.data()
+          setTitle(data.title || '')
+          setContent(data.content || '')
+          setCategoryId(data.categoryId || 'Place')
+          setParent(data.parent || '')
+          setTags((data.tagIds || []).join(', '))
+          setVersion(data.version || 1.0)
+        }
+      }
+      fetchArticle()
+    }
+  }, [editSlug, db])
 
   useEffect(() => {
     if (!isUserLoading && user?.isAnonymous) {
@@ -86,10 +112,12 @@ export default function ContributePage() {
 
     setIsPublishing(true)
 
-    // Generate a permanent URL-friendly slug
-    const slug = title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
+    // A to Z Flow: Use existing slug if editing, otherwise generate new one
+    const slug = editSlug || title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
     const articleId = slug; 
     const articleRef = doc(db, 'articles_published', articleId);
+
+    const newVersion = editSlug ? parseFloat((version + 0.1).toFixed(1)) : 1.0;
 
     const articleData = {
       id: articleId,
@@ -99,35 +127,35 @@ export default function ContributePage() {
       categoryId,
       parent: parent || null,
       authorId: user.uid,
-      createdAt: new Date().toISOString(),
+      createdAt: editSlug ? undefined : new Date().toISOString(), // Keep original if editing
       updatedAt: new Date().toISOString(),
-      version: 1.0,
+      version: newVersion,
       isPublished: true,
       tagIds: tags.split(',').map(t => t.trim()).filter(t => !!t),
-      image: `https://picsum.photos/seed/${slug}/800/600`
+      image: editSlug ? undefined : `https://picsum.photos/seed/${slug}/800/600` // Keep original image if editing
     };
 
     // Save Article to Published Collection
     setDocumentNonBlocking(articleRef, articleData, { merge: true });
 
-    // Initialize Revision History
+    // Initialize/Add Revision History
     const revisionsColRef = collection(db, 'articles_published', articleId, 'revisions');
     addDocumentNonBlocking(revisionsColRef, {
       articleId,
       userId: user.uid,
       username: user.displayName || user.email?.split('@')[0] || 'Heritage Architect',
-      revisionNumber: 1.0,
+      revisionNumber: newVersion,
       contentSnapshot: content,
-      changesSummary: "Initial publication of the heritage node.",
+      changesSummary: editSlug ? `Updated heritage entry to version ${newVersion}.` : "Initial publication of the heritage node.",
       createdAt: new Date().toISOString()
     });
 
     toast({ 
-      title: "Archive Published", 
-      description: `"${title}" has been added to BharatDarshan Wiki.` 
+      title: editSlug ? "Archive Updated" : "Archive Published", 
+      description: `"${title}" has been ${editSlug ? 'updated' : 'added'} to BharatDarshan Wiki.` 
     })
     
-    // Redirect to the new article page
+    // Redirect to the article page
     setTimeout(() => {
       router.push(`/article/${slug}`)
     }, 1500)
@@ -161,7 +189,7 @@ export default function ContributePage() {
     <div className="max-w-5xl mx-auto space-y-8 pb-12 animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-2 border-l-4 border-primary pl-6">
-          <h1 className="text-5xl font-headline font-black text-white">Draft Archive</h1>
+          <h1 className="text-5xl font-headline font-black text-white">{editSlug ? 'Edit Node' : 'Draft Archive'}</h1>
           <p className="text-muted-foreground text-lg italic">Constructing new knowledge nodes for the Bharat ecosystem.</p>
         </div>
         <div className="flex gap-2">
@@ -175,7 +203,7 @@ export default function ContributePage() {
             className="gap-2 bg-primary text-black hover:bg-primary/90 font-black rounded-xl neon-glow h-12 px-8"
           >
             {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Publish to Wiki
+            {editSlug ? 'Update Wiki' : 'Publish to Wiki'}
           </Button>
         </div>
       </div>
@@ -329,5 +357,13 @@ export default function ContributePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ContributePage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-12 w-12 text-primary animate-spin" /></div>}>
+      <ContributeForm />
+    </Suspense>
   )
 }

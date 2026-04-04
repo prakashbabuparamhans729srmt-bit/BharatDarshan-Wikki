@@ -129,7 +129,8 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
       })
       return
     }
-    router.push('/contribute')
+    // A to Z Flow: Pass the current slug to the contribute page for editing
+    router.push(`/contribute?edit=${slug}`)
   }
 
   if (isArticleLoading) {

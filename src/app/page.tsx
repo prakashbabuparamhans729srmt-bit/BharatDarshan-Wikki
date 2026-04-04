@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, MapPin, Sparkles, BookOpen, Users, Globe, ArrowRight, Mic, Loader2 } from 'lucide-react'
+import { Search, MapPin, Sparkles, BookOpen, Users, Globe, ArrowRight, Mic, Loader2, Compass, ShieldCheck, History, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -43,6 +43,14 @@ export default function Home() {
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
     }
   }
+
+  const roadmapSteps = [
+    { title: "Browse Index", desc: "Discover all 28 states alphabetically.", icon: BookOpen, link: "/browse" },
+    { title: "Voice Exploration", desc: "Speak to find hidden heritage nodes.", icon: Mic, action: () => setShowVoiceSearch(true) },
+    { title: "Contribute History", desc: "Write new entries for the live wiki.", icon: Sparkles, link: "/contribute" },
+    { title: "Community Talk", desc: "Discuss facts on live Talk Pages.", icon: MessageSquare, link: "/browse" },
+    { title: "Revision History", desc: "Track every edit across the timeline.", icon: History, link: "/dashboard" }
+  ]
 
   return (
     <div className="max-w-6xl mx-auto space-y-20 pb-20">
@@ -101,6 +109,48 @@ export default function Home() {
               </Button>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* A to Z Heritage Roadmap */}
+      <section className="space-y-10">
+        <div className="text-center space-y-2">
+          <h2 className="text-4xl font-headline font-black text-white">A-Z Heritage Roadmap</h2>
+          <p className="text-muted-foreground italic">Master the wiki flow from exploration to preservation.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {roadmapSteps.map((step, i) => (
+            <div key={i} className="group relative">
+              {i < roadmapSteps.length - 1 && (
+                <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-[2px] bg-primary/10 z-0" />
+              )}
+              {step.link ? (
+                <Link href={step.link}>
+                  <Card className="h-full bg-[#161C21]/60 border-white/5 hover:border-primary/40 transition-all rounded-[2rem] p-6 text-center space-y-4 hover:scale-105 cursor-pointer relative z-10">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mx-auto group-hover:scale-110 transition-transform">
+                      <step.icon className="h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-white text-sm">{step.title}</h4>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">{step.desc}</p>
+                    </div>
+                  </Card>
+                </Link>
+              ) : (
+                <button className="w-full text-left" onClick={step.action}>
+                  <Card className="h-full bg-[#161C21]/60 border-white/5 hover:border-primary/40 transition-all rounded-[2rem] p-6 text-center space-y-4 hover:scale-105 cursor-pointer relative z-10">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mx-auto group-hover:scale-110 transition-transform">
+                      <step.icon className="h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-white text-sm">{step.title}</h4>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">{step.desc}</p>
+                    </div>
+                  </Card>
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
