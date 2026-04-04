@@ -118,7 +118,7 @@ function ContributeForm() {
       categoryId,
       parent: parent || null,
       authorId: user.uid,
-      createdAt: editSlug ? (new Date().toISOString()) : (new Date().toISOString()), // Simplified for prototype
+      createdAt: editSlug ? (new Date().toISOString()) : (new Date().toISOString()), 
       updatedAt: new Date().toISOString(),
       version: newVersion,
       isPublished: true,
