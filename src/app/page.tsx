@@ -36,15 +36,6 @@ export default function Home() {
   
   const { data: liveArticles, isLoading: isLiveLoading } = useCollection(latestArticlesQuery);
 
-  // 2. Fetch recent activity (comments) for a "Live Wiki Feed"
-  const recentActivityQuery = useMemoFirebase(() => {
-    // We'll simulate this by grabbing any recent comments across articles if possible, 
-    // but for simplicity we'll use a collectionGroup or just recent articles
-    return query(collection(db, 'articles_published'), orderBy('updatedAt', 'desc'), limit(10));
-  }, [db]);
-  
-  const { data: recentActivity } = useCollection(recentActivityQuery);
-
   // Hybrid approach: use live data if available, otherwise fallback to mock data
   const featuredArticles = (liveArticles && liveArticles.length > 0) 
     ? liveArticles 
@@ -202,7 +193,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-t from-[#161C21] to-transparent opacity-60" />
                     <div className="absolute top-6 left-6">
                       <Badge className="bg-primary text-black font-black uppercase text-[10px] tracking-widest px-4 py-1.5 shadow-neon">
-                        {article.category || 'Heritage'}
+                        {article.category || article.categoryId || 'Heritage'}
                       </Badge>
                     </div>
                   </div>

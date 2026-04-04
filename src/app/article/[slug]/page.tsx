@@ -252,9 +252,9 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
             
             <TabsContent value="read" className="mt-16 space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
               <article className="prose prose-invert max-w-none">
-                <p className="text-3xl leading-[1.6] text-foreground/90 font-light selection:bg-primary/20 article-dropcap italic">
+                <div className="text-3xl leading-[1.6] text-foreground/90 font-light selection:bg-primary/20 article-dropcap italic whitespace-pre-wrap">
                   {article.content}
-                </p>
+                </div>
                 <div className="mt-16 p-10 bg-primary/5 rounded-[3rem] border border-primary/10 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-8 opacity-5 transition-transform group-hover:scale-150">
                     <History className="h-32 w-32" />

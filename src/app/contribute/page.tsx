@@ -118,7 +118,7 @@ function ContributeForm() {
       categoryId,
       parent: parent || null,
       authorId: user.uid,
-      createdAt: editSlug ? undefined : new Date().toISOString(),
+      createdAt: editSlug ? (new Date().toISOString()) : (new Date().toISOString()), // Simplified for prototype
       updatedAt: new Date().toISOString(),
       version: newVersion,
       isPublished: true,
@@ -126,7 +126,7 @@ function ContributeForm() {
       image: `https://picsum.photos/seed/${slug}/800/600` 
     };
 
-    // Save Article to Published Collection (Non-blocking as per guidelines)
+    // Save Article to Published Collection (Non-blocking)
     setDocumentNonBlocking(articleRef, articleData, { merge: true });
 
     // Track Revision History in subcollection
