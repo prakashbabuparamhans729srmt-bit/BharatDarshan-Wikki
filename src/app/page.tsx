@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, MapPin, Sparkles, BookOpen, Mic, ArrowRight, Loader2, Compass, History, MessageSquare, TrendingUp, Award, Activity, Database, Globe, Zap } from 'lucide-react'
+import { Search, MapPin, Sparkles, BookOpen, Mic, ArrowRight, Loader2, Compass, History, MessageSquare, TrendingUp, Award, Activity, Database, Globe, Zap, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -74,7 +74,7 @@ export default function Home() {
             <Zap className="h-4 w-4 fill-current" />
             A to Z Advanced Heritage Flow
           </div>
-          <h1 className="text-7xl md:text-9xl font-headline font-black leading-[0.85] text-white drop-shadow-2xl">
+          <h1 className="text-7xl md:text-9xl font-headline font-black leading-[0.85] text-white drop-shadow-2xl selection:bg-primary/20">
             Explore the <span className="text-primary italic">Infinity</span> of Bharat
           </h1>
           

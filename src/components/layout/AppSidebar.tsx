@@ -1,7 +1,7 @@
 
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { 
   Home, 
@@ -22,6 +22,7 @@ import {
   History,
   TrendingUp,
   Award,
+  Mic,
   Image as ImageIcon
 } from 'lucide-react'
 import { 
@@ -40,9 +41,13 @@ import {
 import { STATES } from '@/lib/mock-data'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { usePathname } from 'next/navigation'
+import { VoiceSearchDialog } from '@/components/ai/VoiceSearchDialog'
+import { useUser } from '@/firebase'
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { user } = useUser()
+  const [showVoiceSearch, setShowVoiceSearch] = useState(false)
 
   const isRouteActive = (route: string) => pathname === route
 
@@ -93,6 +98,12 @@ export function AppSidebar() {
                   <ImageIcon className="h-5 w-5" />
                   <span className="font-bold">Media Library</span>
                 </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton onClick={() => setShowVoiceSearch(true)} tooltip="Voice Explorer" className="h-12 hover:bg-primary/10 hover:text-primary transition-all rounded-xl">
+                <Mic className="h-5 w-5" />
+                <span className="font-bold">Voice Explorer</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -182,16 +193,21 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 border-t border-foreground/5 bg-secondary/20">
         <Link href="/dashboard" className="flex items-center gap-3 p-3 rounded-2xl bg-foreground/5 hover:bg-foreground/10 transition-all cursor-pointer group border border-foreground/5">
           <Avatar className="h-10 w-10 border border-primary/20 shadow-sm transition-transform group-hover:scale-110">
-            <AvatarImage src="https://picsum.photos/seed/user-side/100" />
-            <AvatarFallback className="bg-primary text-black font-black">AD</AvatarFallback>
+            <AvatarImage src={`https://picsum.photos/seed/${user?.uid || 'guest'}/100`} />
+            <AvatarFallback className="bg-primary text-black font-black">
+              {user?.displayName?.slice(0, 1) || 'G'}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 overflow-hidden">
-            <p className="text-xs font-bold text-foreground truncate">Admin Explorer</p>
-            <p className="text-[10px] text-primary/70 font-black uppercase tracking-widest">Lvl 48</p>
+            <p className="text-xs font-bold text-foreground truncate">{user?.displayName || (user?.isAnonymous ? 'Guest Mode' : 'Authenticating...')}</p>
+            <p className="text-[10px] text-primary/70 font-black uppercase tracking-widest">
+              {user ? 'Verified Node' : 'Limited Access'}
+            </p>
           </div>
           <ChevronRight className="h-4 w-4 text-primary opacity-0 group-hover:opacity-100 transition-all" />
         </Link>
       </SidebarFooter>
+      <VoiceSearchDialog open={showVoiceSearch} onOpenChange={setShowVoiceSearch} />
     </Sidebar>
   )
 }

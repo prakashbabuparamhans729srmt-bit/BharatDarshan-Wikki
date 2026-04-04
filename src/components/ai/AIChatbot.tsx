@@ -10,6 +10,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { aiVoiceSearchContent } from '@/ai/flows/ai-voice-search-content-flow'
 import { Badge } from '@/components/ui/badge'
 
+/**
+ * @description Advanced AI Bharat Assistant. Acting as the master guide for the A to Z flow.
+ */
 export function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<{ role: 'user' | 'ai', text: string }[]>([
