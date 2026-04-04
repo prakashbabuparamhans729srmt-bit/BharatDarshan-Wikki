@@ -39,7 +39,7 @@ export function AIChatbot() {
       let response = `I've analyzed your query about "${text}". `;
       
       const q = text.toLowerCase();
-      if (q.includes('help') || q.includes('how') || q.includes('a to z') || q.includes('guide')) {
+      if (q.includes('help') || q.includes('how') || q.includes('a to z') || q.includes('guide') || q.includes('flow')) {
         response = "BharatDarshan Wiki is India's most advanced digital encyclopedia. Here is your A to Z roadmap:\n\n" +
           "• **A** - Auth: Secure login to unlock editing rights.\n" +
           "• **B** - Browse: Alphabetical index of all 28 states.\n" +
@@ -49,13 +49,15 @@ export function AIChatbot() {
           "• **M** - Media: A high-res archive of visual heritage.\n" +
           "• **S** - Search: Deep crawling of live and archived data.\n" +
           "• **T** - Talk Page: Real-time community discussions on every article.\n" +
-          "• **V** - Voice: Advanced Voice Search—just speak and explore!\n\nWhat would you like to explore first?";
+          "• **V** - Voice: Advanced Voice Search—just speak and explore!\n\nEverything is fully 'chalu' (operational). What would you like to explore first?";
       } else if (q.includes('language') || q.includes('translate') || q.includes('hindi')) {
         response = "We support 22 official Indian languages! On any article page, go to the 'AI & Tools' tab. Our Gemini AI will translate the entire content into your chosen language in seconds.";
       } else if (q.includes('voice') || q.includes('mic') || q.includes('speak')) {
         response = "Voice Search is active! Click the Mic icon in the Search bar or right here. You can ask me things like 'Tell me about the Shore Temple' or 'Search for Rajasthan forts'.";
+      } else if (q.includes('edit') || q.includes('update')) {
+        response = "To edit any article, simply navigate to that page and click the 'Edit Archive' button. This will open the A-Z Advanced Editor where you can refine content using AI before publishing.";
       } else {
-        response += "I'm searching our heritage archives for live nodes... Did you know you can earn 'Heritage Points' on your Dashboard for every verified edit you make?";
+        response += "I'm searching our heritage archives for live nodes... Did you know you can earn 'Heritage Points' on your Dashboard for every verified edit you make? The system is 100% operational.";
       }
 
       setMessages(prev => [...prev, { 

@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, MapPin, Sparkles, BookOpen, Mic, ArrowRight, Loader2, Compass, History, MessageSquare, TrendingUp, Award, Activity } from 'lucide-react'
+import { Search, MapPin, Sparkles, BookOpen, Mic, ArrowRight, Loader2, Compass, History, MessageSquare, TrendingUp, Award, Activity, Database, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -36,8 +36,6 @@ export default function Home() {
   
   const { data: liveArticles, isLoading: isLiveLoading } = useCollection(latestArticlesQuery);
 
-  // 2. Fetch recent activity (comments or revisions) to show the app is "chalu" (active)
-  // For this A-Z flow, we'll simulate activity if Firestore is new, otherwise pull live nodes.
   const featuredArticles = (liveArticles && liveArticles.length > 0) 
     ? liveArticles 
     : ARTICLES.slice(0, 3);
@@ -50,11 +48,11 @@ export default function Home() {
   }
 
   const roadmapSteps = [
-    { title: "Browse Index", desc: "Discover all 28 states alphabetically.", icon: BookOpen, link: "/browse" },
-    { title: "Voice Exploration", desc: "Speak to find hidden heritage nodes.", icon: Mic, action: () => setShowVoiceSearch(true) },
-    { title: "Contribute History", desc: "Write new entries for the live wiki.", icon: Sparkles, link: "/contribute" },
-    { title: "Community Talk", desc: "Discuss facts on live Talk Pages.", icon: MessageSquare, link: "/browse" },
-    { title: "Revision History", desc: "Track every edit across the timeline.", icon: History, link: "/dashboard" }
+    { title: "Browse Index", desc: "Discover all 28 states alphabetically.", icon: BookOpen, link: "/browse", letter: "B" },
+    { title: "Voice Exploration", desc: "Speak to find hidden heritage nodes.", icon: Mic, action: () => setShowVoiceSearch(true), letter: "V" },
+    { title: "Contribute History", desc: "Write new entries for the live wiki.", icon: Sparkles, link: "/contribute", letter: "C" },
+    { title: "Community Talk", desc: "Discuss facts on live Talk Pages.", icon: MessageSquare, link: "/browse", letter: "T" },
+    { title: "Revision History", desc: "Track every edit across the timeline.", icon: History, link: "/dashboard", letter: "H" }
   ]
 
   return (
@@ -119,9 +117,14 @@ export default function Home() {
 
       {/* A to Z Heritage Roadmap */}
       <section className="space-y-12">
-        <div className="text-center space-y-3">
-          <h2 className="text-5xl font-headline font-black text-white">Advanced Roadmap</h2>
-          <p className="text-muted-foreground text-xl italic font-light">From exploration to preservation—your A to Z guide.</p>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 px-4">
+          <div className="space-y-2">
+            <h2 className="text-5xl font-headline font-black text-white">Advanced Roadmap</h2>
+            <p className="text-muted-foreground text-xl italic font-light">From exploration to preservation—your A to Z guide.</p>
+          </div>
+          <Badge variant="outline" className="border-primary/20 text-primary font-black px-6 py-2 uppercase tracking-[0.3em] text-xs">
+            Operational Node: CHALU
+          </Badge>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 px-4">
           {roadmapSteps.map((step, i) => (
@@ -132,6 +135,7 @@ export default function Home() {
               {step.link ? (
                 <Link href={step.link}>
                   <Card className="h-full bg-[#161C21]/60 border-white/5 hover:border-primary/40 transition-all rounded-[2.5rem] p-8 text-center space-y-6 hover:scale-105 cursor-pointer relative z-10 shadow-2xl">
+                    <div className="absolute top-4 right-6 text-4xl font-black text-white/5 select-none">{step.letter}</div>
                     <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mx-auto group-hover:scale-110 transition-transform shadow-sm">
                       <step.icon className="h-8 w-8" />
                     </div>
@@ -142,8 +146,9 @@ export default function Home() {
                   </Card>
                 </Link>
               ) : (
-                <button className="w-full text-left" onClick={step.action}>
+                <button className="w-full text-left h-full" onClick={step.action}>
                   <Card className="h-full bg-[#161C21]/60 border-white/5 hover:border-primary/40 transition-all rounded-[2.5rem] p-8 text-center space-y-6 hover:scale-105 cursor-pointer relative z-10 shadow-2xl">
+                    <div className="absolute top-4 right-6 text-4xl font-black text-white/5 select-none">{step.letter}</div>
                     <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mx-auto group-hover:scale-110 transition-transform shadow-sm">
                       <step.icon className="h-8 w-8" />
                     </div>
@@ -222,8 +227,8 @@ export default function Home() {
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
         {[
           { label: "Active Contributors", value: "4,200+", icon: Award },
-          { label: "Heritage Nodes", value: "12.5k", icon: BookOpen },
-          { label: "Live Talk Pages", value: "8.1k", icon: MessageSquare }
+          { label: "Heritage Nodes", value: "12.5k", icon: Database },
+          { label: "Live Talk Pages", value: "8.1k", icon: Globe }
         ].map((stat, i) => (
           <Card key={i} className="bg-primary p-12 rounded-[3.5rem] border-none shadow-neon text-black flex flex-col items-center justify-center text-center gap-4 transition-all hover:scale-[1.02]">
             <stat.icon className="h-10 w-10 mb-2" />
