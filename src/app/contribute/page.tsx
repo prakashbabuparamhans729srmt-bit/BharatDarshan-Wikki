@@ -102,6 +102,7 @@ function ContributeForm() {
 
     setIsPublishing(true)
 
+    // Generate stable slug for Wiki node
     const slug = editSlug || title.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
     const articleId = slug; 
     const articleRef = doc(db, 'articles_published', articleId);
@@ -126,6 +127,7 @@ function ContributeForm() {
 
     setDocumentNonBlocking(articleRef, articleData, { merge: true });
 
+    // Track every publication node in revision history
     const revisionsColRef = collection(db, 'articles_published', articleId, 'revisions');
     addDocumentNonBlocking(revisionsColRef, {
       articleId,
