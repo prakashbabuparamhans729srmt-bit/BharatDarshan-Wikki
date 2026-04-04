@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, MapPin, Sparkles, BookOpen, Mic, ArrowRight, Loader2, Compass, History, MessageSquare, TrendingUp, Award } from 'lucide-react'
+import { Search, MapPin, Sparkles, BookOpen, Mic, ArrowRight, Loader2, Compass, History, MessageSquare, TrendingUp, Award, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -36,7 +36,8 @@ export default function Home() {
   
   const { data: liveArticles, isLoading: isLiveLoading } = useCollection(latestArticlesQuery);
 
-  // Hybrid approach: use live data if available, otherwise fallback to mock data
+  // 2. Fetch recent activity (comments or revisions) to show the app is "chalu" (active)
+  // For this A-Z flow, we'll simulate activity if Firestore is new, otherwise pull live nodes.
   const featuredArticles = (liveArticles && liveArticles.length > 0) 
     ? liveArticles 
     : ARTICLES.slice(0, 3);

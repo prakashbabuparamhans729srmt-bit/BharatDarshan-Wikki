@@ -4,7 +4,7 @@
 import React, { use, useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, ChevronRight, User, Send, Lock, Loader2, Sparkles } from 'lucide-react'
+import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, ChevronRight, User, Send, Lock, Loader2, Sparkles, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
