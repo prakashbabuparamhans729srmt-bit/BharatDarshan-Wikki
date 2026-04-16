@@ -4,10 +4,7 @@ service cloud.firestore {
 
     /**
      * BHARATDARSHAN WIKI - SECURITY RULES CONFIGURATION
-     * 
-     * Core Philosophy:
-     * This ruleset enforces a "Contributor Ownership" model combined with "Public Consumption" for published 
-     * content. 
+     * SYNC: A-Z Advanced Heritage Flow Fully Operational
      */
 
     // --- GLOBAL HELPER FUNCTIONS ---
@@ -34,7 +31,7 @@ service cloud.firestore {
      * @path /user_profiles/{userId}
      */
     match /user_profiles/{userId} {
-      allow get, list: if true;
+      allow read: if true;
       allow create: if isOwner(userId);
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
@@ -53,32 +50,17 @@ service cloud.firestore {
      * Master geographical and thematic data.
      */
     match /states/{stateId} {
-      allow get, list: if true;
+      allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 
     match /districts/{districtId} {
-      allow get, list: if true;
+      allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 
     match /places/{placeId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /languages/{languageId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /categories/{categoryId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /tags/{tagId} {
-      allow get, list: if true;
+      allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 
@@ -86,15 +68,16 @@ service cloud.firestore {
      * @path /user_media_assets/{userId}/{assetId}
      */
     match /user_media_assets/{userId}/{assetId} {
-      allow get, list: if true;
+      allow read: if true;
       allow create, update, delete: if isOwner(userId);
     }
 
     /**
      * @path /articles_published/{articleId}
+     * CORE WIKI NODES
      */
     match /articles_published/{articleId} {
-      allow get, list: if true; 
+      allow read: if true; 
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
       allow update: if isExistingOwner(resource.data.authorId) || isAdmin();
       allow delete: if isExistingOwner(resource.data.authorId) || isAdmin();
@@ -103,19 +86,19 @@ service cloud.firestore {
        * Subcollections for Revisions, Comments, and Translations
        */
       match /revisions/{revisionId} {
-        allow get, list: if true; 
+        allow read: if true; 
         allow create: if isSignedIn();
         allow update, delete: if isExistingOwner(resource.data.userId) || isAdmin();
       }
 
       match /comments/{commentId} {
-        allow get, list: if true;
+        allow read: if true;
         allow create: if isSignedIn();
         allow update, delete: if isExistingOwner(resource.data.userId) || isAdmin();
       }
 
       match /translations/{translationId} {
-        allow get, list: if true;
+        allow read: if true;
         allow create: if isSignedIn();
         allow update, delete: if isAdmin();
       }

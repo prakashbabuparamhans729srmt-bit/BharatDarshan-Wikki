@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -205,7 +204,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-t from-[#161C21] to-transparent opacity-80" />
                     <div className="absolute top-8 left-8">
                       <Badge className="bg-primary text-black font-black uppercase text-[10px] tracking-widest px-6 py-2 shadow-neon rounded-xl">
-                        {article.category || article.categoryId || 'Heritage'}
+                        {article.categoryId || article.category || 'Heritage'}
                       </Badge>
                     </div>
                   </div>

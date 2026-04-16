@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from 'react'
@@ -16,8 +15,8 @@ export default function BrowsePage() {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null)
   const db = useFirestore()
 
-  // Fetch live States from Firestore to show contribution counts
-  const liveStatesQuery = useMemoFirebase(() => query(collection(db, 'articles_published'), where('category', '==', 'State')), [db]);
+  // Standardized query using categoryId as per schema
+  const liveStatesQuery = useMemoFirebase(() => query(collection(db, 'articles_published'), where('categoryId', '==', 'State')), [db]);
   const { data: liveStates, isLoading: isLiveLoading } = useCollection(liveStatesQuery);
 
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')

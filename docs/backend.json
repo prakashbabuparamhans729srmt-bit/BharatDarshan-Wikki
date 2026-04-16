@@ -24,8 +24,9 @@
         "slug": { "type": "string" },
         "content": { "type": "string" },
         "authorId": { "type": "string" },
-        "categoryId": { "type": "string" },
-        "version": { "type": "number" }
+        "categoryId": { "type": "string", "enum": ["State", "District", "Place"] },
+        "version": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "title", "slug", "content", "authorId"]
     },
@@ -56,6 +57,10 @@
     "/articles_published/{articleId}/comments/{commentId}": {
       "schema": { "$ref": "#/backend/entities/Comment" },
       "description": "Discussion comments on articles."
+    },
+    "/articles_published/{articleId}/revisions/{revisionId}": {
+      "schema": { "type": "object" },
+      "description": "Historical revisions of the article."
     },
     "/user_media_assets/{userId}/{assetId}": {
       "schema": { "type": "object" },
