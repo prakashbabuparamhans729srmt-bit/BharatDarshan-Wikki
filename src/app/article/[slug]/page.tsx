@@ -1,10 +1,10 @@
 
 "use client"
 
-import React, { use, useState, useEffect } from 'react'
+import React, { use, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, ChevronRight, User, Send, Lock, Loader2, Sparkles, Activity } from 'lucide-react'
+import { Edit2, MapPin, Share2, History, Bookmark, MessageSquare, ChevronRight, User, Send, Lock, Loader2, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -27,8 +27,7 @@ import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 /**
  * @description Advanced Article Page. Pulls live data from Firestore /articles_published
- * using the slug as the document ID. Supports live Talk Page (Comments) and 
- * dynamic Related Heritage.
+ * using the slug as the document ID. Supports live Talk Page (Comments).
  */
 export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
@@ -255,18 +254,6 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 <div className="text-3xl leading-[1.6] text-foreground/90 font-light selection:bg-primary/20 article-dropcap italic whitespace-pre-wrap">
                   {article.content}
                 </div>
-                <div className="mt-16 p-10 bg-primary/5 rounded-[3rem] border border-primary/10 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-8 opacity-5 transition-transform group-hover:scale-150">
-                    <History className="h-32 w-32" />
-                  </div>
-                  <h3 className="text-2xl font-headline font-black text-primary mb-4">Historical Context</h3>
-                  <p className="text-xl leading-[1.8] text-foreground/70 font-light italic relative z-10">
-                    The history of {article.title} is deeply intertwined with the cultural evolution of the Indian subcontinent. 
-                    Recent records maintained by BharatDarshan contributors highlight its strategic importance 
-                    across eras and its role as a beacon of heritage and learning. Every revision in our database 
-                    strengthens the digital timeline of this heritage node.
-                  </p>
-                </div>
               </article>
             </TabsContent>
 
@@ -275,17 +262,6 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
                 <TranslatorTool content={article.content} />
                 <AudioGuide text={article.content} title={article.title} />
               </div>
-              <Card className="bg-[#161C21]/60 p-12 rounded-[3.5rem] border border-white/5 space-y-8">
-                <div className="flex items-center gap-4 text-primary">
-                  <Sparkles className="h-10 w-10" />
-                  <h3 className="text-3xl font-headline font-black text-white">AI Analysis</h3>
-                </div>
-                <p className="text-xl text-muted-foreground font-light italic leading-relaxed">
-                  Our advanced Gemini models are currently indexing the architectural motifs and linguistic nuances of this article. 
-                  Soon, you will be able to generate immersive 3D walkthroughs directly from text descriptions.
-                </p>
-                <Button variant="outline" className="h-14 rounded-xl border-primary/20 text-primary font-black uppercase tracking-widest text-[10px] px-8">Check Progress</Button>
-              </Card>
             </TabsContent>
 
             <TabsContent value="discussion" className="mt-16 space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
