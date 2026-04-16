@@ -66,6 +66,7 @@ export default function Home() {
             alt="Beautiful landscape of India"
             fill
             className="object-cover opacity-60 scale-105 group-hover:scale-100 transition-transform duration-1000"
+            data-ai-hint="India landscape"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         </div>
@@ -117,7 +118,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* A to Z Heritage Roadmap - The "Chalu" Flow */}
+      {/* A to Z Heritage Roadmap - THE COMPLETE FLOW */}
       <section className="space-y-16 py-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 px-4">
           <div className="space-y-4 text-center md:text-left">
