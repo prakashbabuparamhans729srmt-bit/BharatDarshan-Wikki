@@ -16,8 +16,8 @@ import { useFirestore, useCollection, useMemoFirebase } from '@/firebase'
 import { collection, query, limit, orderBy } from 'firebase/firestore'
 
 /**
- * @description Advanced Home Page. Pulls live "Featured Heritage" and "Recent Activity" 
- * from Firestore to provide a true A-Z live wiki experience.
+ * @description Advanced Home Page. Entry point for the A to Z Heritage Flow.
+ * Pulls live "Featured Heritage" from Firestore to provide a true live wiki experience.
  */
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -47,7 +47,7 @@ export default function Home() {
     }
   }
 
-  // Expanded A to Z Roadmap steps - THE COMPLETE FLOW
+  // Expanded A to Z Roadmap steps - THE COMPLETE OPERATIONAL FLOW
   const roadmapSteps = [
     { title: "Browse Index", desc: "Discover all 28 states alphabetically.", icon: BookOpen, link: "/browse", letter: "A" },
     { title: "Voice Search", desc: "Speak to find hidden heritage nodes.", icon: Mic, action: () => setShowVoiceSearch(true), letter: "V" },

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, Suspense } from 'react'
@@ -17,8 +18,8 @@ import { doc, collection, getDoc } from 'firebase/firestore'
 import { setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase/non-blocking-updates'
 
 /**
- * @description Advanced Contribution Page. Allows users to create/edit articles,
- * refine them with AI, and publish them to the live wiki database with version history.
+ * @description Advanced Contribution Page. Central node for building the wiki archive.
+ * Allows live publishing with Gemini AI refinement and full version history logging.
  */
 function ContributeForm() {
   const { user, isUserLoading } = useUser()

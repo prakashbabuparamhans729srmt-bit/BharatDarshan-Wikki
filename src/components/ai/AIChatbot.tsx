@@ -11,8 +11,8 @@ import { aiVoiceSearchContent } from '@/ai/flows/ai-voice-search-content-flow'
 import { Badge } from '@/components/ui/badge'
 
 /**
- * @description Advanced AI Bharat Assistant. Acting as the master guide for the A to Z flow.
- * Provides context-aware help and explains the "A to Z" operational flow of the wiki.
+ * @description Advanced AI Bharat Assistant. Acting as the master guide for the A to Z Heritage flow.
+ * Provides context-aware help and explains the "A to Z" operational roadmap of the wiki.
  */
 export function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false)
