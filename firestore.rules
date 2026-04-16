@@ -26,7 +26,7 @@ service cloud.firestore {
 
     // --- CORE WIKI ARCHIVES ---
     match /articles_published/{articleId} {
-      // Public reading enabled for A to Z exploration
+      // Public reading enabled for A to Z exploration (fixing list/get permissions)
       allow read: if true; 
       
       // Contributions require verified authentication
