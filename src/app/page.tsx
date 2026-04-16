@@ -47,7 +47,7 @@ export default function Home() {
     }
   }
 
-  // Expanded A to Z Roadmap steps
+  // Expanded A to Z Roadmap steps - THE COMPLETE FLOW
   const roadmapSteps = [
     { title: "Browse Index", desc: "Discover all 28 states alphabetically.", icon: BookOpen, link: "/browse", letter: "A" },
     { title: "Voice Search", desc: "Speak to find hidden heritage nodes.", icon: Mic, action: () => setShowVoiceSearch(true), letter: "V" },
