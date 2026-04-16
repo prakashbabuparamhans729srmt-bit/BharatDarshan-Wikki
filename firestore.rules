@@ -28,7 +28,8 @@ service cloud.firestore {
     // --- CORE WIKI ARCHIVES ---
     match /articles_published/{articleId} {
       // Allow global reading (get and list) for A to Z discovery
-      allow read: if true;
+      // Fixes: "Missing or insufficient permissions" for auth: null
+      allow get, list: if true;
       
       // Contributions require verified authentication
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
@@ -37,14 +38,14 @@ service cloud.firestore {
 
       // Talk Page (Comments)
       match /comments/{commentId} {
-        allow read: if true;
+        allow get, list: if true;
         allow create: if isSignedIn();
         allow delete: if isOwner(resource.data.userId);
       }
 
       // Revision History
       match /revisions/{revisionId} {
-        allow read: if true;
+        allow get, list: if true;
         allow create: if isSignedIn();
         allow update, delete: if false; 
       }
