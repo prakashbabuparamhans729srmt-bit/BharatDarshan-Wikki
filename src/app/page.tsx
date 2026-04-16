@@ -52,14 +52,14 @@ export default function Home() {
     { title: "Browse Index", desc: "Discover all 28 states alphabetically.", icon: BookOpen, link: "/browse", letter: "A" },
     { title: "Voice Search", desc: "Speak to find hidden heritage nodes.", icon: Mic, action: () => setShowVoiceSearch(true), letter: "V" },
     { title: "Contribute Node", desc: "Write new entries for the live wiki.", icon: Sparkles, link: "/contribute", letter: "C" },
-    { title: "Community Talk", desc: "Discuss facts on live Talk Pages.", icon: MessageSquare, link: "/browse", letter: "T" },
+    { title: "Community Talk", desc: "Join conversations on live Talk Pages.", icon: MessageSquare, link: "/browse", letter: "T" },
     { title: "Archive History", desc: "Track every edit across the timeline.", icon: History, link: "/dashboard", letter: "Z" }
   ]
 
   return (
     <div className="max-w-6xl mx-auto space-y-24 pb-20 animate-in fade-in duration-1000">
       {/* Hero Section */}
-      <section className="relative rounded-[4rem] overflow-hidden border-2 border-primary/30 bg-black neon-glow group shadow-[0_0_50px_rgba(7,241,214,0.1)]">
+      <section className="relative rounded-[4rem] overflow-hidden border-2 border-primary/30 bg-black neon-glow group shadow-[0_0_50px_rgba(7,241,214,0.15)]">
         <div className="absolute inset-0 z-0">
           <Image 
             src="https://images.unsplash.com/photo-1542708993627-b6e5bbae43c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxJbmRpYSUyMGxhbmRzY2FwZXxlbnwwfHx8fDE3NzIwOTIxMDd8MA&ixlib=rb-4.1.0&q=80&w=1200"
@@ -73,7 +73,7 @@ export default function Home() {
         <div className="relative z-10 px-8 py-24 md:py-48 text-center space-y-10 max-w-5xl mx-auto">
           <div className="inline-flex items-center gap-3 px-8 py-3 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-black tracking-[0.4em] uppercase animate-pulse backdrop-blur-md">
             <Zap className="h-4 w-4 fill-current" />
-            A to Z Advanced Flow: Operational
+            A to Z Advanced Flow: 100% OPERATIONAL
           </div>
           <h1 className="text-7xl md:text-9xl font-headline font-black leading-[0.85] text-white drop-shadow-2xl selection:bg-primary/20">
             Explore the <span className="text-primary italic">Infinity</span> of Bharat
@@ -127,9 +127,9 @@ export default function Home() {
           </div>
           <div className="flex flex-col items-center md:items-end gap-2">
             <Badge className="bg-primary/10 text-primary border border-primary/20 font-black px-8 py-3 uppercase tracking-[0.4em] text-xs shadow-sm">
-              Flow Operational: 100%
+              Flow Sync Status: 100%
             </Badge>
-            <span className="text-[10px] font-black uppercase tracking-widest text-white/20">Sync ID: DARSHAN-AZ-PRO</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/20">Sync ID: DARSHAN-AZ-SYNC-ACTIVE</span>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8 px-4">

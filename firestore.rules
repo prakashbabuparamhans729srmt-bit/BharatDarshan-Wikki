@@ -19,14 +19,15 @@ service cloud.firestore {
 
     // --- USER PROFILES ---
     match /user_profiles/{userId} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if isSignedIn(); 
       allow create, update: if isOwner(userId);
       allow delete: if false; 
     }
 
     // --- CORE WIKI ARCHIVES ---
     match /articles_published/{articleId} {
-      // Explicitly allow list and get for A to Z exploration
+      // Allow global reading (get and list) for A to Z discovery
       allow read: if true;
       
       // Contributions require verified authentication
