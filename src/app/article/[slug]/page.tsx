@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { use, useState, useEffect } from 'react'
@@ -62,9 +63,10 @@ export default function ArticlePage({ params }: { params: Promise<{ slug: string
 
   // 3. Dynamic Related Heritage (Articles in the same category)
   const relatedQuery = useMemoFirebase(() => {
+    const category = article.categoryId || article.category || 'Place';
     return query(
       collection(db, 'articles_published'),
-      where('categoryId', '==', article.categoryId || article.category || 'Place'),
+      where('categoryId', '==', category),
       limit(5)
     );
   }, [db, article.categoryId, article.category]);
