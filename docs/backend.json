@@ -1,23 +1,27 @@
+
 {
   "entities": {
     "UserProfile": {
       "title": "UserProfile",
       "type": "object",
-      "description": "User profile information.",
+      "description": "User profile information for wiki contributors.",
       "properties": {
         "id": { "type": "string" },
         "username": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "firstName": { "type": "string" },
         "lastName": { "type": "string" },
-        "memberSince": { "type": "string", "format": "date-time" }
+        "memberSince": { "type": "string", "format": "date-time" },
+        "lastActive": { "type": "string", "format": "date-time" },
+        "themePreference": { "type": "string", "enum": ["light", "dark", "system"] },
+        "preferredLanguageId": { "type": "string" }
       },
       "required": ["id", "email"]
     },
     "Article": {
       "title": "Article",
       "type": "object",
-      "description": "Heritage wiki article entry.",
+      "description": "A live heritage wiki node representing a state, district, or place.",
       "properties": {
         "id": { "type": "string" },
         "title": { "type": "string" },
@@ -25,19 +29,40 @@
         "content": { "type": "string" },
         "authorId": { "type": "string" },
         "categoryId": { "type": "string", "enum": ["State", "District", "Place"] },
+        "parent": { "type": "string" },
         "version": { "type": "number" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "tagIds": { "type": "array", "items": { "type": "string" } },
+        "image": { "type": "string" }
       },
       "required": ["id", "title", "slug", "content", "authorId"]
     },
     "Comment": {
       "title": "Comment",
       "type": "object",
+      "description": "A community contribution to an article's Talk Page.",
       "properties": {
         "id": { "type": "string" },
         "userId": { "type": "string" },
         "username": { "type": "string" },
         "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "articleId": { "type": "string" }
+      }
+    },
+    "Revision": {
+      "title": "Revision",
+      "type": "object",
+      "description": "A historical snapshot of a heritage node update.",
+      "properties": {
+        "id": { "type": "string" },
+        "articleId": { "type": "string" },
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "revisionNumber": { "type": "number" },
+        "contentSnapshot": { "type": "string" },
+        "changesSummary": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
     }
@@ -48,23 +73,23 @@
   "firestore": {
     "/user_profiles/{userId}": {
       "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "User profile documents."
+      "description": "Public contributor profiles."
     },
     "/articles_published/{articleId}": {
       "schema": { "$ref": "#/backend/entities/Article" },
-      "description": "Live published wiki articles."
+      "description": "Live digital heritage encyclopedia nodes."
     },
     "/articles_published/{articleId}/comments/{commentId}": {
       "schema": { "$ref": "#/backend/entities/Comment" },
-      "description": "Discussion comments on articles."
+      "description": "Discussion threads for specific heritage nodes."
     },
     "/articles_published/{articleId}/revisions/{revisionId}": {
-      "schema": { "type": "object" },
-      "description": "Historical revisions of the article."
+      "schema": { "$ref": "#/backend/entities/Revision" },
+      "description": "Archive logs for tracking history of changes."
     },
     "/user_media_assets/{userId}/{assetId}": {
       "schema": { "type": "object" },
-      "description": "Media assets uploaded by users."
+      "description": "Media assets contributed by the heritage community."
     }
   }
 }

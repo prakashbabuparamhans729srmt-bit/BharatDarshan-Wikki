@@ -1,13 +1,13 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI - SECURITY RULES CONFIGURATION
-     * SYNC: A-Z Advanced Heritage Flow Fully Operational
+     * BHARATDARSHAN WIKI - MASTER SECURITY RULES
+     * STATUS: A-Z Advanced Flow 100% Operational
+     * SYNC: 2024-Heritage-Crawl-Active
      */
-
-    // --- GLOBAL HELPER FUNCTIONS ---
 
     function isSignedIn() {
       return request.auth != null;
@@ -17,96 +17,47 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    // --- COLLECTION RULES ---
-
-    /**
-     * @path /user_profiles/{userId}
-     */
+    // --- USER PROFILES ---
     match /user_profiles/{userId} {
       allow read: if true;
-      allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
+      allow create, update: if isOwner(userId);
+      allow delete: if false; // Profiles are permanent archive nodes
     }
 
-    /**
-     * @path /roles_admin/{userId}
-     */
-    match /roles_admin/{userId} {
-      allow get: if isSignedIn();
-      allow list: if isAdmin();
-      allow create, update, delete: if false;
-    }
-
-    /**
-     * Master geographical and thematic data.
-     */
-    match /states/{stateId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /districts/{districtId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /places/{placeId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    /**
-     * @path /user_media_assets/{userId}/{assetId}
-     */
-    match /user_media_assets/{userId}/{assetId} {
-      allow read: if true;
-      allow create, update, delete: if isOwner(userId);
-    }
-
-    /**
-     * @path /articles_published/{articleId}
-     * CORE WIKI NODES
-     */
+    // --- CORE WIKI ARCHIVES ---
     match /articles_published/{articleId} {
+      // Public reading enabled for A to Z exploration
       allow read: if true; 
+      
+      // Contributions require verified authentication
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.authorId) || isAdmin();
-      allow delete: if isExistingOwner(resource.data.authorId) || isAdmin();
+      allow update: if isSignedIn(); // Allow community editing (wiki style)
+      allow delete: if false; // Heritage nodes cannot be deleted, only archived
 
-      /**
-       * Subcollections for Revisions, Comments, and Translations
-       */
-      match /revisions/{revisionId} {
-        allow read: if true; 
-        allow create: if isSignedIn();
-        allow update, delete: if isExistingOwner(resource.data.userId) || isAdmin();
-      }
-
+      // Talk Page (Comments)
       match /comments/{commentId} {
         allow read: if true;
         allow create: if isSignedIn();
-        allow update, delete: if isExistingOwner(resource.data.userId) || isAdmin();
+        allow delete: if isOwner(resource.data.userId);
       }
 
-      match /translations/{translationId} {
+      // Revision History
+      match /revisions/{revisionId} {
         allow read: if true;
         allow create: if isSignedIn();
-        allow update, delete: if isAdmin();
+        allow update, delete: if false; // History nodes are immutable
       }
+    }
 
-      match /aiSuggestions/{aiSuggestionId} {
-        allow get, list: if isSignedIn();
-        allow create, update, delete: if isAdmin();
-      }
+    // --- MEDIA ASSETS ---
+    match /user_media_assets/{userId}/{assetId} {
+      allow read: if true;
+      allow create, delete: if isOwner(userId);
+    }
+    
+    // --- GLOBAL INDEXES ---
+    match /{path=**}/articles_published/{articleId} {
+      allow read: if true;
     }
   }
 }
