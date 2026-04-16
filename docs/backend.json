@@ -4,7 +4,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "UserProfile",
       "type": "object",
-      "description": "Represents a registered user of the BharatDarshan Wiki application, allowing for content contributions, profile management, and personalized settings.",
+      "description": "Represents a registered user or contributor to the BharatDarshan Wiki platform. Stores profile information, excluding authentication details.",
       "properties": {
         "id": {
           "type": "string",
@@ -12,68 +12,212 @@
         },
         "username": {
           "type": "string",
-          "description": "A unique username chosen by the user for identification within the platform."
+          "description": "A unique username chosen by the user for display."
         },
         "email": {
           "type": "string",
-          "description": "The user's email address, used for communication and identification. (Note: Authentication handled externally)",
+          "description": "The user's email address.",
           "format": "email"
-        },
-        "firstName": {
-          "type": "string",
-          "description": "The first name of the user."
-        },
-        "lastName": {
-          "type": "string",
-          "description": "The last name of the user."
         },
         "bio": {
           "type": "string",
-          "description": "A short biography or description provided by the user about themselves."
+          "description": "A short biographical description provided by the user."
         },
-        "profileImageUrl": {
+        "joinDate": {
           "type": "string",
-          "description": "URL to the user's profile picture.",
-          "format": "uri"
-        },
-        "memberSince": {
-          "type": "string",
-          "description": "Timestamp indicating when the user registered on the platform.",
+          "description": "The date and time when the user registered on the platform.",
           "format": "date-time"
-        },
-        "lastActive": {
-          "type": "string",
-          "description": "Timestamp indicating the last time the user was active on the platform.",
-          "format": "date-time"
-        },
-        "preferredLanguageId": {
-          "type": "string",
-          "description": "Reference to the Language entity representing the user's preferred content language. (Relationship: Language 1:N UserProfile)"
-        },
-        "themePreference": {
-          "type": "string",
-          "description": "The user's preferred theme for the application (light, dark, or device default).",
-          "items": {
-            "type": "string"
-          }
         }
       },
       "required": [
         "id",
         "username",
         "email",
-        "firstName",
-        "lastName",
-        "memberSince",
-        "preferredLanguageId",
-        "themePreference"
+        "joinDate"
+      ]
+    },
+    "Language": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Language",
+      "type": "object",
+      "description": "Represents a supported language for content and translation within the BharatDarshan Wiki.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Language entity, typically an ISO 639-1 or BCP 47 language code (e.g., 'en', 'hi', 'mr')."
+        },
+        "name": {
+          "type": "string",
+          "description": "The English name of the language (e.g., 'English', 'Hindi', 'Marathi')."
+        },
+        "nativeName": {
+          "type": "string",
+          "description": "The name of the language in its native script (e.g., 'हिन्दी', 'मराठी')."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "nativeName"
+      ]
+    },
+    "State": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "State",
+      "type": "object",
+      "description": "Represents an Indian State, serving as a top-level geographical entity for the BharatDarshan Wiki.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the State entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the state."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly identifier for the state, used for dynamic routing."
+        },
+        "description": {
+          "type": "string",
+          "description": "A general description or overview of the state."
+        },
+        "capital": {
+          "type": "string",
+          "description": "The capital city of the state."
+        },
+        "population": {
+          "type": "number",
+          "description": "The population of the state, as an integer."
+        },
+        "areaSqKm": {
+          "type": "number",
+          "description": "The total area of the state in square kilometers, as an integer."
+        },
+        "mapImageUrl": {
+          "type": "string",
+          "description": "URL to an image depicting the geographical map of the state.",
+          "format": "uri"
+        },
+        "establishedDate": {
+          "type": "string",
+          "description": "The date when the state was officially established or formed.",
+          "format": "date"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "slug",
+        "description",
+        "capital",
+        "population",
+        "areaSqKm"
+      ]
+    },
+    "District": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "District",
+      "type": "object",
+      "description": "Represents a district within an Indian State.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the District entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the district."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly identifier for the district, unique within its state."
+        },
+        "description": {
+          "type": "string",
+          "description": "A general description or overview of the district."
+        },
+        "stateId": {
+          "type": "string",
+          "description": "Reference to the State this district belongs to. (Relationship: State 1:N District)"
+        },
+        "population": {
+          "type": "number",
+          "description": "The population of the district, as an integer."
+        },
+        "areaSqKm": {
+          "type": "number",
+          "description": "The total area of the district in square kilometers, as an integer."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "slug",
+        "description",
+        "stateId",
+        "population",
+        "areaSqKm"
+      ]
+    },
+    "Place": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Place",
+      "type": "object",
+      "description": "Represents a specific point of interest, landmark, or location within a district.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Place entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The common name of the place (e.g., 'Taj Mahal', 'Gateway of India')."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly identifier for the place, unique within its district."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the place."
+        },
+        "districtId": {
+          "type": "string",
+          "description": "Reference to the District this place belongs to. (Relationship: District 1:N Place)"
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Geographical latitude of the place, allowing for decimal values."
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Geographical longitude of the place, allowing for decimal values."
+        },
+        "type": {
+          "type": "string",
+          "description": "Categorization of the place (e.g., 'Historical Site', 'Religious Place', 'Natural Landmark', 'Museum', 'Beach')."
+        },
+        "address": {
+          "type": "string",
+          "description": "The physical address of the place."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "slug",
+        "description",
+        "districtId",
+        "type"
       ]
     },
     "Category": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Category",
       "type": "object",
-      "description": "Defines broad classifications for articles, such as 'State', 'District', or 'Point of Interest', to structure the geographical content.",
+      "description": "Represents a broad thematic category for organizing articles (e.g., 'History', 'Culture', 'Geography').",
       "properties": {
         "id": {
           "type": "string",
@@ -81,29 +225,30 @@
         },
         "name": {
           "type": "string",
-          "description": "The name of the category (e.g., 'State', 'District', 'Point of Interest')."
+          "description": "The name of the category (e.g., 'Ancient Sites', 'National Parks')."
         },
         "description": {
           "type": "string",
-          "description": "A brief description of what this category represents."
+          "description": "A brief description explaining the scope of the category."
         },
-        "slug": {
-          "type": "string",
-          "description": "A URL-friendly version of the category name for use in navigation or URLs."
+        "articleIds": {
+          "type": "array",
+          "description": "References to Articles belonging to this category. (Relationship: Category N:N Article)",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
         "id",
-        "name",
-        "description",
-        "slug"
+        "name"
       ]
     },
     "Tag": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Tag",
       "type": "object",
-      "description": "Represents keywords or labels associated with articles for more granular content discovery and filtering (e.g., 'Historical', 'Adventure', 'Religious').",
+      "description": "Represents a granular keyword or label used to describe and filter articles (e.g., 'Forts', 'Beaches', 'Cuisine').",
       "properties": {
         "id": {
           "type": "string",
@@ -111,29 +256,83 @@
         },
         "name": {
           "type": "string",
-          "description": "The name of the tag (e.g., 'Historical Site', 'National Park', 'Cuisine')."
+          "description": "The name of the tag (e.g., 'Monuments', 'Wildlife', 'Festivals')."
         },
         "description": {
           "type": "string",
-          "description": "A description of the tag's purpose or scope."
+          "description": "A brief description explaining the context of the tag."
         },
-        "slug": {
-          "type": "string",
-          "description": "A URL-friendly version of the tag name for use in navigation or URLs."
+        "articleIds": {
+          "type": "array",
+          "description": "References to Articles associated with this tag. (Relationship: Tag N:N Article)",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
         "id",
-        "name",
-        "description",
-        "slug"
+        "name"
+      ]
+    },
+    "Image": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Image",
+      "type": "object",
+      "description": "Represents an image asset used within articles, including metadata and provenance.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Image entity."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL where the image file is hosted.",
+          "format": "uri"
+        },
+        "altText": {
+          "type": "string",
+          "description": "Alternative text for the image, crucial for accessibility and SEO."
+        },
+        "caption": {
+          "type": "string",
+          "description": "A short caption or description displayed with the image."
+        },
+        "uploadedByUserId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who uploaded this image. (Relationship: UserProfile 1:N Image)"
+        },
+        "uploadDate": {
+          "type": "string",
+          "description": "The date and time when the image was uploaded.",
+          "format": "date-time"
+        },
+        "sourceUrl": {
+          "type": "string",
+          "description": "The original source URL of the image, if applicable (e.g., Wikimedia Commons).",
+          "format": "uri"
+        },
+        "articleIds": {
+          "type": "array",
+          "description": "References to Articles where this image is used. (Relationship: Image N:N Article)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "url",
+        "altText",
+        "uploadedByUserId",
+        "uploadDate"
       ]
     },
     "Article": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Article",
       "type": "object",
-      "description": "Represents a piece of content on the BharatDarshan Wiki, detailing information about a state, district, or point of interest.",
+      "description": "The primary content unit of the BharatDarshan Wiki, representing a detailed article about a State, District, or Place, contributed by users.",
       "properties": {
         "id": {
           "type": "string",
@@ -141,57 +340,76 @@
         },
         "title": {
           "type": "string",
-          "description": "The primary title of the article."
+          "description": "The main title of the article."
         },
         "slug": {
           "type": "string",
-          "description": "A URL-friendly, unique identifier derived from the title for dynamic routes."
+          "description": "A URL-friendly identifier for the article, unique across all articles for dynamic routing."
         },
         "content": {
           "type": "string",
-          "description": "The main textual content of the article, typically in Markdown or HTML format."
+          "description": "The main rich text content of the article, potentially in HTML or Markdown format."
         },
-        "categoryId": {
+        "summary": {
           "type": "string",
-          "description": "Reference to the Category entity classifying this article (e.g., 'State', 'District', 'Point of Interest'). (Relationship: Category 1:N Article)"
-        },
-        "parentArticleId": {
-          "type": "string",
-          "description": "Self-referencing foreign key to link an article to its parent (e.g., a 'District' article links to its 'State' article). (Relationship: Article 1:N Article)"
-        },
-        "authorId": {
-          "type": "string",
-          "description": "Reference to the UserProfile entity of the original author of this article. (Relationship: UserProfile 1:N Article)"
+          "description": "A brief summary or introductory paragraph of the article."
         },
         "createdAt": {
           "type": "string",
-          "description": "Timestamp indicating when the article was first created.",
+          "description": "The date and time when the article was first created.",
           "format": "date-time"
         },
         "updatedAt": {
           "type": "string",
-          "description": "Timestamp indicating when the article was last updated.",
+          "description": "The date and time when the article was last updated.",
           "format": "date-time"
         },
-        "version": {
-          "type": "number",
-          "description": "The current version number of the article, incremented with each major revision."
+        "createdByUserId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who initially created this article. (Relationship: UserProfile 1:N Article)"
         },
-        "isPublished": {
-          "type": "boolean",
-          "description": "Indicates whether the article is publicly visible (true) or still in draft/review (false)."
+        "lastEditedByUserId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who last edited this article. (Relationship: UserProfile 1:N Article)"
         },
-        "latitude": {
-          "type": "number",
-          "description": "The geographical latitude of the place described in the article, if applicable."
+        "status": {
+          "type": "string",
+          "description": "The current status of the article (e.g., 'draft', 'published', 'pending_review', 'archived')."
         },
-        "longitude": {
-          "type": "number",
-          "description": "The geographical longitude of the place described in the article, if applicable."
+        "publishDate": {
+          "type": "string",
+          "description": "The date and time when the article was officially published.",
+          "format": "date-time"
+        },
+        "stateId": {
+          "type": "string",
+          "description": "Optional reference to a State if the article is primarily about a specific state. (Relationship: State 0..1:N Article)"
+        },
+        "districtId": {
+          "type": "string",
+          "description": "Optional reference to a District if the article is primarily about a specific district. (Relationship: District 0..1:N Article)"
+        },
+        "placeId": {
+          "type": "string",
+          "description": "Optional reference to a Place if the article is primarily about a specific point of interest. (Relationship: Place 0..1:N Article)"
+        },
+        "imageIds": {
+          "type": "array",
+          "description": "References to Images used within this article. (Relationship: Article N:N Image)",
+          "items": {
+            "type": "string"
+          }
         },
         "tagIds": {
           "type": "array",
-          "description": "References to Tag entities associated with this article. (Relationship: Article N:N Tag)",
+          "description": "References to Tags associated with this article. (Relationship: Article N:N Tag)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "categoryIds": {
+          "type": "array",
+          "description": "References to Categories this article belongs to. (Relationship: Article N:N Category)",
           "items": {
             "type": "string"
           }
@@ -202,235 +420,106 @@
         "title",
         "slug",
         "content",
-        "categoryId",
-        "authorId",
+        "summary",
         "createdAt",
         "updatedAt",
-        "version",
-        "isPublished"
+        "createdByUserId",
+        "lastEditedByUserId",
+        "status"
       ]
     },
-    "Comment": {
+    "ArticleRevision": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Comment",
+      "title": "ArticleRevision",
       "type": "object",
-      "description": "Represents a user comment made on an article, allowing for reader interaction and feedback.",
+      "description": "Records historical versions of an article, enabling a 'Wikipedia-like history version' feature for tracking changes and allowing rollbacks.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Comment entity."
+          "description": "Unique identifier for the ArticleRevision entity."
         },
         "articleId": {
           "type": "string",
-          "description": "Reference to the Article entity the comment belongs to. (Relationship: Article 1:N Comment)"
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the UserProfile entity of the user who posted the comment. (Relationship: UserProfile 1:N Comment)"
-        },
-        "content": {
-          "type": "string",
-          "description": "The text content of the comment."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp indicating when the comment was posted.",
-          "format": "date-time"
-        },
-        "isApproved": {
-          "type": "boolean",
-          "description": "Indicates whether the comment has been approved for public display (true) or is pending moderation (false)."
-        },
-        "parentId": {
-          "type": "string",
-          "description": "Self-referencing foreign key to link a comment to its parent comment, enabling threaded discussions. (Relationship: Comment 1:N Comment)"
-        }
-      },
-      "required": [
-        "id",
-        "articleId",
-        "userId",
-        "content",
-        "createdAt",
-        "isApproved"
-      ]
-    },
-    "Revision": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Revision",
-      "type": "object",
-      "description": "Tracks historical versions and changes made to an Article, supporting a Wikipedia-like editing history and content recovery.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Revision entity."
-        },
-        "articleId": {
-          "type": "string",
-          "description": "Reference to the Article entity this revision belongs to. (Relationship: Article 1:N Revision)"
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to the UserProfile entity of the user who made this revision. (Relationship: UserProfile 1:N Revision)"
+          "description": "Reference to the Article this revision belongs to. (Relationship: Article 1:N ArticleRevision)"
         },
         "revisionNumber": {
           "type": "number",
-          "description": "A sequential number identifying this revision within the article's history, starting from 1."
+          "description": "An incremental number representing the version of the article within its revision history."
         },
-        "contentSnapshot": {
+        "content": {
           "type": "string",
-          "description": "A snapshot of the article's full content at the time of this revision."
+          "description": "The full content of the article at this specific revision."
         },
-        "changesSummary": {
+        "summary": {
           "type": "string",
-          "description": "A brief summary provided by the user describing the changes made in this revision."
+          "description": "The summary of the article at this specific revision."
         },
-        "createdAt": {
+        "editedByUserId": {
           "type": "string",
-          "description": "Timestamp indicating when this revision was created.",
+          "description": "Reference to the UserProfile who made this revision. (Relationship: UserProfile 1:N ArticleRevision)"
+        },
+        "editedAt": {
+          "type": "string",
+          "description": "The date and time when this revision was made.",
           "format": "date-time"
+        },
+        "changeSummary": {
+          "type": "string",
+          "description": "A brief description provided by the editor summarizing the changes made in this revision."
         }
       },
       "required": [
         "id",
         "articleId",
-        "userId",
         "revisionNumber",
-        "contentSnapshot",
-        "changesSummary",
-        "createdAt"
+        "content",
+        "summary",
+        "editedByUserId",
+        "editedAt"
       ]
     },
-    "MediaAsset": {
+    "Translation": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "MediaAsset",
+      "title": "Translation",
       "type": "object",
-      "description": "Manages image, video, or other media files uploaded and used within the application's articles.",
+      "description": "Stores AI-generated or manually refined translations of articles into various supported languages, enhancing accessibility.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the MediaAsset entity."
-        },
-        "filename": {
-          "type": "string",
-          "description": "The original filename of the uploaded media asset."
-        },
-        "mimeType": {
-          "type": "string",
-          "description": "The MIME type of the media file (e.g., 'image/jpeg', 'video/mp4')."
-        },
-        "url": {
-          "type": "string",
-          "description": "The public URL where the media asset is stored and can be accessed.",
-          "format": "uri"
-        },
-        "altText": {
-          "type": "string",
-          "description": "Alternative text for the media asset, crucial for accessibility and SEO."
-        },
-        "description": {
-          "type": "string",
-          "description": "A longer description of the media asset, providing context or details."
-        },
-        "uploadedByUserId": {
-          "type": "string",
-          "description": "Reference to the UserProfile entity of the user who uploaded this media asset. (Relationship: UserProfile 1:N MediaAsset)"
-        },
-        "uploadedAt": {
-          "type": "string",
-          "description": "Timestamp indicating when the media asset was uploaded.",
-          "format": "date-time"
-        },
-        "articleIds": {
-          "type": "array",
-          "description": "References to Article entities where this media asset is used. (Relationship: Article N:N MediaAsset)",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "id",
-        "filename",
-        "mimeType",
-        "url",
-        "altText",
-        "uploadedByUserId",
-        "uploadedAt"
-      ]
-    },
-    "Language": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Language",
-      "type": "object",
-      "description": "Defines the supported languages for content translation within the application, enabling multilingual access.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Language entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "The full name of the language (e.g., 'Hindi', 'English', 'Marathi')."
-        },
-        "code": {
-          "type": "string",
-          "description": "The ISO 639-1 standard language code (e.g., 'hi' for Hindi, 'en' for English)."
-        },
-        "isRTL": {
-          "type": "boolean",
-          "description": "Indicates if the language is written Right-To-Left (true) or Left-To-Right (false)."
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "code",
-        "isRTL"
-      ]
-    },
-    "TranslatedArticleContent": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "TranslatedArticleContent",
-      "type": "object",
-      "description": "Stores translated versions of an article's content for multilingual support, generated by AI or human contributors.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the TranslatedArticleContent entity."
+          "description": "Unique identifier for the Translation entity."
         },
         "articleId": {
           "type": "string",
-          "description": "Reference to the original Article entity this translation belongs to. (Relationship: Article 1:N TranslatedArticleContent)"
+          "description": "Reference to the original Article that was translated. (Relationship: Article 1:N Translation)"
         },
         "languageId": {
           "type": "string",
-          "description": "Reference to the Language entity for which this content is translated. (Relationship: Language 1:N TranslatedArticleContent)"
+          "description": "Reference to the Language this article is translated into. (Relationship: Language 1:N Translation)"
         },
         "translatedTitle": {
           "type": "string",
-          "description": "The title of the article translated into the specified language."
+          "description": "The translated title of the article in the target language."
         },
         "translatedContent": {
           "type": "string",
-          "description": "The main content of the article translated into the specified language."
+          "description": "The full translated content of the article in the target language."
         },
-        "translatedSlug": {
+        "translatedSummary": {
           "type": "string",
-          "description": "A URL-friendly, unique identifier for the translated article, if localized URLs are needed."
+          "description": "The translated summary of the article in the target language."
         },
         "translatedByUserId": {
           "type": "string",
-          "description": "Reference to the UserProfile entity of the user who performed or initiated this translation, if applicable. (Relationship: UserProfile 1:N TranslatedArticleContent)"
+          "description": "Optional reference to the UserProfile who reviewed or manually edited this translation. If purely AI-generated, this can be null. (Relationship: UserProfile 0..1:N Translation)"
         },
-        "translatedAt": {
+        "translationTimestamp": {
           "type": "string",
-          "description": "Timestamp indicating when this translation was created or last updated.",
+          "description": "The date and time when this translation was generated or last updated.",
           "format": "date-time"
         },
-        "isAIGenerated": {
-          "type": "boolean",
-          "description": "Indicates whether this translation was primarily generated by an AI tool (true) or human-edited/created (false)."
+        "sourceLanguageId": {
+          "type": "string",
+          "description": "Reference to the original Language of the article from which this translation was made. (Relationship: Language 1:N Translation)"
         }
       },
       "required": [
@@ -439,8 +528,82 @@
         "languageId",
         "translatedTitle",
         "translatedContent",
-        "translatedAt",
-        "isAIGenerated"
+        "translatedSummary",
+        "translationTimestamp",
+        "sourceLanguageId"
+      ]
+    },
+    "AISuggestion": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AISuggestion",
+      "type": "object",
+      "description": "Stores AI-generated suggestions for content improvement, summarization, or fact-checking, aiding contributors in refining articles.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AISuggestion entity."
+        },
+        "articleId": {
+          "type": "string",
+          "description": "Reference to the Article to which this suggestion applies. (Relationship: Article 1:N AISuggestion)"
+        },
+        "revisionId": {
+          "type": "string",
+          "description": "Optional reference to a specific ArticleRevision this suggestion pertains to, if the suggestion is tied to a particular version of the article. (Relationship: ArticleRevision 0..1:N AISuggestion)"
+        },
+        "suggestedText": {
+          "type": "string",
+          "description": "The AI's proposed new text, summary, or specific content improvement."
+        },
+        "suggestionType": {
+          "type": "string",
+          "description": "The type of suggestion provided by the AI (e.g., 'content_improvement', 'summarization', 'fact_check', 'grammar_correction', 'SEO_optimization')."
+        },
+        "targetField": {
+          "type": "string",
+          "description": "Indicates which field of the article (e.g., 'title', 'content', 'summary') the AI suggestion targets."
+        },
+        "originalTextSnippet": {
+          "type": "string",
+          "description": "A snippet of the original text from the article that the AI suggestion is meant to replace or improve."
+        },
+        "suggestedBy": {
+          "type": "string",
+          "description": "Identifier of the AI model or service that generated the suggestion (e.g., 'Gemini AI')."
+        },
+        "suggestedAt": {
+          "type": "string",
+          "description": "The date and time when the AI suggestion was generated.",
+          "format": "date-time"
+        },
+        "isApplied": {
+          "type": "boolean",
+          "description": "A boolean flag indicating whether the suggestion has been incorporated or applied to the article's content by a user."
+        },
+        "appliedByUserId": {
+          "type": "string",
+          "description": "Optional reference to the UserProfile who applied this suggestion. (Relationship: UserProfile 0..1:N AISuggestion)"
+        },
+        "appliedAt": {
+          "type": "string",
+          "description": "The date and time when the suggestion was applied to the article.",
+          "format": "date-time"
+        },
+        "acceptanceStatus": {
+          "type": "string",
+          "description": "The current status of the suggestion (e.g., 'pending', 'accepted', 'rejected', 'partially_accepted')."
+        }
+      },
+      "required": [
+        "id",
+        "articleId",
+        "suggestedText",
+        "suggestionType",
+        "targetField",
+        "suggestedBy",
+        "suggestedAt",
+        "isApplied",
+        "acceptanceStatus"
       ]
     }
   },
@@ -453,49 +616,27 @@
   "firestore": {
     "structure": [
       {
-        "path": "/user_profiles/{userId}",
+        "path": "/users/{userId}",
         "definition": {
           "entityName": "UserProfile",
           "schema": {
             "$ref": "#/backend/entities/UserProfile"
           },
-          "description": "Stores user profiles. Each profile is owned by the corresponding userId, ensuring private profile management. Some fields may be publicly visible.",
+          "description": "Stores individual user profiles. Path-based ownership (`userId`) ensures privacy and simplifies security rules for user profile management. Users can read/write their own profile data. Basic profile info might be publicly readable for contributor listings."
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Denormalized collection for global administrator roles. The existence of a document at this path signifies that the corresponding user (identified by `userId`) is an admin, enabling robust role-based access control without custom claims.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique ID of the user."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/categories/{categoryId}",
-        "definition": {
-          "entityName": "Category",
-          "schema": {
-            "$ref": "#/backend/entities/Category"
-          },
-          "description": "Stores global categories for articles. This collection is publicly readable and writeable only by administrators.",
-          "params": [
-            {
-              "name": "categoryId",
-              "description": "The unique ID of the category."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/tags/{tagId}",
-        "definition": {
-          "entityName": "Tag",
-          "schema": {
-            "$ref": "#/backend/entities/Tag"
-          },
-          "description": "Stores global tags for articles. This collection is publicly readable and writeable only by administrators.",
-          "params": [
-            {
-              "name": "tagId",
-              "description": "The unique ID of the tag."
+              "description": "The unique ID of the user who holds the admin role."
             }
           ]
         }
@@ -507,148 +648,188 @@
           "schema": {
             "$ref": "#/backend/entities/Language"
           },
-          "description": "Stores global supported languages for the application. This collection is publicly readable and writeable only by administrators.",
+          "description": "Master data for all supported content and translation languages. Globally readable by all users. Write access is restricted to administrators.",
           "params": [
             {
               "name": "languageId",
-              "description": "The unique ID of the language (e.g., 'en', 'hi')."
+              "description": "The unique identifier for the language (e.g., 'en', 'hi')."
             }
           ]
         }
       },
       {
-        "path": "/articles_published/{articleId}",
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Master data for article categories. Globally readable by all users. Write access is restricted to administrators.",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "The unique identifier for the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/tags/{tagId}",
+        "definition": {
+          "entityName": "Tag",
+          "schema": {
+            "$ref": "#/backend/entities/Tag"
+          },
+          "description": "Master data for article tags. Globally readable by all users. Write access is restricted to administrators.",
+          "params": [
+            {
+              "name": "tagId",
+              "description": "The unique identifier for the tag."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/states/{stateId}",
+        "definition": {
+          "entityName": "State",
+          "schema": {
+            "$ref": "#/backend/entities/State"
+          },
+          "description": "Stores information about Indian States. Globally readable by all users. Write access is restricted to administrators.",
+          "params": [
+            {
+              "name": "stateId",
+              "description": "The unique identifier for the state."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/districts/{districtId}",
+        "definition": {
+          "entityName": "District",
+          "schema": {
+            "$ref": "#/backend/entities/District"
+          },
+          "description": "Stores information about Districts within Indian States. Contains `stateId` for relationship. Globally readable by all users. Write access is restricted to administrators.",
+          "params": [
+            {
+              "name": "districtId",
+              "description": "The unique identifier for the district."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/places/{placeId}",
+        "definition": {
+          "entityName": "Place",
+          "schema": {
+            "$ref": "#/backend/entities/Place"
+          },
+          "description": "Stores information about specific points of interest. Contains `districtId` for relationship. Globally readable by all users. Write access is restricted to administrators.",
+          "params": [
+            {
+              "name": "placeId",
+              "description": "The unique identifier for the place."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/images/{imageId}",
+        "definition": {
+          "entityName": "Image",
+          "schema": {
+            "$ref": "#/backend/entities/Image"
+          },
+          "description": "Stores metadata for image assets used across the wiki. All images are globally readable. The `uploadedByUserId` can update or delete their own images.",
+          "params": [
+            {
+              "name": "imageId",
+              "description": "The unique identifier for the image."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/articles/{articleId}",
         "definition": {
           "entityName": "Article",
           "schema": {
             "$ref": "#/backend/entities/Article"
           },
-          "description": "Contains publicly accessible articles (where isPublished is true). Includes 'authorId' for ownership verification for editing. Ensures QAPs by homogeneous security posture (all documents are public).",
+          "description": "The primary content unit of the wiki. Publicly readable if `status == 'published'`. Users can create, read, update, and delete their own articles if `status == 'draft'`. Includes `createdByUserId` and `status` fields for explicit authorization and QAPs.",
           "params": [
             {
               "name": "articleId",
-              "description": "The unique ID of the article."
+              "description": "The unique identifier for the article."
             }
           ]
         }
       },
       {
-        "path": "/user_articles_drafts/{userId}/{articleId}",
+        "path": "/articles/{articleId}/revisions/{revisionId}",
         "definition": {
-          "entityName": "Article",
+          "entityName": "ArticleRevision",
           "schema": {
-            "$ref": "#/backend/entities/Article"
+            "$ref": "#/backend/entities/ArticleRevision"
           },
-          "description": "Stores article drafts, which are private to the 'userId' who authored them (where isPublished is false). Enforces ownership via path for authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique ID of the user who owns the draft."
-            },
-            {
-              "name": "articleId",
-              "description": "The unique ID of the draft article."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/articles_published/{articleId}/comments/{commentId}",
-        "definition": {
-          "entityName": "Comment",
-          "schema": {
-            "$ref": "#/backend/entities/Comment"
-          },
-          "description": "Comments on published articles. Includes 'userId' (comment author) and 'articleId'. Read access for all users, write access for authenticated users, with 'isApproved' for public visibility.",
+          "description": "Records historical versions of an article. Includes denormalized `articleStatus` and `articleCreatedByUserId` from the parent article for authorization independence. Revisions of published articles are publicly readable. Revisions of draft articles are readable/writable by the `articleCreatedByUserId`.",
           "params": [
             {
               "name": "articleId",
-              "description": "The unique ID of the article the comment belongs to."
-            },
-            {
-              "name": "commentId",
-              "description": "The unique ID of the comment."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/articles_published/{articleId}/revisions/{revisionId}",
-        "definition": {
-          "entityName": "Revision",
-          "schema": {
-            "$ref": "#/backend/entities/Revision"
-          },
-          "description": "Historical revisions of published articles. Includes 'userId' (revision author). Denormalizes 'articleAuthorId' and 'articleIsPublished' from the parent article for authorization independence, allowing atomic rule checks.",
-          "params": [
-            {
-              "name": "articleId",
-              "description": "The unique ID of the article this revision belongs to."
+              "description": "The unique identifier of the parent article."
             },
             {
               "name": "revisionId",
-              "description": "The unique ID of the revision."
+              "description": "The unique identifier for the specific article revision."
             }
           ]
         }
       },
       {
-        "path": "/user_media_assets/{userId}/{mediaAssetId}",
+        "path": "/articles/{articleId}/translations/{translationId}",
         "definition": {
-          "entityName": "MediaAsset",
+          "entityName": "Translation",
           "schema": {
-            "$ref": "#/backend/entities/MediaAsset"
+            "$ref": "#/backend/entities/Translation"
           },
-          "description": "Media assets uploaded by a specific user. Owned by the 'userId' in the path, ensuring private management while public URLs can be shared in articles.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique ID of the user who uploaded the media asset."
-            },
-            {
-              "name": "mediaAssetId",
-              "description": "The unique ID of the media asset."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/articles_published/{articleId}/translations/{languageId}",
-        "definition": {
-          "entityName": "TranslatedArticleContent",
-          "schema": {
-            "$ref": "#/backend/entities/TranslatedArticleContent"
-          },
-          "description": "Translated content for published articles. Uses 'languageId' as document ID. Includes 'translatedByUserId'. Denormalizes 'parentArticleAuthorId' and 'parentArticleIsPublished' for authorization independence, allowing contributors to manage translations for public articles.",
+          "description": "Stores translated content for articles. Includes denormalized `articleStatus` and `articleCreatedByUserId` for authorization independence. Translations of published articles are publicly readable. Translations of draft articles are readable/writable by the `articleCreatedByUserId` or `translatedByUserId`.",
           "params": [
             {
               "name": "articleId",
-              "description": "The unique ID of the original article."
+              "description": "The unique identifier of the parent article."
             },
             {
-              "name": "languageId",
-              "description": "The unique ID of the language for the translation."
+              "name": "translationId",
+              "description": "The unique identifier for the translation."
             }
           ]
         }
       },
       {
-        "path": "/roles_admin/{uid}",
+        "path": "/articles/{articleId}/aiSuggestions/{aiSuggestionId}",
         "definition": {
-          "entityName": "roles_admin",
+          "entityName": "AISuggestion",
           "schema": {
-            "$ref": "#/backend/entities/UserProfile"
+            "$ref": "#/backend/entities/AISuggestion"
           },
-          "description": "A collection to store admin roles. Document existence signifies admin status for the respective 'uid'. Used for database access control (DBAC) and authorization independence.",
+          "description": "Stores AI-generated suggestions for content improvement. Includes denormalized `articleStatus` and `articleCreatedByUserId` for authorization independence. Suggestions for draft articles are readable/writable by the `articleCreatedByUserId`. Suggestions for published articles might be readable by all authenticated contributors or restricted to administrators.",
           "params": [
             {
-              "name": "uid",
-              "description": "The unique ID of the user who has administrative privileges."
+              "name": "articleId",
+              "description": "The unique identifier of the parent article."
+            },
+            {
+              "name": "aiSuggestionId",
+              "description": "The unique identifier for the AI suggestion."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore structure for the BharatDarshan Wiki application is designed with a strong emphasis on Authorization Independence, Structural Segregation, and Query as a Security Policy (QAP) to ensure scalability, security, and debuggability. \n\n**Authorization Independence:**\n1.  **Path-Based Ownership:** For user-specific, private data like `UserProfile`s, `UserArticlesDrafts`, and `UserMediaAssets`, the `userId` is embedded directly in the path (e.g., `/user_profiles/{userId}`). This makes authorization rules simple and atomic: `request.auth.uid == userId` for ownership checks, eliminating the need for `get()` calls to other documents to determine access.\n2.  **Denormalization for Subcollections:** For subcollections like `Revisions` and `TranslatedArticleContent` that logically belong to an `Article`, critical authorization attributes from the parent `Article` are denormalized into the subcollection documents. Specifically, `Revision` documents will include the `articleAuthorId` and `articleIsPublished` status from their parent article, and `TranslatedArticleContent` documents will include `parentArticleAuthorId` and `parentArticleIsPublished`. This allows security rules to evaluate access based solely on the data within the document and the request context, without requiring a `get()` operation on the parent article. This is crucial for maintaining atomic operations and simplifying rule logic.\n3.  **Direct Reference for Comments:** `Comment` documents store their `userId` and `articleId` directly, allowing `request.auth.uid == comment.userId` for personal comment management, and public read access if the parent article is published and the comment is approved.\n4.  **Global Roles (DBAC):** Administrative roles are managed via a dedicated top-level collection (`/roles_admin/{uid}`). Authorization rules check for the *existence* of a document at `/roles_admin/$(request.auth.uid)`, which is an independent and efficient check, adhering to the DBAC principle.\n\n**QAPs (Rules are not Filters):**\n1.  **Structural Segregation for Articles:** The core strategy for QAPs is the segregation of articles into two distinct top-level collections based on their publication status: `/articles_published` and `/user_articles_drafts/{userId}`. \n    *   Documents in `/articles_published` are explicitly published (meaning `isPublished: true` is an invariant for this collection) and are intended to be publicly readable by all. This allows `list` queries on this collection to efficiently retrieve all public articles without security rules needing to filter results, thereby enforcing the QAP principle. \n    *   Documents in `/user_articles_drafts/{userId}` are drafts (`isPublished: false`) and are strictly private to the `userId` in the path. `list` queries on this collection will only return drafts belonging to the authenticated user, again without the rules acting as filters.\n2.  **Homogeneous Security Posture:** All documents within a given collection or subcollection (`/categories`, `/tags`, `/languages`, `/articles_published/{articleId}/comments`, etc.) share a uniform security posture. For instance, all `Category` documents are publicly readable, and all `Comment` documents under a published article are publicly readable (subject to `isApproved`). This structural consistency simplifies security rules, making them clear statements of intent rather than complex filtering logic.\n\nBy adhering to these principles, the Firestore structure provides a robust foundation for secure, scalable, and easily auditable access control, while efficiently supporting complex queries and multi-language content contribution."
+    "reasoning": "The Firestore structure for BharatDarshan Wiki prioritizes security, scalability, and debuggability by strictly adhering to the core design principles. This design employs **Structural Segregation** and **Authorization Independence via Denormalization** to ensure robust and easily maintainable security rules.\n\n**Authorization Independence:**\n\n1.  **User Profiles and Roles:** `users/{userId}` ensures path-based ownership for user profiles, making rules simple (`request.auth.uid == userId`). A dedicated `roles_admin/{userId}` collection uses document existence to grant admin privileges, avoiding `get()` calls for role checks.\n2.  **Core Content (States, Districts, Places, Languages, Categories, Tags):** These entities are designed as globally readable, master data in root collections (`/states`, `/districts`, etc.). Write access will be restricted to authenticated administrators, whose role is checked via the independent `/roles_admin/{userId}` collection. No authorization denormalization is needed within these collections themselves as their primary access posture is public read.\n3.  **Articles:** The `Article` entity in `/articles/{articleId}` uses its `status` field (`published`, `draft`, `pending_review`) and `createdByUserId` for authorization. Public articles (`status == 'published'`) are globally readable. Drafts are restricted to `createdByUserId`. This leverages queryable fields and avoids `get()` calls for parent data.\n4.  **Dependent Content (ArticleRevision, Translation, AISuggestion):** These subcollections (`/articles/{articleId}/revisions`, `/articles/{articleId}/translations`, `/articles/{articleId}/aiSuggestions`) inherently depend on the parent `Article`'s status and ownership. To achieve **Authorization Independence**, each document in these subcollections will denormalize critical authorization context from its parent `Article`. Specifically, `articleStatus` (e.g., 'published', 'draft') and `articleCreatedByUserId` will be copied into every `ArticleRevision`, `Translation`, and `AISuggestion` document. This allows security rules for these subcollections to evaluate access rights solely based on the `resource.data` of the document being accessed, eliminating costly and complex `get()` calls to the parent article and enabling atomic operations (like creating an article and its first revision in a batch).\n\n**Queryable Authorization Patterns (QAPs):**\n\n1.  **Public Content:** Collections like `/states`, `/districts`, `/places`, `/languages`, `/categories`, `/tags`, and `articles` with `status: 'published'` are designed for efficient public `list` queries without security rule filters. Their documents are inherently public.\n2.  **User-Specific Content:** `users/{userId}` and `articles` with `status: 'draft'` (filtered by `createdByUserId`) allow authenticated users to `list` and manage their private content using direct `request.auth.uid` checks against document fields or path segments.\n3.  **Dependent Content:** By denormalizing `articleStatus` and `articleCreatedByUserId` into `ArticleRevision`, `Translation`, and `AISuggestion` documents, `list` operations on these subcollections can be secured and made efficient. For example, a user can query their own draft translations by filtering on `articleCreatedByUserId` and `articleStatus`, or public translations by filtering on `articleStatus == 'published'`, without the rules becoming filters.\n\nThis architecture minimizes rule complexity, prevents security vulnerabilities arising from `get()` dependencies, and ensures high performance for both reads and writes, crucial for a collaborative, content-rich platform like BharatDarshan Wiki."
   }
 }
