@@ -45,15 +45,14 @@ export function AIChatbot() {
       const q = text.toLowerCase();
       if (q.includes('help') || q.includes('how') || q.includes('a to z') || q.includes('guide') || q.includes('flow') || q.includes('roadmap')) {
         response = "BharatDarshan Wiki is India's most advanced digital encyclopedia. The **A to Z Heritage Flow** is now fully active ('chalu'). Here is your roadmap:\n\n" +
-          "• **A** - Auth: Secure login to unlock advanced editing rights.\n" +
-          "• **B** - Browse: A perfect alphabetical index of all 28 states.\n" +
-          "• **C** - Contribute: Write new heritage entries and use **Gemini AI** to refine them.\n" +
-          "• **D** - Dashboard: Your personal command center for points, rewards, and stats.\n" +
-          "• **H** - History: Every edit is tracked in our time-stamped Revision History.\n" +
-          "• **M** - Media: A high-fidelity visual archive for photos and videos.\n" +
-          "• **S** - Search: Advanced deep crawling of live and archived heritage nodes.\n" +
-          "• **T** - Talk Page: Real-time community discussion hub on every single article.\n" +
-          "• **V** - Voice: Speak to explore! Our STT engine translates your voice into history.\n\nEverything is operational and synchronized. What would you like to explore first?";
+          "• **A** - Auth & Alphabetical: Secure access to all 28 states indexed alphabetically.\n" +
+          "• **B** - Browse: Deep navigation through states, districts, and sites.\n" +
+          "• **C** - Contribute: Publish new heritage nodes with Gemini AI refinement.\n" +
+          "• **D** - Dashboard: Track your contributions, points, and verified status.\n" +
+          "• **H** - History: Version tracking for every archive node.\n" +
+          "• **S** - Search: Advanced text and voice crawling of the heritage index.\n" +
+          "• **T** - Talk Page: Real-time community discussion on every article.\n" +
+          "• **V** - Voice: Advanced STT to speak naturally and find history.\n\nEverything is operational and synchronized. What would you like to explore first?";
       } else if (q.includes('language') || q.includes('translate') || q.includes('hindi')) {
         response = "We support 22 official Indian languages! On any article page, go to the 'AI Tools' tab. Our Gemini models will translate the entire content into your chosen language in seconds. Our localization flow is fully advanced.";
       } else if (q.includes('voice') || q.includes('mic') || q.includes('speak')) {
