@@ -7,50 +7,23 @@ service cloud.firestore {
      * 
      * Core Philosophy:
      * This ruleset enforces a "Contributor Ownership" model combined with "Public Consumption" for published 
-     * content. It prioritizes the "Authorization Independence" principle by utilizing denormalized fields 
-     * (articleStatus, articleCreatedByUserId) in subcollections to avoid expensive cross-document lookups.
-     *
-     * Data Structure:
-     * - /users/{userId}: Private profile management for contributors.
-     * - /roles_admin/{userId}: Root-level collection used for RBAC lookup.
-     * - /articles/{articleId}: The central content hub with state-based (draft/published) access.
-     * - Master Data: /states, /districts, /places, /languages, /categories, /tags are public-read, admin-write.
-     * - Assets: /images are public-read, contributor-write (for their own uploads).
-     *
-     * Key Security Decisions:
-     * 1. Public Reading: Master geographical data and published articles are available to all users.
-     * 2. Draft Privacy: Content marked as 'draft' is strictly restricted to the original author.
-     * 3. RBAC: Global administrative permissions are checked via a dedicated /roles_admin lookup.
-     * 4. Relational Integrity: On creation, documents must align their internal ownership IDs with the authenticated user.
-     * 5. Immutability: Critical relationship fields (like creator IDs) cannot be changed after creation.
+     * content. 
      */
 
     // --- GLOBAL HELPER FUNCTIONS ---
 
-    /**
-     * @description Checks if the request is coming from an authenticated user.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * @description Checks if the authenticated user's UID matches the provided userId.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * @description Checks if the user is a registered administrator by checking document existence.
-     */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    /**
-     * @description Combines existence check and ownership for secure updates/deletes.
-     */
     function isExistingOwner(userId) {
       return resource != null && isOwner(userId);
     }
@@ -58,25 +31,17 @@ service cloud.firestore {
     // --- COLLECTION RULES ---
 
     /**
-     * @description Individual contributor profiles.
-     * @path /users/{userId}
-     * @allow (create) if auth.uid == 'user_123' and data.id == 'user_123'
-     * @deny (create) if auth.uid == 'user_123' but data.id == 'user_999'
-     * @principle Pattern 4: Self-Creation. Enforces path-field consistency.
+     * @path /user_profiles/{userId}
      */
-    match /users/{userId} {
+    match /user_profiles/{userId} {
       allow get, list: if true;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
     }
 
     /**
-     * @description RBAC storage. Document existence determines admin status.
      * @path /roles_admin/{userId}
-     * @allow (get) if isSignedIn()
-     * @deny (write) if any client attempts to modify roles directly.
-     * @principle Pattern 2: Global Roles. Protected from client-side writes.
      */
     match /roles_admin/{userId} {
       allow get: if isSignedIn();
@@ -85,11 +50,7 @@ service cloud.firestore {
     }
 
     /**
-     * @description Master geographical and thematic data.
-     * @path /states/{id}, /districts/{id}, /places/{id}, /languages/{id}, /categories/{id}, /tags/{id}
-     * @allow (get) if true (Public Knowledge)
-     * @deny (update) if auth is not an Admin.
-     * @principle Pattern 5: Public Read with restricted writes.
+     * Master geographical and thematic data.
      */
     match /states/{stateId} {
       allow get, list: if true;
@@ -122,72 +83,47 @@ service cloud.firestore {
     }
 
     /**
-     * @description Image assets metadata.
-     * @path /images/{imageId}
-     * @allow (create) if uploadedByUserId matches authenticated UID.
-     * @deny (delete) if requester is not the original uploader.
-     * @principle Pattern 5: Ownership-based writes for shared public assets.
+     * @path /user_media_assets/{userId}/{assetId}
      */
-    match /images/{imageId} {
+    match /user_media_assets/{userId}/{assetId} {
       allow get, list: if true;
-      allow create: if isSignedIn() && request.resource.data.uploadedByUserId == request.auth.uid;
-      allow update, delete: if isExistingOwner(resource.data.uploadedByUserId);
+      allow create, update, delete: if isOwner(userId);
     }
 
     /**
-     * @description Primary content articles. Supports draft privacy and published public access.
-     * @path /articles/{articleId}
-     * @allow (get) if status == 'published'
-     * @deny (update) if user is not the creator or an admin.
-     * @principle Hybrid: Public Read with Ownership/Role writes.
+     * @path /articles_published/{articleId}
      */
-    match /articles/{articleId} {
-      allow get: if resource.data.status == 'published' || isOwner(resource.data.createdByUserId) || isAdmin();
-      allow list: if true; // Access controlled by client filters; secure by status in queries.
-      allow create: if isSignedIn() && request.resource.data.createdByUserId == request.auth.uid;
-      allow update: if (isExistingOwner(resource.data.createdByUserId) || isAdmin()) && request.resource.data.createdByUserId == resource.data.createdByUserId;
-      allow delete: if isExistingOwner(resource.data.createdByUserId) || isAdmin();
+    match /articles_published/{articleId} {
+      allow get, list: if true; 
+      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update: if isExistingOwner(resource.data.authorId) || isAdmin();
+      allow delete: if isExistingOwner(resource.data.authorId) || isAdmin();
 
       /**
-       * @description Article Revisions (History). Uses denormalized article meta for rule independence.
-       * @path /articles/{articleId}/revisions/{revisionId}
-       * @allow (get) if denormalized articleStatus == 'published'.
+       * Subcollections for Revisions, Comments, and Translations
        */
       match /revisions/{revisionId} {
-        allow get: if resource.data.articleStatus == 'published' || isOwner(resource.data.articleCreatedByUserId) || isAdmin();
-        allow list: if true; 
-        allow create: if isSignedIn() && (request.resource.data.articleCreatedByUserId == request.auth.uid || isAdmin());
-        allow update, delete: if isExistingOwner(resource.data.articleCreatedByUserId) || isAdmin();
+        allow get, list: if true; 
+        allow create: if isSignedIn();
+        allow update, delete: if isExistingOwner(resource.data.userId) || isAdmin();
       }
 
-      /**
-       * @description Article Translations. Accessible to authors, translators, or public if published.
-       * @path /articles/{articleId}/translations/{translationId}
-       */
+      match /comments/{commentId} {
+        allow get, list: if true;
+        allow create: if isSignedIn();
+        allow update, delete: if isExistingOwner(resource.data.userId) || isAdmin();
+      }
+
       match /translations/{translationId} {
-        allow get: if resource.data.articleStatus == 'published' || isOwner(resource.data.articleCreatedByUserId) || isOwner(resource.data.translatedByUserId) || isAdmin();
-        allow list: if true;
-        allow create: if isSignedIn(); // Any authenticated user can contribute translations.
-        allow update: if isExistingOwner(resource.data.articleCreatedByUserId) || isExistingOwner(resource.data.translatedByUserId) || isAdmin();
-        allow delete: if isExistingOwner(resource.data.articleCreatedByUserId) || isAdmin();
+        allow get, list: if true;
+        allow create: if isSignedIn();
+        allow update, delete: if isAdmin();
       }
 
-      /**
-       * @description AI Suggestions for content improvements.
-       * @path /articles/{articleId}/aiSuggestions/{aiSuggestionId}
-       */
       match /aiSuggestions/{aiSuggestionId} {
-        allow get: if resource.data.articleStatus == 'published' ? isSignedIn() : isOwner(resource.data.articleCreatedByUserId);
-        allow list: if isSignedIn();
-        allow create: if isSignedIn(); // Usually created by system, but allowed for prototyping.
-        allow update: if isExistingOwner(resource.data.articleCreatedByUserId) || isAdmin();
-        allow delete: if isAdmin();
+        allow get, list: if isSignedIn();
+        allow create, update, delete: if isAdmin();
       }
     }
   }
 }
-// This ruleset avoids schema validation (P5) to remain flexible for prototyping, focusing strictly on authorization links and relational integrity.
-// Every write operation requires authentication and identity verification (P1, P2).
-// Subcollection rules use denormalized data to remain performant and logically independent (Denormalization Principle).
-// Every update/delete check verifies document existence (P7).
-// Conditions are kept on single lines to prevent syntax errors (P1).
