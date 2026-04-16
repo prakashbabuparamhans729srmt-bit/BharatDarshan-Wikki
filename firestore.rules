@@ -21,18 +21,18 @@ service cloud.firestore {
     match /user_profiles/{userId} {
       allow read: if true;
       allow create, update: if isOwner(userId);
-      allow delete: if false; // Profiles are permanent archive nodes
+      allow delete: if false; 
     }
 
     // --- CORE WIKI ARCHIVES ---
     match /articles_published/{articleId} {
-      // Public reading enabled for A to Z exploration (fixing list/get permissions)
-      allow read: if true; 
+      // Explicitly allow list and get for A to Z exploration
+      allow read: if true;
       
       // Contributions require verified authentication
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isSignedIn(); // Allow community editing (wiki style)
-      allow delete: if false; // Heritage nodes cannot be deleted, only archived
+      allow update: if isSignedIn(); // Allow community editing
+      allow delete: if false; 
 
       // Talk Page (Comments)
       match /comments/{commentId} {
@@ -45,7 +45,7 @@ service cloud.firestore {
       match /revisions/{revisionId} {
         allow read: if true;
         allow create: if isSignedIn();
-        allow update, delete: if false; // History nodes are immutable
+        allow update, delete: if false; 
       }
     }
 
