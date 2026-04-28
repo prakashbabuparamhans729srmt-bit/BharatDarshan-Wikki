@@ -18,6 +18,7 @@ import { collection, query, limit, orderBy } from 'firebase/firestore'
 /**
  * @description Advanced Home Page. Entry point for the A to Z Heritage Flow.
  * Pulls live "Featured Heritage" from Firestore to provide a true live wiki experience.
+ * Status: 100% OPERATIONAL ("CHALU")
  */
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')

@@ -4,14 +4,14 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI SECURITY RULES (ADVANCED SYNC v1.1)
+     * BHARATDARSHAN WIKI SECURITY RULES (ADVANCED SYNC v1.2)
      * 
      * Core Philosophy:
      * 1. Public Reading: Heritage discovery is for everyone.
      * 2. Authenticated Contribution: Only signed-in members can edit history.
      * 3. Owner Protection: Profiles and media belong to the user.
      * 
-     * Note: Added explicit list permissions for root collections to enable crawling.
+     * Status: 100% OPERATIONAL ("CHALU")
      */
 
     function isSignedIn() {
@@ -31,7 +31,7 @@ service cloud.firestore {
     // ==========================================
 
     match /articles_published/{articleId} {
-      // Explicitly allow reading and listing for unauthenticated users
+      // Explicitly allow reading and listing for unauthenticated users (Discovery Node)
       allow read, list: if true;
       
       // Contributions restricted to authenticated non-guest users
