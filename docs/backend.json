@@ -34,7 +34,8 @@
         "updatedAt": { "type": "string", "format": "date-time" },
         "createdAt": { "type": "string", "format": "date-time" },
         "tagIds": { "type": "array", "items": { "type": "string" } },
-        "image": { "type": "string" }
+        "image": { "type": "string" },
+        "isPublished": { "type": "boolean" }
       },
       "required": ["id", "title", "slug", "content", "authorId"]
     },
