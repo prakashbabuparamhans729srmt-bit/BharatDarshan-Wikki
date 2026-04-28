@@ -50,9 +50,17 @@
       "schema": "#/backend/entities/Article",
       "description": "Primary flat collection for all heritage nodes."
     },
+    "/articles_published/{articleId}/comments/{commentId}": {
+      "schema": "object",
+      "description": "Talk page community comments for historical nodes."
+    },
+    "/articles_published/{articleId}/revisions/{revisionId}": {
+      "schema": "object",
+      "description": "Historical snapshots of the heritage node contents."
+    },
     "/user_profiles/{userId}": {
       "schema": "#/backend/entities/UserProfile",
-      "description": "User profiles and preferences."
+      "description": "User profiles and heritage preferences."
     },
     "/user_media_assets/{userId}/{assetId}": {
       "schema": "object",
