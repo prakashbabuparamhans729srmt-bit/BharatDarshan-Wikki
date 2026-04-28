@@ -1,96 +1,630 @@
-
 {
   "entities": {
-    "UserProfile": {
-      "title": "UserProfile",
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
       "type": "object",
-      "description": "User profile information for wiki contributors.",
+      "description": "Represents a registered user or contributor to the BharatDarshan Wiki platform. Users can create, edit, and comment on content.",
       "properties": {
-        "id": { "type": "string" },
-        "username": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "firstName": { "type": "string" },
-        "lastName": { "type": "string" },
-        "memberSince": { "type": "string", "format": "date-time" },
-        "lastActive": { "type": "string", "format": "date-time" },
-        "themePreference": { "type": "string", "enum": ["light", "dark", "system"] },
-        "preferredLanguageId": { "type": "string" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "username": {
+          "type": "string",
+          "description": "A unique username for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address, used for identification.",
+          "format": "email"
+        },
+        "bio": {
+          "type": "string",
+          "description": "A short biography or description about the user."
+        },
+        "profilePictureUrl": {
+          "type": "string",
+          "description": "URL to the user's profile picture.",
+          "format": "uri"
+        },
+        "joinedDate": {
+          "type": "string",
+          "description": "The date and time when the user joined the platform.",
+          "format": "date-time"
+        },
+        "followerIds": {
+          "type": "array",
+          "description": "An array of User IDs who are following this user. (Relationship: User N:N User)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "followingIds": {
+          "type": "array",
+          "description": "An array of User IDs that this user is following. (Relationship: User N:N User)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lastActiveDate": {
+          "type": "string",
+          "description": "The date and time of the user's last activity on the platform.",
+          "format": "date-time"
+        }
       },
-      "required": ["id", "email"]
+      "required": [
+        "id",
+        "username",
+        "email",
+        "joinedDate"
+      ]
     },
-    "Article": {
-      "title": "Article",
+    "State": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "State",
       "type": "object",
-      "description": "A live heritage wiki node representing a state, district, or place.",
+      "description": "Represents a major geographical state in India, serving as a primary category for content.",
       "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "slug": { "type": "string" },
-        "content": { "type": "string" },
-        "authorId": { "type": "string" },
-        "categoryId": { "type": "string", "enum": ["State", "District", "Place"] },
-        "parent": { "type": "string" },
-        "version": { "type": "number" },
-        "updatedAt": { "type": "string", "format": "date-time" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "tagIds": { "type": "array", "items": { "type": "string" } },
-        "image": { "type": "string" },
-        "isPublished": { "type": "boolean" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the State entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the state."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed textual description or article about the state."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to a representative image for the state.",
+          "format": "uri"
+        },
+        "createdByUserId": {
+          "type": "string",
+          "description": "Reference to the User who initially created this state's content. (Relationship: User 1:N State)"
+        },
+        "lastEditedByUserId": {
+          "type": "string",
+          "description": "Reference to the User who last edited this state's content. (Relationship: User 1:N State)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time when the state's content was first created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "The date and time when the state's content was last updated.",
+          "format": "date-time"
+        },
+        "tagIds": {
+          "type": "array",
+          "description": "References to Tags associated with this state for additional categorization. (Relationship: State N:N Tag)",
+          "items": {
+            "type": "string"
+          }
+        }
       },
-      "required": ["id", "title", "slug", "content", "authorId"]
+      "required": [
+        "id",
+        "name",
+        "description",
+        "createdByUserId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "District": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "District",
+      "type": "object",
+      "description": "Represents a geographical district within a state, containing various points of interest.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the District entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the district."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed textual description or article about the district."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to a representative image for the district.",
+          "format": "uri"
+        },
+        "stateId": {
+          "type": "string",
+          "description": "Reference to the parent State this district belongs to. (Relationship: State 1:N District)"
+        },
+        "createdByUserId": {
+          "type": "string",
+          "description": "Reference to the User who initially created this district's content. (Relationship: User 1:N District)"
+        },
+        "lastEditedByUserId": {
+          "type": "string",
+          "description": "Reference to the User who last edited this district's content. (Relationship: User 1:N District)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time when the district's content was first created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "The date and time when the district's content was last updated.",
+          "format": "date-time"
+        },
+        "tagIds": {
+          "type": "array",
+          "description": "References to Tags associated with this district for additional categorization. (Relationship: District N:N Tag)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "stateId",
+        "createdByUserId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PointOfInterest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PointOfInterest",
+      "type": "object",
+      "description": "Represents a specific point of interest, landmark, or article content within a district.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PointOfInterest entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the point of interest or article."
+        },
+        "content": {
+          "type": "string",
+          "description": "The main textual content or article body describing the point of interest."
+        },
+        "districtId": {
+          "type": "string",
+          "description": "Reference to the parent District this point of interest belongs to. (Relationship: District 1:N PointOfInterest)"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to a primary image for the point of interest.",
+          "format": "uri"
+        },
+        "galleryImageUrls": {
+          "type": "array",
+          "description": "An array of URLs for additional images related to the point of interest.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "videoUrl": {
+          "type": "string",
+          "description": "URL to an embedded video (e.g., YouTube) related to the point of interest.",
+          "format": "uri"
+        },
+        "createdByUserId": {
+          "type": "string",
+          "description": "Reference to the User who initially created this point of interest's content. (Relationship: User 1:N PointOfInterest)"
+        },
+        "lastEditedByUserId": {
+          "type": "string",
+          "description": "Reference to the User who last edited this point of interest's content. (Relationship: User 1:N PointOfInterest)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time when the point of interest's content was first created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "The date and time when the point of interest's content was last updated.",
+          "format": "date-time"
+        },
+        "tagIds": {
+          "type": "array",
+          "description": "References to Tags associated with this point of interest for additional categorization. (Relationship: PointOfInterest N:N Tag)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "content",
+        "districtId",
+        "createdByUserId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Tag": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tag",
+      "type": "object",
+      "description": "Represents a customizable tag or label used to categorize states, districts, and points of interest.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Tag entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the tag (e.g., 'Historical', 'Religious', 'Natural')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of what the tag represents."
+        },
+        "createdByUserId": {
+          "type": "string",
+          "description": "Reference to the User who created this tag. (Relationship: User 1:N Tag)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time when the tag was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "createdByUserId",
+        "createdAt"
+      ]
     },
     "Comment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Comment",
       "type": "object",
-      "description": "A community contribution to an article's Talk Page.",
+      "description": "Represents a comment made by a user on a PointOfInterest article.",
       "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "username": { "type": "string" },
-        "content": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "articleId": { "type": "string" }
-      }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Comment entity."
+        },
+        "content": {
+          "type": "string",
+          "description": "The textual content of the comment."
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Reference to the User who authored this comment. (Relationship: User 1:N Comment)"
+        },
+        "pointOfInterestId": {
+          "type": "string",
+          "description": "Reference to the PointOfInterest article this comment belongs to. (Relationship: PointOfInterest 1:N Comment)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time when the comment was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "The date and time when the comment was last updated."
+        }
+      },
+      "required": [
+        "id",
+        "content",
+        "authorId",
+        "pointOfInterestId",
+        "createdAt"
+      ]
     },
-    "Revision": {
-      "title": "Revision",
+    "ContentRevision": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContentRevision",
       "type": "object",
-      "description": "A historical snapshot of a heritage node update.",
+      "description": "Stores historical versions of content for States, Districts, and Points of Interest, enabling Wikipedia-like edit history tracking.",
       "properties": {
-        "id": { "type": "string" },
-        "articleId": { "type": "string" },
-        "userId": { "type": "string" },
-        "username": { "type": "string" },
-        "revisionNumber": { "type": "number" },
-        "contentSnapshot": { "type": "string" },
-        "changesSummary": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ContentRevision entity."
+        },
+        "entityType": {
+          "type": "string",
+          "description": "The type of entity this revision belongs to (e.g., 'State', 'District', 'PointOfInterest').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entityId": {
+          "type": "string",
+          "description": "Reference to the ID of the specific entity (State, District, or PointOfInterest) that this revision is for."
+        },
+        "content": {
+          "type": "string",
+          "description": "The full content of the entity at this specific revision point."
+        },
+        "editedByUserId": {
+          "type": "string",
+          "description": "Reference to the User who made this revision. (Relationship: User 1:N ContentRevision)"
+        },
+        "editedAt": {
+          "type": "string",
+          "description": "The date and time when this content revision was made.",
+          "format": "date-time"
+        },
+        "changesSummary": {
+          "type": "string",
+          "description": "A brief summary of the changes made in this revision."
+        }
+      },
+      "required": [
+        "id",
+        "entityType",
+        "entityId",
+        "content",
+        "editedByUserId",
+        "editedAt"
+      ]
+    },
+    "ContentTranslation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContentTranslation",
+      "type": "object",
+      "description": "Stores translated versions of content for States, Districts, and Points of Interest to support multiple Indian languages.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ContentTranslation entity."
+        },
+        "entityType": {
+          "type": "string",
+          "description": "The type of entity this translation belongs to (e.g., 'State', 'District', 'PointOfInterest').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "entityId": {
+          "type": "string",
+          "description": "Reference to the ID of the specific entity (State, District, or PointOfInterest) that this translation is for."
+        },
+        "languageCode": {
+          "type": "string",
+          "description": "The ISO 639-1 code for the language of the translation (e.g., 'hi' for Hindi, 'ta' for Tamil)."
+        },
+        "translatedTitle": {
+          "type": "string",
+          "description": "The translated title of the content."
+        },
+        "translatedContent": {
+          "type": "string",
+          "description": "The full translated content of the entity."
+        },
+        "translatedByUserId": {
+          "type": "string",
+          "description": "Reference to the User (or AI system) who performed this translation. (Relationship: User 1:N ContentTranslation)"
+        },
+        "translatedAt": {
+          "type": "string",
+          "description": "The date and time when this translation was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "entityType",
+        "entityId",
+        "languageCode",
+        "translatedContent",
+        "translatedAt"
+      ]
     }
   },
   "auth": {
-    "providers": ["password", "anonymous"]
+    "providers": [
+      "password",
+      "anonymous"
+    ]
   },
   "firestore": {
-    "/user_profiles/{userId}": {
-      "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "Public contributor profiles."
-    },
-    "/articles_published/{articleId}": {
-      "schema": { "$ref": "#/backend/entities/Article" },
-      "description": "Live digital heritage encyclopedia nodes."
-    },
-    "/articles_published/{articleId}/comments/{commentId}": {
-      "schema": { "$ref": "#/backend/entities/Comment" },
-      "description": "Discussion threads for specific heritage nodes."
-    },
-    "/articles_published/{articleId}/revisions/{revisionId}": {
-      "schema": { "$ref": "#/backend/entities/Revision" },
-      "description": "Archive logs for tracking history of changes."
-    },
-    "/user_media_assets/{userId}/{assetId}": {
-      "schema": { "type": "object" },
-      "description": "Media assets contributed by the heritage community."
-    }
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores individual user profiles. Users can read and update their own profile; others can read public profile information.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, corresponding to `request.auth.uid`."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_contributors/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "A top-level collection indicating users who have contributor privileges. The existence of a document with the user's UID grants the contributor role, enabling authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who is a contributor."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admins/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "A top-level collection indicating users who have administrator privileges. The existence of a document with the user's UID grants the admin role, enabling authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who is an administrator."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/states/{stateId}",
+        "definition": {
+          "entityName": "State",
+          "schema": {
+            "$ref": "#/backend/entities/State"
+          },
+          "description": "Stores rich content for Indian states. Publicly readable. Write access is restricted to authenticated contributors and administrators. Includes `createdByUserId` and `lastEditedByUserId` for ownership tracking and authorization independence.",
+          "params": [
+            {
+              "name": "stateId",
+              "description": "The unique identifier of the state."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/states/{stateId}/districts/{districtId}",
+        "definition": {
+          "entityName": "District",
+          "schema": {
+            "$ref": "#/backend/entities/District"
+          },
+          "description": "Stores rich content for districts within a specific state. Publicly readable. Write access is restricted to authenticated contributors and administrators. Includes `createdByUserId` and `lastEditedByUserId` for ownership tracking and authorization independence.",
+          "params": [
+            {
+              "name": "stateId",
+              "description": "The unique identifier of the parent state."
+            },
+            {
+              "name": "districtId",
+              "description": "The unique identifier of the district."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}",
+        "definition": {
+          "entityName": "PointOfInterest",
+          "schema": {
+            "$ref": "#/backend/entities/PointOfInterest"
+          },
+          "description": "Stores detailed articles and content for points of interest within a district. Publicly readable. Write access is restricted to authenticated contributors and administrators. Includes `createdByUserId` and `lastEditedByUserId` for ownership tracking and authorization independence.",
+          "params": [
+            {
+              "name": "stateId",
+              "description": "The unique identifier of the parent state."
+            },
+            {
+              "name": "districtId",
+              "description": "The unique identifier of the parent district."
+            },
+            {
+              "name": "poiId",
+              "description": "The unique identifier of the point of interest."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}/comments/{commentId}",
+        "definition": {
+          "entityName": "Comment",
+          "schema": {
+            "$ref": "#/backend/entities/Comment"
+          },
+          "description": "Stores user comments associated with a specific Point of Interest. Publicly readable. Authenticated users can create comments; authors can edit or delete their own comments. Includes `authorId` for ownership tracking and authorization independence.",
+          "params": [
+            {
+              "name": "stateId",
+              "description": "The unique identifier of the parent state."
+            },
+            {
+              "name": "districtId",
+              "description": "The unique identifier of the parent district."
+            },
+            {
+              "name": "poiId",
+              "description": "The unique identifier of the parent point of interest."
+            },
+            {
+              "name": "commentId",
+              "description": "The unique identifier of the comment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/tags/{tagId}",
+        "definition": {
+          "entityName": "Tag",
+          "schema": {
+            "$ref": "#/backend/entities/Tag"
+          },
+          "description": "Stores customizable tags for categorizing content. Publicly readable. Write access is restricted to authenticated contributors and administrators. Includes `createdByUserId` for ownership tracking and authorization independence.",
+          "params": [
+            {
+              "name": "tagId",
+              "description": "The unique identifier of the tag."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/content_revisions/{revisionId}",
+        "definition": {
+          "entityName": "ContentRevision",
+          "schema": {
+            "$ref": "#/backend/entities/ContentRevision"
+          },
+          "description": "Stores historical versions of content for States, Districts, and Points of Interest. Publicly readable for viewing edit history. Write access is restricted to authenticated contributors and administrators. Includes denormalized `entityType`, `entityId`, and `editedByUserId` for direct lookup, query efficiency, and authorization independence.",
+          "params": [
+            {
+              "name": "revisionId",
+              "description": "The unique identifier for the content revision."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/content_translations/{translationId}",
+        "definition": {
+          "entityName": "ContentTranslation",
+          "schema": {
+            "$ref": "#/backend/entities/ContentTranslation"
+          },
+          "description": "Stores translated versions of content for States, Districts, and Points of Interest. Publicly readable. Write access is restricted to authenticated contributors, administrators, or AI translation services. Includes denormalized `entityType`, `entityId`, and `translatedByUserId` for direct lookup, query efficiency, and authorization independence.",
+          "params": [
+            {
+              "name": "translationId",
+              "description": "The unique identifier for the content translation."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for BharatDarshan Wiki prioritizes security, scalability, and debuggability by adhering to core design principles. All content (States, Districts, PointsOfInterest, Tags, Comments, Revisions, Translations) is designed for public readability, enabling simple 'allow read;' rules and robust 'list' queries (QAPs). Write access is governed by a clear, database-backed access control (DBAC) system using dedicated roles collections (`/roles_contributors`, `/roles_admins`).\n\nAuthorization Independence is achieved through strategic denormalization and the use of explicit ownership fields. For instance, `createdByUserId`, `lastEditedByUserId`, `authorId`, `editedByUserId`, and `translatedByUserId` are embedded directly within their respective documents. This eliminates the need for `get()` calls in security rules to check parent document attributes or complex chained dependencies, ensuring atomic operations and simplified rule logic. A user's ability to edit their own comment, for example, is checked directly against the `authorId` field in the `Comment` document itself, without needing to retrieve the parent PointOfInterest document. Similarly, contributor and admin roles are verified by checking the existence of a document in the top-level `/roles_contributors` or `/roles_admins` collections, a highly independent and efficient check.\n\nStructural segregation is applied by nesting geographical content hierarchically (`/states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}`). This provides a clear, logical organization. User-specific data, such as profiles, are stored under `/users/{userId}`. Collaborative data like `ContentRevisions` and `ContentTranslations` are placed in top-level collections (`/content_revisions`, `/content_translations`) and include denormalized `entityType` and `entityId` fields. This centralizes revision and translation history, making it easy to query across different content types (e.g., 'show all revisions made by a user') without complex collection group queries or security rule filtering. The explicit inclusion of `editedByUserId` or `translatedByUserId` in these documents directly supports author-specific queries from a user's dashboard (QAPs) and allows for fine-grained, independent access control.\n\nOverall, this design minimizes rule complexity, maximizes query efficiency, and ensures a highly debuggable authorization model, fully supporting the Wikipedia-like, multi-contributor, multi-language, and AI-powered features envisioned for BharatDarshan Wiki."
   }
 }

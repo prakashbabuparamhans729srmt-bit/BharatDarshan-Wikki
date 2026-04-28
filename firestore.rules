@@ -1,55 +1,177 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Utility functions
+
+    /**
+     * BharatDarshan Wiki - Security Rules Documentation
+     *
+     * Core Philosophy:
+     * This ruleset implements a community-driven wiki model. Information about Indian states, districts, 
+     * and points of interest is publicly readable to encourage knowledge sharing. Write access is 
+     * strictly controlled via a Role-Based Access Control (RBAC) system (Admins and Contributors) 
+     * and a User-Ownership model for personal content like profiles and comments.
+     *
+     * Data Structure:
+     * - /users/{userId}: Public user profiles.
+     * - /roles_admins/{userId} & /roles_contributors/{userId}: Indicator collections for RBAC.
+     * - /states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}: Hierarchical geographical content.
+     * - /tags, /content_revisions, /content_translations: Top-level utility collections for categorization and history.
+     *
+     * Key Security Decisions:
+     * 1. Public Read Access: All wiki content and user profiles are publicly readable (get and list).
+     * 2. Role-Based Writes: Modification of geographical data requires the 'Contributor' or 'Admin' role.
+     * 3. Ownership-Based Writes: Users have full control over their own profiles and comments.
+     * 4. Denormalization for Authorization: Ownership fields (e.g., authorId, createdByUserId) are stored 
+     *    directly on documents to allow fast, non-recursive authorization checks.
+     * 5. Structural Segregation: Administrative roles are stored in dedicated collections to separate 
+     *    identity from permissions.
+     */
+
+    // --- Helper Functions ---
+
+    /** @description Checks if the request is from an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
+
+    /** @description Checks if the authenticated user's UID matches the provided ID. */
     function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
 
-    // User Profiles
-    match /user_profiles/{userId} {
-      allow read: if true;
-      allow write: if isOwner(userId);
+    /** @description Checks if a user is registered in the admins collection. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admins/$(request.auth.uid));
     }
 
-    // Heritage Articles (Wiki Nodes)
-    match /articles_published/{articleId} {
-      // Global read access for encyclopedia browsing
-      allow read: if true;
-      
-      // Contribution and Editing
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
-      allow delete: if false; 
+    /** @description Checks if a user is a contributor or an admin. */
+    function isContributor() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/roles_contributors/$(request.auth.uid)) || 
+        isAdmin()
+      );
+    }
 
-      // Talk Page (Comments)
-      match /comments/{commentId} {
-        allow read: if true;
-        allow create: if isSignedIn();
-        allow delete: if isOwner(resource.data.userId);
+    /** @description Validates ownership for an existing document during update or delete. */
+    function isExistingOwner(ownerId) {
+      return resource != null && isOwner(ownerId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for user profile documents.
+     * @path /users/{userId}
+     * @allow (create) if a user creates their own profile document.
+     * @deny (update) if a user tries to modify a profile that isn't theirs.
+     * @principle Self-creation and ownership-based writes for personal profiles.
+     */
+    match /users/{userId} {
+      allow get, list: if true;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(resource.data.id) && request.resource.data.id == resource.data.id;
+      allow delete: if isAdmin(); // Only admins can delete user profiles for moderation.
+    }
+
+    /**
+     * @description Indicator collections for RBAC. These are read-only for users to verify their own roles.
+     * @path /roles_admins/{userId} & /roles_contributors/{userId}
+     * @principle Structural segregation of roles for efficient authorization checks.
+     */
+    match /roles_admins/{userId} {
+      allow get, list: if isSignedIn();
+      allow write: if false; // Role management typically happens via Admin SDK or Console.
+    }
+
+    match /roles_contributors/{userId} {
+      allow get, list: if isSignedIn();
+      allow write: if false;
+    }
+
+    /**
+     * @description Rules for State geographical data.
+     * @path /states/{stateId}
+     * @allow (create) if the user has a contributor or admin role.
+     * @deny (delete) if the user is a standard signed-in user without roles.
+     * @principle Role-based access control for core platform content.
+     */
+    match /states/{stateId} {
+      allow get, list: if true;
+      allow create: if isContributor() && request.resource.data.createdByUserId == request.auth.uid;
+      allow update: if isContributor() && request.resource.data.createdByUserId == resource.data.createdByUserId;
+      allow delete: if isAdmin();
+
+      /**
+       * @description Rules for Districts within a state.
+       * @path /states/{stateId}/districts/{districtId}
+       * @principle Hierarchical nesting with inherited role-based write permissions.
+       */
+      match /districts/{districtId} {
+        allow get, list: if true;
+        allow create: if isContributor() && request.resource.data.createdByUserId == request.auth.uid;
+        allow update: if isContributor() && request.resource.data.createdByUserId == resource.data.createdByUserId;
+        allow delete: if isAdmin();
+
+        /**
+         * @description Rules for Points of Interest (POI) within a district.
+         * @path /states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}
+         */
+        match /pointsOfInterest/{poiId} {
+          allow get, list: if true;
+          allow create: if isContributor() && request.resource.data.createdByUserId == request.auth.uid;
+          allow update: if isContributor() && request.resource.data.createdByUserId == resource.data.createdByUserId;
+          allow delete: if isAdmin();
+
+          /**
+           * @description Rules for user comments on POIs.
+           * @path /states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}/comments/{commentId}
+           * @allow (create) if the user is signed in and sets themselves as author.
+           * @allow (update) if the author is editing their own comment.
+           * @principle Ownership-based writes for community interactions.
+           */
+          match /comments/{commentId} {
+            allow get, list: if true;
+            allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+            allow update: if isExistingOwner(resource.data.authorId) && request.resource.data.authorId == resource.data.authorId;
+            allow delete: if isExistingOwner(resource.data.authorId) || isAdmin();
+          }
+        }
       }
-
-      // Revision History
-      match /revisions/{revisionId} {
-        allow read: if true;
-        allow create: if isSignedIn();
-        allow update, delete: if false; 
-      }
     }
 
-    // Media Assets
-    match /user_media_assets/{userId}/{assetId} {
-      allow read: if true;
-      allow write: if isOwner(userId);
+    /**
+     * @description Rules for global content tags.
+     * @path /tags/{tagId}
+     * @principle Public read with role-restricted writes for metadata.
+     */
+    match /tags/{tagId} {
+      allow get, list: if true;
+      allow create: if isContributor() && request.resource.data.createdByUserId == request.auth.uid;
+      allow update: if isContributor() && request.resource.data.createdByUserId == resource.data.createdByUserId;
+      allow delete: if isAdmin();
     }
-    
-    // Global list access helper
-    match /{path=**}/articles_published/{articleId} {
-      allow read: if true;
+
+    /**
+     * @description Rules for tracking Wikipedia-like content revisions.
+     * @path /content_revisions/{revisionId}
+     * @principle Append-only historical tracking for contributors and admins.
+     */
+    match /content_revisions/{revisionId} {
+      allow get, list: if true;
+      allow create: if isContributor() && request.resource.data.editedByUserId == request.auth.uid;
+      allow update, delete: if isAdmin(); // Revisions are generally immutable once created.
+    }
+
+    /**
+     * @description Rules for multi-language content translations.
+     * @path /content_translations/{translationId}
+     * @principle Authoritative translation management by contributors or admins.
+     */
+    match /content_translations/{translationId} {
+      allow get, list: if true;
+      allow create: if isContributor() && request.resource.data.translatedByUserId == request.auth.uid;
+      allow update: if isContributor() && request.resource.data.translatedByUserId == resource.data.translatedByUserId;
+      allow delete: if isAdmin();
     }
   }
 }
