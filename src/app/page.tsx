@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react'
@@ -26,6 +25,7 @@ export default function Home() {
   const db = useFirestore()
 
   // 1. Fetch live articles from Firestore for the "Featured Heritage" section
+  // Note: If this fails with a permission error, firestore.rules must allow public 'list'
   const latestArticlesQuery = useMemoFirebase(() => {
     return query(
       collection(db, 'articles_published'), 
@@ -36,6 +36,7 @@ export default function Home() {
   
   const { data: liveArticles, isLoading: isLiveLoading } = useCollection(latestArticlesQuery);
 
+  // Fallback to mock data if Firestore is empty to ensure the UI is never blank
   const featuredArticles = (liveArticles && liveArticles.length > 0) 
     ? liveArticles 
     : ARTICLES.slice(0, 3);
