@@ -3,59 +3,38 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI SECURITY RULES
+     * BHARATDARSHAN WIKI SECURITY RULES (ADVANCED SYNC)
      * 
      * Core Philosophy:
-     * This ruleset implements a multi-tier authorization model for a collaborative Indian geography wiki. 
-     * It prioritizes public accessibility for educational content while strictly controlling modification 
-     * rights through role-based access and individual ownership.
-     * 
-     * Data Structure:
-     * - User Profiles: Located at /users/{userId}.
-     * - Role Management: Top-level collections /roles_admins and /roles_contributors act as registry for permissions.
-     * - Wiki Hierarchy: Geographical data is nested (/states -> /districts -> /pointsOfInterest).
-     * - Social & Metadata: Comments are nested under content; Tags, Revisions, and Translations are top-level for global querying.
-     * 
-     * Key Security Decisions:
-     * 1. Public Read Access: All wiki content, comments, and historical revisions are publicly readable to encourage knowledge sharing.
-     * 2. Role-Based Writes: Modifications to states, districts, POIs, and tags require the user to exist in the 'admins' or 'contributors' registry.
-     * 3. Ownership-Based Social Writes: Comments can be created by any signed-in user but modified only by the original author.
-     * 4. Denormalization for Performance: Critical ID fields (authorId, createdByUserId) are required on documents to allow fast authorization without recursive lookups.
-     * 5. Structural Consistency: Rules enforce that internal ID fields match the Firestore document path during creation.
+     * Public reading for heritage discovery.
+     * Authenticated/Role-based writes for contribution.
+     * Owner-based writes for profiles and media.
      */
 
     // ==========================================
     // GLOBAL HELPER FUNCTIONS
     // ==========================================
 
-    /** @description Checks if the request is from an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the user's UID matches the provided ID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks if the user is a registered administrator. */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admins/$(request.auth.uid));
     }
 
-    /** @description Checks if the user is a registered contributor. */
     function isContributor() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_contributors/$(request.auth.uid));
     }
 
-    /** @description Checks if the user has permission to edit wiki content (Admin or Contributor). */
     function canEditWiki() {
-      return isAdmin() || isContributor();
-    }
-
-    /** @description Safely checks ownership of an existing document for updates/deletes. */
-    function isExistingOwner(authorIdField) {
-      return resource != null && isOwner(authorIdField);
+      // In guest-friendly mode for prototype, we allow signed-in users 
+      // who aren't anonymous to contribute, or specific role check.
+      return isSignedIn() && (!request.auth.token.anonymous || isAdmin() || isContributor());
     }
 
     // ==========================================
@@ -63,128 +42,77 @@ service cloud.firestore {
     // ==========================================
 
     /**
-     * @description Rules for user profiles. Publicly readable; owner-only updates.
-     * @path /users/{userId}
-     * @allow Create if auth.uid matches path ID.
-     * @deny Update if user is not the profile owner.
-     * @principle Pattern 4 (Self-Creation) and Pattern 1 (Ownership).
+     * @description Primary Heritage Archive Node
+     * Used by: Home, Browse, Search, Article pages.
      */
-    match /users/{userId} {
-      allow get, list: if true;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isAdmin();
-    }
-
-    /**
-     * @description System collections for role management. Restricted to Admin modification.
-     * @path /roles_admins/{userId} and /roles_contributors/{userId}
-     * @allow Get for the user themselves to verify their own role.
-     * @deny Any write by non-admins.
-     * @principle Pattern 2 (Roles).
-     */
-    match /roles_admins/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isAdmin();
-      allow write: if isAdmin();
-    }
-
-    match /roles_contributors/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isAdmin();
-      allow write: if isAdmin();
-    }
-
-    /**
-     * @description Geographical States. Public read; Contributor/Admin writes.
-     * @path /states/{stateId}
-     * @allow Create if user is a contributor and sets createdByUserId correctly.
-     * @deny Update if user is not a contributor or tries to change the original creator.
-     * @principle Pattern 5 (Public Read with Authorized Writes).
-     */
-    match /states/{stateId} {
-      allow get, list: if true;
-      allow create: if canEditWiki() && request.resource.data.createdByUserId == request.auth.uid;
-      allow update: if canEditWiki() && request.resource.data.createdByUserId == resource.data.createdByUserId;
+    match /articles_published/{articleId} {
+      allow read: if true;
+      allow create: if canEditWiki() && request.resource.data.authorId == request.auth.uid;
+      allow update: if canEditWiki();
       allow delete: if isAdmin();
 
-      /**
-       * @description Districts within a state.
-       * @path /states/{stateId}/districts/{districtId}
-       * @allow Create if user is a contributor.
-       * @principle Relational integrity enforced via path nesting.
-       */
-      match /districts/{districtId} {
-        allow get, list: if true;
-        allow create: if canEditWiki() && request.resource.data.createdByUserId == request.auth.uid;
-        allow update: if canEditWiki() && request.resource.data.createdByUserId == resource.data.createdByUserId;
-        allow delete: if isAdmin();
+      // Nested Talk Page (Comments)
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      }
 
-        /**
-         * @description Points of Interest (POIs) - the primary wiki articles.
-         * @path /states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}
-         * @allow Get/List for everyone.
-         * @principle Pattern 5 (Public Read with Authorized Writes).
-         */
-        match /pointsOfInterest/{poiId} {
-          allow get, list: if true;
-          allow create: if canEditWiki() && request.resource.data.createdByUserId == request.auth.uid;
-          allow update: if canEditWiki() && request.resource.data.createdByUserId == resource.data.createdByUserId;
-          allow delete: if isAdmin();
-
-          /**
-           * @description User comments on articles.
-           * @path /states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}/comments/{commentId}
-           * @allow Create for any signed-in user. Update/Delete for the author only.
-           * @principle Pattern 1 (Ownership) for social interactions.
-           */
-          match /comments/{commentId} {
-            allow get, list: if true;
-            allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-            allow update: if isExistingOwner(resource.data.authorId) && request.resource.data.authorId == resource.data.authorId;
-            allow delete: if isExistingOwner(resource.data.authorId) || isAdmin();
-          }
-        }
+      // Nested Version History
+      match /revisions/{revisionId} {
+        allow read: if true;
+        allow create: if canEditWiki() && request.resource.data.userId == request.auth.uid;
       }
     }
 
     /**
-     * @description Global Tags for categorization.
-     * @path /tags/{tagId}
-     * @allow Create/Update if user is a contributor.
-     * @principle Shared metadata protection.
+     * @description User Profile Node
+     * Synchronizes user data for the dashboard and settings.
      */
-    match /tags/{tagId} {
-      allow get, list: if true;
-      allow create: if canEditWiki() && request.resource.data.createdByUserId == request.auth.uid;
-      allow update: if canEditWiki();
-      allow delete: if isAdmin();
+    match /user_profiles/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     /**
-     * @description Historical versions of wiki content.
-     * @path /content_revisions/{revisionId}
-     * @allow Create by contributors when they edit content. Read by public.
-     * @principle Auditable audit trail.
+     * @description User Media Archive
+     * Stores pointers to heritage images and videos.
      */
-    match /content_revisions/{revisionId} {
-      allow get, list: if true;
-      allow create: if canEditWiki() && request.resource.data.editedByUserId == request.auth.uid;
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+    match /user_media_assets/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId);
+      
+      match /{allSubpaths=**} {
+        allow read: if true;
+        allow write: if isOwner(userId);
+      }
     }
 
     /**
-     * @description Translations of wiki content into different languages.
-     * @path /content_translations/{translationId}
-     * @allow Public read. Writes by contributors or admins.
-     * @principle Support for multi-lingual Indian audience.
+     * @description System Roles Node
      */
-    match /content_translations/{translationId} {
-      allow get, list: if true;
-      allow create: if canEditWiki() && request.resource.data.translatedByUserId == request.auth.uid;
-      allow update: if canEditWiki();
-      allow delete: if isAdmin();
+    match /roles_admins/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /roles_contributors/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Legacy State/District/POI paths from backend.json (Keeping for safety)
+    match /states/{stateId} {
+      allow read: if true;
+      allow write: if canEditWiki();
+      match /districts/{districtId} {
+        allow read: if true;
+        allow write: if canEditWiki();
+        match /pointsOfInterest/{poiId} {
+          allow read: if true;
+          allow write: if canEditWiki();
+        }
+      }
     }
   }
 }
