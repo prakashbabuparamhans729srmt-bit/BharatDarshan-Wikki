@@ -3,131 +3,140 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BharatDarshan Wiki - Security Rules Documentation
-     *
+     * BHARATDARSHAN WIKI SECURITY RULES
+     * 
      * Core Philosophy:
-     * This ruleset implements a community-driven wiki model. Information about Indian states, districts, 
-     * and points of interest is publicly readable to encourage knowledge sharing. Write access is 
-     * strictly controlled via a Role-Based Access Control (RBAC) system (Admins and Contributors) 
-     * and a User-Ownership model for personal content like profiles and comments.
-     *
+     * This ruleset implements a multi-tier authorization model for a collaborative Indian geography wiki. 
+     * It prioritizes public accessibility for educational content while strictly controlling modification 
+     * rights through role-based access and individual ownership.
+     * 
      * Data Structure:
-     * - /users/{userId}: Public user profiles.
-     * - /roles_admins/{userId} & /roles_contributors/{userId}: Indicator collections for RBAC.
-     * - /states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}: Hierarchical geographical content.
-     * - /tags, /content_revisions, /content_translations: Top-level utility collections for categorization and history.
-     *
+     * - User Profiles: Located at /users/{userId}.
+     * - Role Management: Top-level collections /roles_admins and /roles_contributors act as registry for permissions.
+     * - Wiki Hierarchy: Geographical data is nested (/states -> /districts -> /pointsOfInterest).
+     * - Social & Metadata: Comments are nested under content; Tags, Revisions, and Translations are top-level for global querying.
+     * 
      * Key Security Decisions:
-     * 1. Public Read Access: All wiki content and user profiles are publicly readable (get and list).
-     * 2. Role-Based Writes: Modification of geographical data requires the 'Contributor' or 'Admin' role.
-     * 3. Ownership-Based Writes: Users have full control over their own profiles and comments.
-     * 4. Denormalization for Authorization: Ownership fields (e.g., authorId, createdByUserId) are stored 
-     *    directly on documents to allow fast, non-recursive authorization checks.
-     * 5. Structural Segregation: Administrative roles are stored in dedicated collections to separate 
-     *    identity from permissions.
+     * 1. Public Read Access: All wiki content, comments, and historical revisions are publicly readable to encourage knowledge sharing.
+     * 2. Role-Based Writes: Modifications to states, districts, POIs, and tags require the user to exist in the 'admins' or 'contributors' registry.
+     * 3. Ownership-Based Social Writes: Comments can be created by any signed-in user but modified only by the original author.
+     * 4. Denormalization for Performance: Critical ID fields (authorId, createdByUserId) are required on documents to allow fast authorization without recursive lookups.
+     * 5. Structural Consistency: Rules enforce that internal ID fields match the Firestore document path during creation.
      */
 
-    // --- Helper Functions ---
+    // ==========================================
+    // GLOBAL HELPER FUNCTIONS
+    // ==========================================
 
     /** @description Checks if the request is from an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the authenticated user's UID matches the provided ID. */
+    /** @description Checks if the user's UID matches the provided ID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks if a user is registered in the admins collection. */
+    /** @description Checks if the user is a registered administrator. */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admins/$(request.auth.uid));
     }
 
-    /** @description Checks if a user is a contributor or an admin. */
+    /** @description Checks if the user is a registered contributor. */
     function isContributor() {
-      return isSignedIn() && (
-        exists(/databases/$(database)/documents/roles_contributors/$(request.auth.uid)) || 
-        isAdmin()
-      );
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_contributors/$(request.auth.uid));
     }
 
-    /** @description Validates ownership for an existing document during update or delete. */
-    function isExistingOwner(ownerId) {
-      return resource != null && isOwner(ownerId);
+    /** @description Checks if the user has permission to edit wiki content (Admin or Contributor). */
+    function canEditWiki() {
+      return isAdmin() || isContributor();
     }
 
-    // --- Collection Rules ---
+    /** @description Safely checks ownership of an existing document for updates/deletes. */
+    function isExistingOwner(authorIdField) {
+      return resource != null && isOwner(authorIdField);
+    }
+
+    // ==========================================
+    // COLLECTION RULES
+    // ==========================================
 
     /**
-     * @description Rules for user profile documents.
+     * @description Rules for user profiles. Publicly readable; owner-only updates.
      * @path /users/{userId}
-     * @allow (create) if a user creates their own profile document.
-     * @deny (update) if a user tries to modify a profile that isn't theirs.
-     * @principle Self-creation and ownership-based writes for personal profiles.
+     * @allow Create if auth.uid matches path ID.
+     * @deny Update if user is not the profile owner.
+     * @principle Pattern 4 (Self-Creation) and Pattern 1 (Ownership).
      */
     match /users/{userId} {
       allow get, list: if true;
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(resource.data.id) && request.resource.data.id == resource.data.id;
-      allow delete: if isAdmin(); // Only admins can delete user profiles for moderation.
+      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isAdmin();
     }
 
     /**
-     * @description Indicator collections for RBAC. These are read-only for users to verify their own roles.
-     * @path /roles_admins/{userId} & /roles_contributors/{userId}
-     * @principle Structural segregation of roles for efficient authorization checks.
+     * @description System collections for role management. Restricted to Admin modification.
+     * @path /roles_admins/{userId} and /roles_contributors/{userId}
+     * @allow Get for the user themselves to verify their own role.
+     * @deny Any write by non-admins.
+     * @principle Pattern 2 (Roles).
      */
     match /roles_admins/{userId} {
-      allow get, list: if isSignedIn();
-      allow write: if false; // Role management typically happens via Admin SDK or Console.
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
     }
 
     match /roles_contributors/{userId} {
-      allow get, list: if isSignedIn();
-      allow write: if false;
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
     }
 
     /**
-     * @description Rules for State geographical data.
+     * @description Geographical States. Public read; Contributor/Admin writes.
      * @path /states/{stateId}
-     * @allow (create) if the user has a contributor or admin role.
-     * @deny (delete) if the user is a standard signed-in user without roles.
-     * @principle Role-based access control for core platform content.
+     * @allow Create if user is a contributor and sets createdByUserId correctly.
+     * @deny Update if user is not a contributor or tries to change the original creator.
+     * @principle Pattern 5 (Public Read with Authorized Writes).
      */
     match /states/{stateId} {
       allow get, list: if true;
-      allow create: if isContributor() && request.resource.data.createdByUserId == request.auth.uid;
-      allow update: if isContributor() && request.resource.data.createdByUserId == resource.data.createdByUserId;
+      allow create: if canEditWiki() && request.resource.data.createdByUserId == request.auth.uid;
+      allow update: if canEditWiki() && request.resource.data.createdByUserId == resource.data.createdByUserId;
       allow delete: if isAdmin();
 
       /**
-       * @description Rules for Districts within a state.
+       * @description Districts within a state.
        * @path /states/{stateId}/districts/{districtId}
-       * @principle Hierarchical nesting with inherited role-based write permissions.
+       * @allow Create if user is a contributor.
+       * @principle Relational integrity enforced via path nesting.
        */
       match /districts/{districtId} {
         allow get, list: if true;
-        allow create: if isContributor() && request.resource.data.createdByUserId == request.auth.uid;
-        allow update: if isContributor() && request.resource.data.createdByUserId == resource.data.createdByUserId;
+        allow create: if canEditWiki() && request.resource.data.createdByUserId == request.auth.uid;
+        allow update: if canEditWiki() && request.resource.data.createdByUserId == resource.data.createdByUserId;
         allow delete: if isAdmin();
 
         /**
-         * @description Rules for Points of Interest (POI) within a district.
+         * @description Points of Interest (POIs) - the primary wiki articles.
          * @path /states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}
+         * @allow Get/List for everyone.
+         * @principle Pattern 5 (Public Read with Authorized Writes).
          */
         match /pointsOfInterest/{poiId} {
           allow get, list: if true;
-          allow create: if isContributor() && request.resource.data.createdByUserId == request.auth.uid;
-          allow update: if isContributor() && request.resource.data.createdByUserId == resource.data.createdByUserId;
+          allow create: if canEditWiki() && request.resource.data.createdByUserId == request.auth.uid;
+          allow update: if canEditWiki() && request.resource.data.createdByUserId == resource.data.createdByUserId;
           allow delete: if isAdmin();
 
           /**
-           * @description Rules for user comments on POIs.
+           * @description User comments on articles.
            * @path /states/{stateId}/districts/{districtId}/pointsOfInterest/{poiId}/comments/{commentId}
-           * @allow (create) if the user is signed in and sets themselves as author.
-           * @allow (update) if the author is editing their own comment.
-           * @principle Ownership-based writes for community interactions.
+           * @allow Create for any signed-in user. Update/Delete for the author only.
+           * @principle Pattern 1 (Ownership) for social interactions.
            */
           match /comments/{commentId} {
             allow get, list: if true;
@@ -140,37 +149,41 @@ service cloud.firestore {
     }
 
     /**
-     * @description Rules for global content tags.
+     * @description Global Tags for categorization.
      * @path /tags/{tagId}
-     * @principle Public read with role-restricted writes for metadata.
+     * @allow Create/Update if user is a contributor.
+     * @principle Shared metadata protection.
      */
     match /tags/{tagId} {
       allow get, list: if true;
-      allow create: if isContributor() && request.resource.data.createdByUserId == request.auth.uid;
-      allow update: if isContributor() && request.resource.data.createdByUserId == resource.data.createdByUserId;
+      allow create: if canEditWiki() && request.resource.data.createdByUserId == request.auth.uid;
+      allow update: if canEditWiki();
       allow delete: if isAdmin();
     }
 
     /**
-     * @description Rules for tracking Wikipedia-like content revisions.
+     * @description Historical versions of wiki content.
      * @path /content_revisions/{revisionId}
-     * @principle Append-only historical tracking for contributors and admins.
+     * @allow Create by contributors when they edit content. Read by public.
+     * @principle Auditable audit trail.
      */
     match /content_revisions/{revisionId} {
       allow get, list: if true;
-      allow create: if isContributor() && request.resource.data.editedByUserId == request.auth.uid;
-      allow update, delete: if isAdmin(); // Revisions are generally immutable once created.
+      allow create: if canEditWiki() && request.resource.data.editedByUserId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     /**
-     * @description Rules for multi-language content translations.
+     * @description Translations of wiki content into different languages.
      * @path /content_translations/{translationId}
-     * @principle Authoritative translation management by contributors or admins.
+     * @allow Public read. Writes by contributors or admins.
+     * @principle Support for multi-lingual Indian audience.
      */
     match /content_translations/{translationId} {
       allow get, list: if true;
-      allow create: if isContributor() && request.resource.data.translatedByUserId == request.auth.uid;
-      allow update: if isContributor() && request.resource.data.translatedByUserId == resource.data.translatedByUserId;
+      allow create: if canEditWiki() && request.resource.data.translatedByUserId == request.auth.uid;
+      allow update: if canEditWiki();
       allow delete: if isAdmin();
     }
   }
