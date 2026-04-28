@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react'
@@ -25,7 +26,6 @@ export default function Home() {
   const db = useFirestore()
 
   // 1. Fetch live articles from Firestore for the "Featured Heritage" section
-  // Note: If this fails with a permission error, firestore.rules must allow public 'list'
   const latestArticlesQuery = useMemoFirebase(() => {
     return query(
       collection(db, 'articles_published'), 
