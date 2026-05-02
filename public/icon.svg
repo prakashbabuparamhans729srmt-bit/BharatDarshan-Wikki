@@ -1,12 +1,7 @@
+
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" rx="128" fill="#070707"/>
-  <path d="M256 80L340 164L256 248L172 164L256 80Z" fill="#07F1D6" fill-opacity="0.8">
-    <animateTransform attributeName="transform" type="rotate" from="0 256 164" to="360 256 164" dur="10s" repeatCount="indefinite" />
-  </path>
-  <path d="M256 180C298.526 180 333 214.474 333 257C333 299.526 298.526 334 256 334C213.474 334 179 299.526 179 257C179 214.474 213.474 180 256 180Z" stroke="#07F1D6" stroke-width="20" stroke-linecap="round"/>
-  <path d="M256 210V304M209 257H303" stroke="#07F1D6" stroke-width="12" stroke-linecap="round"/>
-  <circle cx="256" cy="257" r="10" fill="#07F1D6">
-    <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite" />
-  </circle>
-  <text x="50%" y="85%" text-anchor="middle" fill="#07F1D6" font-family="sans-serif" font-weight="900" font-size="40" style="letter-spacing: 0.2em;">BHARAT</text>
+  <circle cx="256" cy="256" r="180" stroke="#07F1D6" stroke-width="20" opacity="0.2"/>
+  <path d="M256 120L290 222H398L311 285L345 387L256 324L167 387L201 285L114 222H222L256 120Z" fill="#07F1D6"/>
+  <path d="M256 60V120M256 452V392M60 256H120M452 256H392" stroke="#07F1D6" stroke-width="20" stroke-linecap="round"/>
 </svg>
