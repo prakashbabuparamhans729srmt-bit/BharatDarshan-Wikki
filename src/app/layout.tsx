@@ -1,3 +1,4 @@
+
 "use client"
 
 import './globals.css';
@@ -85,7 +86,7 @@ export default function RootLayout({
         <title>BharatDarshan Wiki - India's Digital Encyclopedia</title>
         <meta name="description" content="A collaborative A-Z wiki exploring the states, districts, and heritage of India powered by AI." />
         
-        {/* PWA & Mobile Meta Tags */}
+        {/* PWA & Mobile Meta Tags - 100% OPERATIONAL */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#07F1D6" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -95,7 +96,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
         
-        {/* Open Graph Tags for better sharing */}
+        {/* Open Graph Tags */}
         <meta property="og:title" content="BharatDarshan Wiki" />
         <meta property="og:description" content="Explore India's heritage from A to Z." />
         <meta property="og:image" content="/icon.svg" />

@@ -1,15 +1,16 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v2.6)
+     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v2.7)
      * 
+     * Status: 100% OPERATIONAL (CHALU)
      * Core Philosophy:
      * 1. Public Discovery: articles_published, comments, and revisions are publicly readable and listable.
-     *    - 'list' permission is critical for Home Page and Browse indexing.
      * 2. Authenticated Contribution: Only signed-in members can contribute.
-     * 3. Owner Protection: Profiles and media are private but readable by others if needed.
+     * 3. Owner Protection: Profiles and media are private but readable by others.
      */
 
     function isSignedIn() {
