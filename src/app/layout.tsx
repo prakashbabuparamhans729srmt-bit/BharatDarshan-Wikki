@@ -84,6 +84,15 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Alegreya:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
         <title>BharatDarshan Wiki - India's Digital Encyclopedia</title>
         <meta name="description" content="A collaborative A-Z wiki exploring the states, districts, and heritage of India powered by AI." />
+        
+        {/* PWA & Mobile Meta Tags */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#07F1D6" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="BharatWiki" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
       </head>
       <body className="font-body antialiased">
         <FirebaseClientProvider>
