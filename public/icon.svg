@@ -2,7 +2,8 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" rx="128" fill="#070707"/>
   <circle cx="256" cy="256" r="180" stroke="#07F1D6" stroke-width="20" stroke-dasharray="20 10"/>
-  <path d="M256 120V160M256 352V392M120 256H160M352 256H392" stroke="#07F1D6" stroke-width="20" stroke-linecap="round"/>
-  <path d="M256 200L280 256L256 312L232 256L256 200Z" fill="#07F1D6"/>
-  <circle cx="256" cy="256" r="40" stroke="#07F1D6" stroke-width="10"/>
+  <path d="M256 120V392M120 256H392" stroke="#07F1D6" stroke-width="30" stroke-linecap="round"/>
+  <path d="M160 160L352 352M352 160L160 352" stroke="#07F1D6" stroke-width="15" stroke-linecap="round" opacity="0.5"/>
+  <rect x="216" y="216" width="80" height="80" rx="20" fill="#07F1D6"/>
+  <path d="M236 240L256 220L276 240M256 220V272" stroke="black" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

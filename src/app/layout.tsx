@@ -95,6 +95,12 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon.svg" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
+        
+        {/* Open Graph Tags for better sharing */}
+        <meta property="og:title" content="BharatDarshan Wiki" />
+        <meta property="og:description" content="Explore India's heritage from A to Z." />
+        <meta property="og:image" content="/icon.svg" />
+        <meta property="og:type" content="website" />
       </head>
       <body className="font-body antialiased">
         <FirebaseClientProvider>
