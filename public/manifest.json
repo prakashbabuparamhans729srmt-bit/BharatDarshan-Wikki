@@ -2,7 +2,7 @@
 {
   "name": "BharatDarshan Wiki",
   "short_name": "BharatWiki",
-  "description": "India's Digital Encyclopedia of Heritage and Territories",
+  "description": "India's Digital Encyclopedia of Heritage",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#070707",
