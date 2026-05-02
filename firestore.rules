@@ -4,11 +4,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v3.0 - PWA ACTIVE)
+     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v4.0 - PWA & MOBILE ACTIVE)
      * 
      * Status: 100% OPERATIONAL (CHALU)
-     * PWA-ready and Cloud-Synchronized.
-     * Updated to support A-Z Advanced Installation Flow.
+     * Updated for PWA Installation and Alpha-Discovery Flow.
+     * All read/list methods are synchronized for heritage discovery.
      */
 
     function isSignedIn() {
