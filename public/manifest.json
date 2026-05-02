@@ -2,7 +2,7 @@
 {
   "name": "BharatDarshan Wiki",
   "short_name": "BharatWiki",
-  "description": "India's Digital Encyclopedia - A to Z Heritage Archive",
+  "description": "India's Digital Encyclopedia - Heritage from A to Z",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#070707",
