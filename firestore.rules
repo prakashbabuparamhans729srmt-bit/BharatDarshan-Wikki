@@ -4,7 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v1.7)
+     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v1.8)
      * 
      * Core Philosophy:
      * 1. Public Discovery: articles_published, comments, and revisions are publicly readable and listable.
