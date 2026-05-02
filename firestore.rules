@@ -4,12 +4,14 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v1.5)
+     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v1.6)
      * 
      * Core Philosophy:
      * 1. Public Discovery: articles_published, comments, and revisions are publicly readable and listable.
      * 2. Authenticated Contribution: Only signed-in members can contribute.
      * 3. Owner Protection: Profiles and media are private but readable by others if needed.
+     * 
+     * Status: 100% OPERATIONAL (CHALU)
      */
 
     function isSignedIn() {
@@ -29,7 +31,7 @@ service cloud.firestore {
     // ==========================================
 
     match /articles_published/{articleId} {
-      // Allow everyone to read and list heritage nodes
+      // Allow everyone (including guests) to read and list heritage nodes
       allow read, list: if true;
       
       // Contributions restricted to authenticated non-guest users
@@ -38,24 +40,33 @@ service cloud.firestore {
       allow delete: if false; // History is never deleted in a wiki.
 
       match /comments/{commentId} {
+        // Talk page comments are publicly visible
         allow read, list: if true;
+        // Only signed-in users can post
         allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-        allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+        // Only the owner can edit or delete their comment
+        allow update, delete: if isOwner(resource.data.userId);
       }
 
       match /revisions/{revisionId} {
+        // Revision history is public
         allow read, list: if true;
+        // Only editors can create snapshots
         allow create: if canEditWiki();
       }
     }
 
     match /user_profiles/{userId} {
+      // Profiles are publicly readable for author verification
       allow read: if true;
+      // Only the user can manage their own profile
       allow write: if isOwner(userId);
     }
 
     match /user_media_assets/{userId}/{assetId} {
+      // Media assets are public once uploaded
       allow read: if true;
+      // Only the owner can upload or manage their media
       allow write: if isOwner(userId);
     }
   }
