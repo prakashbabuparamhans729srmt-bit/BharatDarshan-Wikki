@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Article": {
@@ -37,6 +38,35 @@
         "preferredLanguageId": { "type": "string" }
       },
       "required": ["id", "email", "username"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "Community contribution to an article's talk page.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "articleId": { "type": "string" },
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "isApproved": { "type": "boolean" }
+      }
+    },
+    "Revision": {
+      "title": "Revision",
+      "description": "Historical snapshot of a heritage node.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "articleId": { "type": "string" },
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "revisionNumber": { "type": "number" },
+        "contentSnapshot": { "type": "string" },
+        "changesSummary": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -51,11 +81,11 @@
       "description": "Primary flat collection for all heritage nodes."
     },
     "/articles_published/{articleId}/comments/{commentId}": {
-      "schema": "object",
+      "schema": "#/backend/entities/Comment",
       "description": "Talk page community comments for historical nodes."
     },
     "/articles_published/{articleId}/revisions/{revisionId}": {
-      "schema": "object",
+      "schema": "#/backend/entities/Revision",
       "description": "Historical snapshots of the heritage node contents."
     },
     "/user_profiles/{userId}": {

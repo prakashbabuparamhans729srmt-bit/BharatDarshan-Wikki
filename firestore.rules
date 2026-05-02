@@ -1,16 +1,15 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI SECURITY RULES (ADVANCED SYNC v1.3)
+     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v1.5)
      * 
      * Core Philosophy:
-     * 1. Public Reading: Heritage discovery is for everyone.
-     * 2. Authenticated Contribution: Only signed-in members can edit history.
-     * 3. Owner Protection: Profiles and media belong to the user.
-     * 
-     * Status: 100% OPERATIONAL ("CHALU")
+     * 1. Public Discovery: articles_published, comments, and revisions are publicly readable and listable.
+     * 2. Authenticated Contribution: Only signed-in members can contribute.
+     * 3. Owner Protection: Profiles and media are private but readable by others if needed.
      */
 
     function isSignedIn() {
@@ -30,13 +29,13 @@ service cloud.firestore {
     // ==========================================
 
     match /articles_published/{articleId} {
-      // Explicitly allow reading and listing for unauthenticated users (Discovery Node)
+      // Allow everyone to read and list heritage nodes
       allow read, list: if true;
       
       // Contributions restricted to authenticated non-guest users
       allow create: if canEditWiki() && request.resource.data.authorId == request.auth.uid;
       allow update: if canEditWiki();
-      allow delete: if false; // Archive preservation: history is never deleted.
+      allow delete: if false; // History is never deleted in a wiki.
 
       match /comments/{commentId} {
         allow read, list: if true;
@@ -56,11 +55,6 @@ service cloud.firestore {
     }
 
     match /user_media_assets/{userId}/{assetId} {
-      allow read: if true;
-      allow write: if isOwner(userId);
-    }
-
-    match /user_media_assets/{userId}/{allPaths=**} {
       allow read: if true;
       allow write: if isOwner(userId);
     }
