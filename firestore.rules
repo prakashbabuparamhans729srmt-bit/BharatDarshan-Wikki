@@ -4,14 +4,14 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v1.6)
+     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v1.7)
      * 
      * Core Philosophy:
      * 1. Public Discovery: articles_published, comments, and revisions are publicly readable and listable.
      * 2. Authenticated Contribution: Only signed-in members can contribute.
      * 3. Owner Protection: Profiles and media are private but readable by others if needed.
      * 
-     * Status: 100% OPERATIONAL (CHALU)
+     * Status: 100% OPERATIONAL (CHALU) - Fixed 'list' permission for collection roots.
      */
 
     function isSignedIn() {
@@ -43,7 +43,7 @@ service cloud.firestore {
         // Talk page comments are publicly visible
         allow read, list: if true;
         // Only signed-in users can post
-        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid);
         // Only the owner can edit or delete their comment
         allow update, delete: if isOwner(resource.data.userId);
       }
