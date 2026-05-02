@@ -1,18 +1,15 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v2.5)
+     * BHARATDARSHAN WIKI SECURITY RULES (AZ SYNC v2.6)
      * 
      * Core Philosophy:
      * 1. Public Discovery: articles_published, comments, and revisions are publicly readable and listable.
      *    - 'list' permission is critical for Home Page and Browse indexing.
      * 2. Authenticated Contribution: Only signed-in members can contribute.
      * 3. Owner Protection: Profiles and media are private but readable by others if needed.
-     * 
-     * Status: 100% OPERATIONAL (CHALU) - Fully Syncing for A-Z Flow.
      */
 
     function isSignedIn() {
@@ -32,43 +29,31 @@ service cloud.firestore {
     // ==========================================
 
     match /articles_published/{articleId} {
-      // Allow everyone (including guests) to read and list heritage nodes
-      // This fix solves the "Missing or insufficient permissions" for home/browse crawling.
       allow read, list: if true;
       
-      // Contributions restricted to authenticated non-guest users
       allow create: if canEditWiki() && request.resource.data.authorId == request.auth.uid;
       allow update: if canEditWiki();
-      allow delete: if false; // History is never deleted in a wiki.
+      allow delete: if false; 
 
       match /comments/{commentId} {
-        // Talk page comments are publicly visible
         allow read, list: if true;
-        // Only signed-in users can post
         allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid);
-        // Only the owner can edit or delete their comment
         allow update, delete: if isOwner(resource.data.userId);
       }
 
       match /revisions/{revisionId} {
-        // Revision history is public
         allow read, list: if true;
-        // Only editors can create snapshots
         allow create: if canEditWiki();
       }
     }
 
     match /user_profiles/{userId} {
-      // Profiles are publicly readable for author verification
       allow read: if true;
-      // Only the user can manage their own profile
       allow write: if isOwner(userId);
     }
 
     match /user_media_assets/{userId}/{assetId} {
-      // Media assets are public once uploaded
       allow read: if true;
-      // Only the owner can upload or manage their media
       allow write: if isOwner(userId);
     }
   }

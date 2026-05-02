@@ -1,13 +1,7 @@
-
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#07F1D6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#05bfa9;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  <rect width="100" height="100" rx="24" fill="url(#grad1)"/>
-  <path d="M50 20 L25 75 L50 60 L75 75 Z" fill="#070707" stroke="#070707" stroke-width="2" stroke-linejoin="round"/>
-  <circle cx="50" cy="50" r="12" fill="none" stroke="#070707" stroke-width="4" stroke-dasharray="4 2"/>
-  <path d="M50 35 L50 45 M50 55 L50 65 M35 50 L45 50 M55 50 L65 50" stroke="#070707" stroke-width="2" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="128" fill="#070707"/>
+  <circle cx="256" cy="256" r="180" stroke="#07F1D6" stroke-width="20" fill="none" opacity="0.3"/>
+  <path d="M256 120 L300 240 L420 256 L300 272 L256 392 L212 272 L92 256 L212 240 Z" fill="#07F1D6">
+  </path>
+  <text x="256" y="460" font-family="Arial, sans-serif" font-weight="bold" font-size="40" fill="#07F1D6" text-anchor="middle">BHARAT</text>
 </svg>
