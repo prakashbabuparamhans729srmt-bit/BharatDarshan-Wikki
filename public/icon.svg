@@ -1,5 +1,7 @@
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#07F1D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="10"/>
-  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="128" fill="#070707"/>
+  <circle cx="256" cy="256" r="180" stroke="#07F1D6" stroke-width="20"/>
+  <path d="M256 120L290 220L390 220L310 280L340 380L256 320L172 380L202 280L122 220L222 220L256 120Z" fill="#07F1D6"/>
+  <path d="M256 80V120M256 392V432M80 256H120M392 256H432" stroke="#07F1D6" stroke-width="20" stroke-linecap="round"/>
 </svg>
